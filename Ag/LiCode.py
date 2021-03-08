@@ -2,8 +2,10 @@ from manimlib import *
 
 class SquareLocTxt():
     CONFIG ={
-        "grid_color" : "#333333",
-         "buff" : 0
+        "grid_color":"#333333",
+        "buff":0,
+        "num_d_p":0,
+        "num_size":25,
     }
     def __init__(self, h, square, loc_txt_colors = None, **kwargs):
         digest_config(self, kwargs)
@@ -18,8 +20,8 @@ class SquareLocTxt():
         
         for i in range(square*square):
             text = DecimalNumber(0,
-                    font_size=25,
-                    num_decimal_places=0
+                    font_size=self.num_size,
+                    num_decimal_places=self.num_d_p
                     )
             self.grid[i].txt = text
             self.grid[i].txt.move_to(self.grid[i])
@@ -42,8 +44,8 @@ class SquareLocTxt():
                     stroke_width=2,
                     )
             self.grid[loc].txt=DecimalNumber(num,
-                    font_size=25,
-                    num_decimal_places=0,
+                    font_size=self.num_size,
+                    num_decimal_places=self.num_d_p,
                     color=BLACK
                     )
             self.grid[loc].txt.move_to(self.grid[loc])
@@ -79,11 +81,7 @@ class ConvolutionPic(Scene):
                 + sq7_7.sq_Vg[8+div*7+mod+7][1].number*sq3_3.sq_Vg[7][1].number\
                 + sq7_7.sq_Vg[8+div*7+mod+8][1].number*sq3_3.sq_Vg[8][1].number
             
-            loctc5[i] = [
-                w5,
-                txt,
-                RED_A
-                ]
+            loctc5[i] = [w5,txt,RED_A]
            
             areas[i] = VGroup(
                     sq7_7.sq_Vg[8+div*7+mod-8],
@@ -294,9 +292,9 @@ class ConvolutionPic(Scene):
         arrow = Arrow(
             sq5_5.sq_Vg.get_right(),
             sq3.sq_Vg.get_left(),
-            color = GREEN_SCREEN,
+            fill_color = WHITE ,
             thickness = 0.1)
-        tex1 = Text("池化",size=0.68).next_to(arrow,UP)
+        tex1 = Text("池化",size=0.6).next_to(arrow,UP,buff=SMALL_BUFF)
 
         self.play(
             ShowCreation(arrow),
@@ -311,7 +309,69 @@ class ConvolutionPic(Scene):
             self.wait(0.5)
         self.wait()
 
+        self.play(
+            FadeOut(sq5_5.sq_Vg),
+            *[FadeOut(ret) for ret in it.chain(ret5s)],
+            *[FadeOut(ret) for ret in it.chain(ret3s)],
+            FadeOut(arrow),
+            FadeOut(tex1),
+            )
+        self.play(sq3.sq_Vg.animate.shift(4.2*LEFT))
 
+        fx_sq3_num = [i for i in range(3*3)] 
+        fx_sq3_datas = [[]]*len(fx_sq3_num)
+        for i,loc in enumerate(sq3loc):
+            num = 1/(1+math.exp(-sq3.sq_Vg[i][1].number))
+            fx_sq3_datas[i] = [loc,num,YELLOW]
+        fx_sq3 = SquareLocTxt(4*3/7,3,fx_sq3_datas,num_size=18,num_d_p=2)
+        fx_sq3.sq_Vg.next_to(sq3.sq_Vg,buff=LARGE_BUFF*3).scale(0.8)
+
+        arrow = Arrow(
+            sq3.sq_Vg.get_right(),
+            fx_sq3.sq_Vg.get_left(),
+            fill_color = WHITE ,
+            )
+        tex1 = Tex("f\\left(x\\right) =\\frac{1}{1+e^{-x}}",font_size=20)\
+                .next_to(arrow,UP,buff=SMALL_BUFF)\
+                .set_color(YELLOW)
+        
+        axes = Axes(
+            (-5,5), (-0.3,1.6),
+            height=1.2,
+            width=9*4/16,
+            axis_config={
+                "include_ticks": False,
+                "tip_config": {
+                    "width": 0.12,
+                    "length": 0.12,
+                    },
+                },
+            )
+        fx_graph = axes.get_graph(
+            lambda x: 1/(1+math.exp(-x)),
+            color=YELLOW,
+            stroke_width=5,
+            x_range = np.array([-4.8, 4.8]),
+            )
+        step_graph = DashedVMobject(
+                axes.get_graph(
+                    lambda x: 1 if x > -5 else 1.0,
+                    color=RED,
+                )
+            )
+        axes_graph = VGroup(axes,fx_graph,step_graph)\
+            .next_to(arrow,DOWN,buff=SMALL_BUFF)
+        
+        self.play(ShowCreation(arrow))
+        self.play(
+            Write(tex1),
+            Write(axes),
+            Write(step_graph),
+            ShowCreation(fx_graph)
+            )
+        self.play(FadeIn(fx_sq3.sq_Vg,shift=RIGHT))
+        self.wait(3)
+        
 
         
         
