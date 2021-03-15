@@ -3,7 +3,7 @@ import platform
  
 sys_str = platform.system()
 if sys_str == "Windows":
-    Font = '阿里巴巴普惠体 B'
+    Font = 'Alibaba PuHuiTi'
 elif sys_str == "Darwin":
     Font = 'Microsoft YaHei Bold'
 else:

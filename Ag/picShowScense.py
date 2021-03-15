@@ -67,7 +67,7 @@ class AI2_8(Scene):
     def construct(self):
         allParts = ObjAnd1Text(
                         "AI2/8 X的多种写法",
-                        "“x” 的多种写法",
+                        "“X”的多种写法",
                         obj_height=2,
             )
         palyALL1(self,allParts)
@@ -76,7 +76,7 @@ class AI2_9(Scene):
     def construct(self):
         allParts = ObjAnd1Text(
                         "AI2/9 寻找特征",
-                        "寻找“x”的特征",
+                        "寻找“X”的特征",
             )
         palyALL1(self,allParts)
 
@@ -104,7 +104,7 @@ class AI2_13(Scene):
             )
         palyALL1(self,allParts)
 
-class AI2_13(Scene):
+class AI2_14(Scene):
     def construct(self):
         allParts = ObjAnd1Text(
                         "AI2/14 验证码2",
@@ -112,16 +112,16 @@ class AI2_13(Scene):
             )
         palyALL1(self,allParts)
 
-class AI2_13(Scene):
+class AI2_15(Scene):
     def construct(self):
         allParts = ObjAnd2Text(
                         "AI2/15 昇腾910",
-                        "Ascend 910"
-                        "昇腾91",
+                        "Ascend 910",
+                        "昇腾910",
             )
         palyALL2(self,allParts)
 
-class AI2_13(Scene):
+class AI2_16(Scene):
     def construct(self):
         allParts = ObjAnd1Text(
                         "AI2/16 昇腾计算产业的全貌",

@@ -215,7 +215,7 @@ class ConvolutionPic(Scene):
             )
         self.remove(sq7_7.formula[num])
         self.wait()
-        k = 25
+        k = 3
         for i in range(1,k):
             self.add(
                 VGroup(ret7_7s[i],lines7_3s[i],ret3_3s[i],lines3_5s[i],ret5_5s[i],))
@@ -224,7 +224,8 @@ class ConvolutionPic(Scene):
             if i < k-1:
                 self.remove(VGroup(ret7_7s[i],lines7_3s[i],ret3_3s[i],lines3_5s[i],ret5_5s[i]))
                 self.remove(sq7_7.formula[i])
-            self.wait(0.5)            
+            self.wait(0.5)    
+        # self.remove(sq7_7.formula[k-1],texj)       
         self.play(
             LaggedStartMap(
                 FadeOut,

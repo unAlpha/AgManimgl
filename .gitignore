@@ -12,6 +12,8 @@ __pycache__/
 
 #Ag
 media/
+change.txt
+manimgl.pdf
 
 # Distribution / packaging
 .Python
