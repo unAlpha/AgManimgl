@@ -27,9 +27,9 @@ class Captain2_1(Scene):
                 
         txt_title =[]
         for i,txt in enumerate(chapter_txt):
-            txt_adj = "%s "%(i+1)+txt
-            txt_title.append(txt_adj)
-            pic_text = Text(txt_adj,
+            txt_add_num = "%s "%(i+1)+txt
+            txt_title.append(txt_add_num)
+            pic_text = Text(txt_add_num,
                     font='Source Han Sans CN',
                     color=BLACK,
                     font_size=60
