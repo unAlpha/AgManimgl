@@ -1,4 +1,4 @@
-from Ag.imports_ag import *
+from manimlib import *
 
 class Captain2_1(Scene):
     def construct(self):

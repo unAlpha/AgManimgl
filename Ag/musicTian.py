@@ -12,6 +12,7 @@ class Music1(Scene):
             )
         self.play(FadeIn(text1,scale=0.5))
         self.wait()
+        
         text2 = TexText(
             "层次一 : 欣赏音乐",
             "层次二 : 自娱自乐",
