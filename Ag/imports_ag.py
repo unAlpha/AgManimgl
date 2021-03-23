@@ -24,7 +24,7 @@ def ObjAndText(
             ):
 
     pic = ImageMobject(Obj)
-    pic.height=height
+    pic.set_height(height)
 
     if text2 is not None:
         picText1 = Text(text1,
@@ -71,3 +71,52 @@ def palyALL(self,allParts):
     self.play(Write(allParts[3]))
     self.wait(10)
     self.play(FadeOut(allParts,shift=TOP))
+
+def introduction(
+        self, 
+        name_ch, 
+        name_eng=None, 
+        bir=None, 
+        intro=None
+        ):
+    all_txt = VGroup()
+    name_chinese = Text(name_ch, font="思源黑体 CN Heavy", size=2.2)
+    all_txt.add(name_chinese)
+    if name_eng is not None:
+        name_english = Text(name_eng, font="Times New Roman", color = BLUE, size=2)
+        all_txt.add(name_english)
+    if bir is not None:
+        birthday = Text(bir,font="思源黑体 CN",size=1.3)
+        all_txt.add(birthday)
+    if intro is not None:
+        introduction = Text(intro, font="思源黑体 CN Heavy", size=1.5)
+        all_txt.add(introduction)
+    
+    all_txt.arrange(
+            DOWN,
+            aligned_edge=LEFT,
+            buff = 0.5
+            ).scale(0.36).to_corner(DL).shift(UP*0.618)
+    ret_buff = 0.5
+    ret = RoundedRectangle(
+        height = all_txt.get_height()+ret_buff,
+        width = all_txt.get_width()+ret_buff,
+        color = BLACK,
+        fill_opacity = 0.5,
+        corner_radius = 0.15,
+        stroke_opacity = 0
+        ).move_to(all_txt)
+
+    if len(all_txt)>=2:
+        self.play(
+            FadeIn(ret),
+            LaggedStartMap(
+                FadeInFromDown,all_txt,
+            lag_ratio=0.2)
+            )
+    else:
+        self.play(
+            FadeIn(ret),
+            Write(all_txt)
+            )  
+    self.wait()
