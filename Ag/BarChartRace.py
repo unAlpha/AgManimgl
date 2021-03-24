@@ -121,6 +121,8 @@ class BarChartRace(VGroup):
             ):
         VGroup.__init__(self, **kwargs)
         self.init_bars(legends, data_0, star_anim)
+        self.line_nums = int(self.datas_value_max/self.value_max)
+        self.init_lines(data_0)
 
     def init_bars(self, legends, data_0, star_anim):
         if data_0 is None:
@@ -138,12 +140,24 @@ class BarChartRace(VGroup):
             one_bar.set_opacity(0)
             self.add(one_bar)
 
+    def init_lines(self, data_0):
+        max_value = self.find_max_value(data_0)
+        num_x = [1, 2, 3, 4]
+        while num_x[-1]<self.line_nums:
+            num_x.append(num_x[-1]+num_x[-3])
+            num_x.append(2*num_x[-1]-num_x[-2])
+        for i in range(len(num_x)):
+            line = TheLines(self.value_max*num_x[i], max_value,)
+            line.set_opacity(0)
+            self.add(line) 
+        self.num_x = num_x
+
     def rank_bar_anim(self, values):
         rand_serial =len(values)-ss.rankdata(values, method='ordinal')
             # 从小到大写法：
             # rand_serial =ss.rankdata(self.nums)-1
         max_value = self.find_max_value(values)
-        for i, the_bar in enumerate(self):
+        for i, the_bar in enumerate(self[:len(values)]):
             if values[i] == 0:
                 value = self.value_0
             else:
@@ -158,48 +172,26 @@ class BarChartRace(VGroup):
             else:
                 the_bar.set_opacity(0)
 
-    def find_max_value(self, values):
-        return max(*values, self.value_max)
-
-class LineChartRace(BarChartRace):
-    def __init__(self, data0, **kwargs):
-        VGroup.__init__(self, **kwargs)
-        self.line_nums = int(self.datas_value_max/self.value_max)
-        self.init_lines(data0)
-
-    def init_lines(self, data0):
-        max_value = self.find_max_value(data0)
-        num_x = [1, 2, 3, 4]
-        while num_x[-1]<self.line_nums:
-            num_x.append(num_x[-1]+num_x[-3])
-            num_x.append(2*num_x[-1]-num_x[-2])
-        for i in range(len(num_x)):
-            line = TheLines(self.value_max*num_x[i], max_value,)
-            line.set_opacity(0)
-            self.add(line) 
-        self.num_x = num_x
-        print(self.num_x)
-
-    def rank_line_anim(self, values):
-        max_value = self.find_max_value(values)
         in_lines_index = 0
-        for the_line in self:
+        for the_line in self[len(values):]:
             the_line.line_updater(the_line.get_value(),max_value)
             if the_line.get_center()[0] < (the_line.graph_origin+the_line.bar_length*RIGHT)[0]:
                 in_lines_index+=1
                 the_line.set_opacity(0.5)
             else:
                 the_line.set_opacity(0)
-
         if in_lines_index>=4:
             if in_lines_index%2 == 0:
                 for jk in range(in_lines_index):
                     if jk not in [in_lines_index-1, in_lines_index-3]:
-                        self[jk].set_opacity(0)
+                        self[jk+len(values)].set_opacity(0)
             if in_lines_index%2 == 1:
                 for jk in range(in_lines_index):
                     if jk not in [in_lines_index-1, in_lines_index-2, in_lines_index-4]:
-                        self[jk].set_opacity(0)
+                        self[jk+len(values)].set_opacity(0)
+
+    def find_max_value(self, values):
+        return max(*values, self.value_max)
 
 class PlotBarChart(Scene):
     def construct(self):
@@ -211,9 +203,9 @@ class PlotBarChart(Scene):
         title = dataArray[1:n_row, 1]
         datas = dataArray[1:n_row, 2:column].astype(np.float)
         datas_max = datas.max()
-        n_column = column-2
-        data_nums = [nums for nums in [datas[:,i] for i in range(0, n_column)]]
-        
+        n_column = column
+        data_nums = [nums for nums in [datas[:,i] for i in range(0, n_column-2)]]
+
         bars = BarChartRace(
                     title,
                     data_nums[0],
@@ -221,15 +213,10 @@ class PlotBarChart(Scene):
                     add_lines = True,
                     datas_value_max = datas_max,
                 )
-        lines = LineChartRace(
-                    data_nums[0],
-                    datas_value_max = datas_max,
-                )
 
-        self.add(bars,lines)
+        self.add(bars)
         for data_num in data_nums:
             self.play(
-                    lines.rank_line_anim, data_num,
                     bars.rank_bar_anim, data_num,
                     rate_func=linear,
                     run_time=2,
