@@ -99,8 +99,8 @@ class TheLines(TheBars):
     def line_updater(self, value, max_value):
         length = self.value_conversion(value, max_value)
         self.move_to(
-            self.graph_origin + RIGHT*length,
-            coor_mask=np.array([1, 0 ,0])
+                self.graph_origin + RIGHT*length,
+                coor_mask=np.array([1, 0 ,0])
             )
         self.set_value(value)
 
@@ -113,12 +113,12 @@ class BarChartRace(VGroup):
         "value_0": 1e-2,       
         }
     def __init__(  
-                self,
-                legends,
-                data_0 = None,
-                star_anim=True,
-                **kwargs
-            ):
+            self,
+            legends,
+            data_0 = None,
+            star_anim=True,
+            **kwargs
+        ):
         VGroup.__init__(self, **kwargs)
         self.init_bars(legends, data_0, star_anim)
         self.line_nums = int(self.datas_value_max/self.value_max)
@@ -152,7 +152,7 @@ class BarChartRace(VGroup):
             self.add(line) 
         self.num_x = num_x
 
-    def rank_bar_anim(self, values):
+    def rank_bars_anim(self, values):
         rand_serial =len(values)-ss.rankdata(values, method='ordinal')
             # 从小到大写法：
             # rand_serial =ss.rankdata(self.nums)-1
@@ -172,6 +172,8 @@ class BarChartRace(VGroup):
             else:
                 the_bar.set_opacity(0)
 
+    def rank_lines_anim(self, values):
+        max_value = self.find_max_value(values)
         in_lines_index = 0
         for the_line in self[len(values):]:
             the_line.line_updater(the_line.get_value(),max_value)
@@ -199,25 +201,44 @@ class PlotBarChart(Scene):
         dataArray = np.array(data)
         row = dataArray.shape[0]
         column = dataArray.shape[1]
+        print(row,column)
         n_row = row
+        star = 50
+        end = 55
+        
         title = dataArray[1:n_row, 1]
+        years = dataArray[0, 2:column].astype(np.float)
         datas = dataArray[1:n_row, 2:column].astype(np.float)
-        datas_max = datas.max()
-        n_column = column
-        data_nums = [nums for nums in [datas[:,i] for i in range(0, n_column-2)]]
+
+        data_nums = [nums for nums in [datas[:,i] for i in range(star, end)]]
+        datas_nums_max = datas.max()
+        year_nums = years[star:end]
+
+        year_val = ValueTracker(years[0])
+        year_text = DecimalNumber(
+                year_val.get_value(),
+                num_decimal_places = 0,
+                group_with_commas = False,
+                font_size = 100,
+                color = BLUE,
+            ).to_corner(DR).shift(UP*0.5)
+
+        year_text.add_updater(lambda mob: mob.set_value(year_val.get_value()))
 
         bars = BarChartRace(
-                    title,
-                    data_nums[0],
-                    star_anim = False,
-                    add_lines = True,
-                    datas_value_max = datas_max,
-                )
+                title,
+                data_nums[0],
+                star_anim = False,
+                add_lines = True,
+                datas_value_max = datas_nums_max,
+            )
 
-        self.add(bars)
-        for data_num in data_nums:
+        self.add(bars, year_text)
+        for i,data_num in enumerate(data_nums):
             self.play(
-                    bars.rank_bar_anim, data_num,
+                    year_val.set_value, years[i],
+                    bars.rank_bars_anim, data_num,
+                    bars.rank_lines_anim, data_num,
                     rate_func=linear,
                     run_time=2,
                 )
