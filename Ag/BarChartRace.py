@@ -203,8 +203,8 @@ class PlotBarChart(Scene):
         column = dataArray.shape[1]
         print(row,column)
         n_row = row
-        star = 50
-        end = 55
+        star = 10
+        end = 11
         
         title = dataArray[1:n_row, 1]
         years = dataArray[0, 2:column].astype(np.float)
@@ -214,7 +214,7 @@ class PlotBarChart(Scene):
         datas_nums_max = datas.max()
         year_nums = years[star:end]
 
-        year_val = ValueTracker(years[0])
+        year_val = ValueTracker(year_nums[0])
         year_text = DecimalNumber(
                 year_val.get_value(),
                 num_decimal_places = 0,
@@ -222,7 +222,6 @@ class PlotBarChart(Scene):
                 font_size = 100,
                 color = BLUE,
             ).to_corner(DR).shift(UP*0.5)
-
         year_text.add_updater(lambda mob: mob.set_value(year_val.get_value()))
 
         bars = BarChartRace(
@@ -236,7 +235,7 @@ class PlotBarChart(Scene):
         self.add(bars, year_text)
         for i,data_num in enumerate(data_nums):
             self.play(
-                    year_val.set_value, years[i],
+                    year_val.set_value, year_nums[i],
                     bars.rank_bars_anim, data_num,
                     bars.rank_lines_anim, data_num,
                     rate_func=linear,
