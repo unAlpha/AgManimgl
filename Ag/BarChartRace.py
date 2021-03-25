@@ -19,6 +19,7 @@ class TheBars(ValueTracker, VGroup):
             "bar_length": 9,
             "bar_opacity": 0.9,
             "bar_color": None,
+            "bar_corner_radius": 0.05,
             "deci_config_nums": {
                     "num_decimal_places": 0,
                     "font_size": 20,
@@ -30,10 +31,12 @@ class TheBars(ValueTracker, VGroup):
         self.init_bar(name, value, max_val)
 
     def init_bar(self, name, value, max_val):        
-        bar = Rectangle(
+        bar = RoundedRectangle(
                 height = self.bar_height,
                 width = self.value_conversion(value, max_val),
                 color = self.bar_color,
+                corner_radius= self.bar_corner_radius,
+                stroke_width = 0,
             ).set_opacity(self.bar_opacity)
         text = Text(str(name), size=self.name_size)
         num_txt = DecimalNumber(value, **self.deci_config_nums)
@@ -123,7 +126,9 @@ class BarChartRace(VGroup):
             "value_max": 10000,
             "bar_num": 10,
             "value_0": 1e-2,
-            "lines_opacity": 0.3,    
+            "lines_opacity": 0.3,
+            "lightness": 0.9,
+            "color_seed": 168,  
         }
     def __init__(  
             self,
@@ -142,18 +147,9 @@ class BarChartRace(VGroup):
             data_0 = [self.value_0]*len(legends)
         rand_serial =len(data_0)-ss.rankdata(data_0, method='ordinal')
         max_value = self.find_max_value(data_0)
-        random.seed(168)
+        random.seed(self.color_seed)
         for i,legend in enumerate(legends):
-            col = list(map(
-                            lambda x: hex(x).split('x')[1].zfill(2), 
-                            tuple(round(i * 255) for i in colorsys.hsv_to_rgb(
-                                    random.random(),
-                                    random.random(),
-                                    0.8)
-                                )
-                        )
-                    )
-            color = "#%s%s%s"%(col[0],col[1],col[2])
+            color = self.random_color()
             if star_anim:
                 one_bar = TheBars(
                         legend, 
@@ -172,8 +168,11 @@ class BarChartRace(VGroup):
                         bar_origin = self.bars_origin,
                         bar_color = color,
                     )
+            bottom_down = one_bar.bar_origin + DOWN*self.spacing*(rand_serial[i])
+            if bottom_down[1] < (BOTTOM+self.bars_height*DOWN)[1]:
+                bottom_down = one_bar.bar_origin*RIGHT + BOTTOM + 2*self.bars_height*DOWN
             one_bar.bar.move_to(
-                one_bar.bar_origin + DOWN*self.spacing*(rand_serial[i]),
+                bottom_down,
                 aligned_edge=LEFT)
             one_bar.set_opacity(0)
             self.add(one_bar)
@@ -207,8 +206,11 @@ class BarChartRace(VGroup):
             else:
                 value = values[i]
             the_bar.bar_updater(value, max_value)
+            bottom_down = the_bar.bar_origin + DOWN*self.spacing*(rand_serial[i])
+            if bottom_down[1] < (BOTTOM+self.bars_height*DOWN)[1]:
+                bottom_down = the_bar.bar_origin*RIGHT + BOTTOM + 2*self.bars_height*DOWN
             the_bar.move_to(
-                the_bar.bar_origin + DOWN*self.spacing*(rand_serial[i]),
+                bottom_down,
                 coor_mask=np.array([0, 1 ,0]))
             mask_position = the_bar.bar_origin + DOWN*self.spacing*self.bar_num
             if the_bar.get_center()[1] > mask_position[1]:
@@ -238,6 +240,18 @@ class BarChartRace(VGroup):
 
     def find_max_value(self, values):
         return max(*values, self.value_max)
+
+    def random_color(self):
+        col = list(map(
+                lambda x: hex(x).split('x')[1].zfill(2), 
+                tuple(round(i * 255) for i in colorsys.hsv_to_rgb(
+                        random.random(),
+                        random.random(),
+                        self.lightness)
+                    )
+                )
+            )
+        return "#%s%s%s"%(col[0],col[1],col[2])
 
 class PlotBarChart(Scene):
     def construct(self):
@@ -279,9 +293,9 @@ class PlotBarChart(Scene):
         self.add(bars, year_text)
         for i,data_num in enumerate(data_nums):
             self.play(
-                    year_val.set_value, year_nums[i],
-                    bars.rank_bars_anim, data_num,
                     bars.rank_lines_anim, data_num,
+                    bars.rank_bars_anim, data_num,
+                    year_val.set_value, year_nums[i],
                     rate_func=linear,
                     run_time=2,
                 )
