@@ -1,6 +1,6 @@
 from manimlib import *
 import scipy.stats as ss
-
+import colorsys
 def get_coords_from_csvdata(file_name):
     import csv
     coords = []
@@ -13,14 +13,16 @@ def get_coords_from_csvdata(file_name):
 
 class TheBars(ValueTracker, VGroup):
     CONFIG = {
-        "bar_height" : 0.4,
-        "name_size" : 0.618,
-        "graph_origin" : 2.6*UP + 4*LEFT,
-        "bar_length": 8,
-        "deci_config": {
-                "num_decimal_places": 0,
-                "font_size": 30,
-            }
+            "bar_height" : None,
+            "name_size" : 0.5,
+            "bar_origin" : 2.6*UP + 4.5*LEFT,
+            "bar_length": 9,
+            "bar_opacity": 0.9,
+            "bar_color": None,
+            "deci_config_nums": {
+                    "num_decimal_places": 0,
+                    "font_size": 20,
+                }
         }
     def __init__(self, name, value, max_val, **kwargs):
         VGroup.__init__(self, **kwargs)
@@ -31,9 +33,10 @@ class TheBars(ValueTracker, VGroup):
         bar = Rectangle(
                 height = self.bar_height,
                 width = self.value_conversion(value, max_val),
-            )
+                color = self.bar_color,
+            ).set_opacity(self.bar_opacity)
         text = Text(str(name), size=self.name_size)
-        num_txt = DecimalNumber(value, **self.deci_config)
+        num_txt = DecimalNumber(value, **self.deci_config_nums)
         self.set_value(value)
         self.bar = bar
         self.text = text
@@ -65,9 +68,14 @@ class TheBars(ValueTracker, VGroup):
         return max(1e-3, val*self.bar_length/max_val)
 
 class TheLines(TheBars):
-    CONFIG = {
-        "line_height": 6,
-        "line_txt_size": 1,
+    CONFIG = { 
+            "lines_height": None,
+            "lines_origin": ORIGIN,
+            "text_direction": UP,
+            "deci_config_ruler": {
+                    "num_decimal_places": 0,
+                    "font_size": 15,
+                }
         }
     def __init__(self, value, max_val, **kwargs):
         VGroup.__init__(self, **kwargs)
@@ -77,15 +85,17 @@ class TheLines(TheBars):
 
     def init_line(self, value, max_val):  
         line = Line(
-                start= UP*self.line_height/2,
-                end= DOWN*self.line_height/2,
-            )
+                start= UP*self.lines_height/2,
+                end= DOWN*self.lines_height/2,
+            ).shift(self.lines_origin)
         line.move_to(
-            self.graph_origin + RIGHT*self.value_conversion(value, max_val),
-            coor_mask=np.array([1, 0 ,0])
+                self.bar_origin + RIGHT*self.value_conversion(value, max_val),
+                coor_mask=np.array([1, 0 ,0])
             )
-        line_txt = DecimalNumber(value, **self.deci_config)
-
+        line_txt = DecimalNumber(
+                value, 
+                **self.deci_config_ruler
+            )
         self.line = line
         self.line_txt = line_txt
         self.line_txt.add_updater(self.line_txt_updater)
@@ -93,24 +103,27 @@ class TheLines(TheBars):
 
     def line_txt_updater(self, mob_txt):
         mob_txt.set_value(self.get_value())
-        mob_txt.next_to(self.line, DOWN, buff=0.25)
+        mob_txt.next_to(self.line, self.text_direction, buff=0.1)
         mob_txt.set_opacity(self.line.get_opacity())
   
     def line_updater(self, value, max_value):
         length = self.value_conversion(value, max_value)
         self.move_to(
-                self.graph_origin + RIGHT*length,
+                self.bar_origin + RIGHT*length,
                 coor_mask=np.array([1, 0 ,0])
             )
         self.set_value(value)
 
 class BarChartRace(VGroup):
     CONFIG = {
-        "spacing": 0.6,
-        "datas_value_max": None,
-        "value_max": 10000,
-        "bar_num": 9,
-        "value_0": 1e-2,       
+            "bars_origin": 2.9*UP + 4.5*LEFT,
+            "bars_height" : 0.4,
+            "spacing": 0.6,
+            "datas_value_max": None,
+            "value_max": 10000,
+            "bar_num": 10,
+            "value_0": 1e-2,
+            "lines_opacity": 0.3,    
         }
     def __init__(  
             self,
@@ -129,25 +142,56 @@ class BarChartRace(VGroup):
             data_0 = [self.value_0]*len(legends)
         rand_serial =len(data_0)-ss.rankdata(data_0, method='ordinal')
         max_value = self.find_max_value(data_0)
+        random.seed(168)
         for i,legend in enumerate(legends):
+            col = list(map(
+                            lambda x: hex(x).split('x')[1].zfill(2), 
+                            tuple(round(i * 255) for i in colorsys.hsv_to_rgb(
+                                    random.random(),
+                                    random.random(),
+                                    0.8)
+                                )
+                        )
+                    )
+            color = "#%s%s%s"%(col[0],col[1],col[2])
             if star_anim:
-                one_bar = TheBars(legend, self.value_0, max_value)
+                one_bar = TheBars(
+                        legend, 
+                        self.value_0, 
+                        max_value,
+                        bar_height = self.bars_height,
+                        bar_origin = self.bars_origin,
+                        bar_color = color,
+                    )
             else:
-                one_bar = TheBars(legend, data_0[i], max_value)
+                one_bar = TheBars(
+                        legend, 
+                        data_0[i],
+                        max_value,
+                        bar_height = self.bars_height,
+                        bar_origin = self.bars_origin,
+                        bar_color = color,
+                    )
             one_bar.bar.move_to(
-                one_bar.graph_origin + DOWN*self.spacing*(rand_serial[i]),
+                one_bar.bar_origin + DOWN*self.spacing*(rand_serial[i]),
                 aligned_edge=LEFT)
             one_bar.set_opacity(0)
             self.add(one_bar)
 
     def init_lines(self, data_0):
         max_value = self.find_max_value(data_0)
-        num_x = [1, 2, 3, 4]
+        num_x = [0, 1, 2, 3, 4]
         while num_x[-1]<self.line_nums:
             num_x.append(num_x[-1]+num_x[-3])
             num_x.append(2*num_x[-1]-num_x[-2])
         for i in range(len(num_x)):
-            line = TheLines(self.value_max*num_x[i], max_value,)
+            line = TheLines(
+                    self.value_max*num_x[i],
+                    max_value,
+                    lines_height = self.spacing*(self.bar_num-1)+self.bars_height+0.1,
+                    lines_origin = self[0].bar_origin + (DOWN*self.spacing*(self.bar_num-1))/2,
+                    bar_origin = self.bars_origin,
+                )
             line.set_opacity(0)
             self.add(line) 
         self.num_x = num_x
@@ -164,11 +208,11 @@ class BarChartRace(VGroup):
                 value = values[i]
             the_bar.bar_updater(value, max_value)
             the_bar.move_to(
-                the_bar.graph_origin + DOWN*self.spacing*(rand_serial[i]),
+                the_bar.bar_origin + DOWN*self.spacing*(rand_serial[i]),
                 coor_mask=np.array([0, 1 ,0]))
-            mask_position = the_bar.graph_origin + DOWN*self.spacing*(self.bar_num)
+            mask_position = the_bar.bar_origin + DOWN*self.spacing*self.bar_num
             if the_bar.get_center()[1] > mask_position[1]:
-                the_bar.set_opacity(1)
+                the_bar.set_opacity(the_bar.bar_opacity)
             else:
                 the_bar.set_opacity(0)
 
@@ -177,19 +221,19 @@ class BarChartRace(VGroup):
         in_lines_index = 0
         for the_line in self[len(values):]:
             the_line.line_updater(the_line.get_value(),max_value)
-            if the_line.get_center()[0] < (the_line.graph_origin+the_line.bar_length*RIGHT)[0]:
+            if the_line.get_center()[0] < (the_line.bar_origin+the_line.bar_length*RIGHT)[0]:
                 in_lines_index+=1
-                the_line.set_opacity(0.5)
+                the_line.set_opacity(self.lines_opacity)
             else:
                 the_line.set_opacity(0)
-        if in_lines_index>=4:
-            if in_lines_index%2 == 0:
-                for jk in range(in_lines_index):
-                    if jk not in [in_lines_index-1, in_lines_index-3]:
-                        self[jk+len(values)].set_opacity(0)
+        if in_lines_index>=5:
             if in_lines_index%2 == 1:
                 for jk in range(in_lines_index):
-                    if jk not in [in_lines_index-1, in_lines_index-2, in_lines_index-4]:
+                    if jk not in [0, in_lines_index-1, in_lines_index-3]:
+                        self[jk+len(values)].set_opacity(0)
+            if in_lines_index%2 == 0:
+                for jk in range(in_lines_index):
+                    if jk not in [0, in_lines_index-1, in_lines_index-2, in_lines_index-4]:
                         self[jk+len(values)].set_opacity(0)
 
     def find_max_value(self, values):
@@ -203,8 +247,8 @@ class PlotBarChart(Scene):
         column = dataArray.shape[1]
         print(row,column)
         n_row = row
-        star = 10
-        end = 11
+        star = 0
+        end = 57
         
         title = dataArray[1:n_row, 1]
         years = dataArray[0, 2:column].astype(np.float)
