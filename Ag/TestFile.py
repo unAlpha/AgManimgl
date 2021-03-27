@@ -5,19 +5,22 @@ class RectPointsTest(Scene):
     def construct(self):
         rect = RoundedRectangle(
                 height = 6,
-                width = 3,
+                width = 2,
                 corner_radius= 1,
+                fill_color = RED,
+                fill_opacity = 1,
+                stroke_width = 1,
             )
         rect_points = self.get_dots(rect.data["points"])
         rect_points_anchors = self.get_dots(rect.get_start_anchors(), customize_color = RED)
-        rect_cubic_ezier = self.cubic_ezier(rect)
+        # rect_cubic_ezier = self.cubic_ezier(rect)
         rect_points_nums = self.get_dot_numbers(rect_points)
         self.add(
                 rect, 
                 rect_points, 
                 rect_points_nums, 
                 rect_points_anchors,
-                rect_cubic_ezier,
+                # rect_cubic_ezier,
             )
         points = rect.data["points"]
         print(points)

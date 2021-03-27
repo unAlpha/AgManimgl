@@ -11,6 +11,31 @@ def get_coords_from_csvdata(file_name):
     csvFile.close()
     return coords
 
+class RRectangle(Rectangle):
+    # CONFIG = {
+    #     "corner_radius": 0.1,
+    # }
+    def stretch(self, factor, dim, **kwargs):
+        def func(points):
+            print(points, "\n----------------------------")
+            points[:, dim] *= factor
+            return points
+        self.apply_points_function(func, works_on_bounding_box=True, **kwargs)
+        return self
+
+    def rescale_to_fit(self, length, dim, stretch=False, **kwargs):
+        old_length = self.length_over_dim(dim)
+        if old_length == 0:
+            return self
+        if stretch:
+            self.stretch(length / old_length, dim, **kwargs)
+        else:
+            self.scale(length / old_length, **kwargs)
+        return self
+
+    def stretch_to_fit_width(self, width, **kwargs):
+        return self.rescale_to_fit(width, 0, stretch=True, **kwargs)
+
 class TheBars(ValueTracker, VGroup):
     CONFIG = {
             "bar_height" : None,
@@ -43,7 +68,7 @@ class TheBars(ValueTracker, VGroup):
         self.add(self.bar, self.text, self.num_txt,)
 
     def the_bar(self, length):
-        return Rectangle( 
+        return RRectangle( 
                 height = self.bar_height,
                 width = length,
                 color = self.bar_color,
@@ -260,8 +285,8 @@ class PlotBarChart(Scene):
         column = dataArray.shape[1]
         print(row,column)
         n_row = row
-        star = 50
-        end = column-2
+        star = 0
+        end = 30
         
         title = dataArray[1:n_row, 1]
         years = dataArray[0, 2:column].astype(np.float)
