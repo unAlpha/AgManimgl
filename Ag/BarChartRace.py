@@ -19,7 +19,7 @@ class TheBars(ValueTracker, VGroup):
             "bar_length": 9,
             "bar_opacity": 0.9,
             "bar_color": None,
-            "bar_corner_radius": 0.05,
+            "min_length": 1e-2,
             "deci_config_nums": {
                     "num_decimal_places": 0,
                     "font_size": 20,
@@ -30,14 +30,8 @@ class TheBars(ValueTracker, VGroup):
         ValueTracker.__init__(self, value, **kwargs)
         self.init_bar(name, value, max_val)
 
-    def init_bar(self, name, value, max_val):        
-        bar = RoundedRectangle(
-                height = self.bar_height,
-                width = self.value_conversion(value, max_val),
-                color = self.bar_color,
-                corner_radius= self.bar_corner_radius,
-                stroke_width = 0,
-            ).set_opacity(self.bar_opacity)
+    def init_bar(self, name, value, max_val):
+        bar = self.the_bar(self.value_conversion(value, max_val))
         text = Text(str(name), size=self.name_size)
         num_txt = DecimalNumber(value, **self.deci_config_nums)
         self.set_value(value)
@@ -47,6 +41,14 @@ class TheBars(ValueTracker, VGroup):
         self.text.add_updater(self.text_updater)
         self.num_txt.add_updater(self.num_txt_updater)
         self.add(self.bar, self.text, self.num_txt,)
+
+    def the_bar(self, length):
+        return Rectangle( 
+                height = self.bar_height,
+                width = length,
+                color = self.bar_color,
+                stroke_width = 0,
+            ).set_opacity(self.bar_opacity)
 
     def text_updater(self, text):
         text.next_to(self.bar, LEFT, buff=0.25)
@@ -61,14 +63,11 @@ class TheBars(ValueTracker, VGroup):
         length = self.value_conversion(value, max_value)
         bar = self[0]
         bar_left = bar.get_left()
-        bar_right = bar.get_right()
-        bar_width = length
-        bar.stretch_to_fit_width(bar_width)
-        bar.move_to(bar_left, LEFT)
+        bar.stretch_to_fit_width(length, about_point = bar_left)
         self.set_value(value)
 
     def value_conversion(self, val, max_val):
-        return max(1e-3, val*self.bar_length/max_val)
+        return max(self.min_length, val*self.bar_length/max_val)
 
 class TheLines(TheBars):
     CONFIG = { 
@@ -120,7 +119,7 @@ class TheLines(TheBars):
 class BarChartRace(VGroup):
     CONFIG = {
             "bars_origin": 2.9*UP + 4.5*LEFT,
-            "bars_height" : 0.4,
+            "bars_height" : 0.5,
             "spacing": 0.6,
             "datas_value_max": None,
             "value_max": 10000,
@@ -128,7 +127,7 @@ class BarChartRace(VGroup):
             "value_0": 1e-2,
             "lines_opacity": 0.3,
             "lightness": 0.9,
-            "color_seed": 168,  
+            "color_seed": 100,  
         }
     def __init__(  
             self,
@@ -149,7 +148,7 @@ class BarChartRace(VGroup):
         max_value = self.find_max_value(data_0)
         random.seed(self.color_seed)
         for i,legend in enumerate(legends):
-            color = self.random_color()
+            cust_color = self.random_color()
             if star_anim:
                 one_bar = TheBars(
                         legend, 
@@ -157,7 +156,7 @@ class BarChartRace(VGroup):
                         max_value,
                         bar_height = self.bars_height,
                         bar_origin = self.bars_origin,
-                        bar_color = color,
+                        bar_color = cust_color,
                     )
             else:
                 one_bar = TheBars(
@@ -166,7 +165,7 @@ class BarChartRace(VGroup):
                         max_value,
                         bar_height = self.bars_height,
                         bar_origin = self.bars_origin,
-                        bar_color = color,
+                        bar_color = cust_color,
                     )
             bottom_down = one_bar.bar_origin + DOWN*self.spacing*(rand_serial[i])
             if bottom_down[1] < (BOTTOM+self.bars_height*DOWN)[1]:
@@ -261,8 +260,8 @@ class PlotBarChart(Scene):
         column = dataArray.shape[1]
         print(row,column)
         n_row = row
-        star = 0
-        end = 57
+        star = 50
+        end = column-2
         
         title = dataArray[1:n_row, 1]
         years = dataArray[0, 2:column].astype(np.float)
