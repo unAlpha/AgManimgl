@@ -1,4 +1,5 @@
 from manimlib import *
+import numpy.linalg as LA
 
 class SquareLocTxt():
     CONFIG ={
@@ -372,7 +373,118 @@ class ConvolutionPic(Scene):
             )
         self.play(FadeIn(fx_sq3.sq_Vg,shift=RIGHT))
         self.wait(3)
-        
+      
+class LiSa(Scene):
+    def construct(self):
+        h_step = 0.2
+        w_step = 3
+        background = Rectangle(
+                width=10,
+                height=2.8,
+                fill_color = BLUE,
+                fill_opacity = 1,
+            ).move_to(BOTTOM+LEFT_SIDE)
 
+        def harmonic_series(num):
+            sum_series=0
+            for i in range(1,num):
+                sum_series=sum_series+1/i
+            return sum_series
+
+        def li_sa_func(shape = 10):
+            vg_shapes = VGroup()
+            for i in range(1,shape+1):
+                rect = Rectangle(width=w_step, height=h_step)
+                rect.next_to(background,UP,aligned_edge=RIGHT,buff=0)
+                rect.shift(w_step*(harmonic_series(shape+1)-harmonic_series(i))/2*RIGHT+0.18*DOWN)
+                txt = Text(str(i)).scale(0.25).next_to(LEFT_SIDE+(background.get_top()[1]-0.0618)*UP,RIGHT).set_color(GREY)
+                vg_shapes.add(rect,txt)
+                vg_shapes.shift(h_step*UP)
+            return vg_shapes
+        
+        def formula_txt(mob):
+            text = Tex(r"\frac{1}{2} L(1+\frac{1}{2} +\frac{1}{3} +\dots +\frac{1}{n} )")
+            text.scale(0.6)
+            arr = DoubleArrow(
+                    background.get_right()[0]*RIGHT,mob.get_right()[0]*RIGHT,
+                    buff = 0,
+                    thickness=0.075,
+                ).move_to(background.get_corner(UR)+0.2*DOWN,coor_mask=[0,1,0]).set_color(YELLOW)
+            text.add_updater(lambda m:m.next_to(arr,UP,buff=0))   
+            return text,arr
+
+        self.add(background,)
+        n = 30     
+        for i in range(n):
+            model = li_sa_func(i+1)
+            arr, text = formula_txt(model)
+            if len(model)>30:
+                self.add(arr, text )
+            self.add(model)
+            self.wait(0.5)
+            if i != n-1:
+                self.remove(model, arr, text )
+        self.wait(5)
+
+
+def PJcurvature(x,y):
+    """
+    input  : the coordinate of the three point
+    output : the curvature and norm direction
+    """
+    t_a = LA.norm([x[1]-x[0],y[1]-y[0]])
+    t_b = LA.norm([x[2]-x[1],y[2]-y[1]])
+    M = np.array([
+        [1, -t_a, t_a**2],
+        [1, 0,    0     ],
+        [1,  t_b, t_b**2]
+    ])
+    a = np.matmul(LA.inv(M),x)
+    b = np.matmul(LA.inv(M),y)
+    kappa = 2*(a[2]*b[1]-b[2]*a[1])/(a[1]**2.+b[1]**2.)**(1.5)
+    return kappa, [b[1], -a[1], 0]/np.sqrt(a[1]**2.+b[1]**2.)
+
+class Curvature(Scene):
+    def construct(self):
+        d = 1e-2
+        vlu = ValueTracker(d)
+        coords = np.array((
+                (-7,  3, 0),
+                (-5,  1, 0),
+                (-2, -1, 0),
+                ( 0,  0, 0),
+                ( 3, -3, 0),
+                ( 4,  2, 0),
+                ( 7,  3, 0),
+            ))
+        curve = VMobject()
+        curve.set_points_smoothly(coords)
+        curve.set_style(stroke_width=8)
+        tan_line_and_vector_and_cirle = self.curvature_vector(curve, vlu.get_value())
+        tan_line_and_vector_and_cirle.add_updater(
+                lambda mob: mob.become(self.curvature_vector(curve, vlu.get_value()))
+            )
+        self.add(curve, tan_line_and_vector_and_cirle)
+        self.play(
+                vlu.set_value, 1-d,
+                run_time = 30,
+                rate_func = linear,
+            )
+
+    def curvature_vector(self, curve_mob, alpha, d_alpha=1e-2):
+        tan_line = TangentLine(curve_mob, alpha, color=GREY, length=20)
+        curve_p = np.array([
+                curve_mob.pfp(alpha-d_alpha),
+                curve_mob.pfp(alpha),
+                curve_mob.pfp(alpha+d_alpha),
+            ])
+        x, y = curve_p[:,0], curve_p[:,1]
+        kappa, norm = PJcurvature(x,y)
+        vector = Vector(norm*1/kappa,color=BLUE)
+        vector.move_to(curve_mob.pfp(alpha)+vector.get_end()/2)
+        circle = Circle(radius = 1/kappa, stroke_width=10)
+        circle.move_to(vector.get_end())
+        return VGroup(tan_line, vector, circle)
+        
         
         
