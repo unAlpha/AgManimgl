@@ -20,6 +20,7 @@ class TheBars(ValueTracker, VGroup):
             "bar_opacity": 0.9,
             "bar_color": None,
             "min_length": 1e-2,
+            "num_txt_buff": 1.2,
             "deci_config_nums": {
                     "num_decimal_places": 0,
                     "font_size": 20,
@@ -57,7 +58,7 @@ class TheBars(ValueTracker, VGroup):
 
     def num_txt_updater(self, deci_txt):
         deci_txt.set_value(self.get_value())
-        deci_txt.next_to(self.bar, RIGHT,buff=0.25)
+        deci_txt.next_to(self.bar, RIGHT,buff=self.num_txt_buff)
         deci_txt.set_opacity(self.bar.get_opacity())
 
     def bar_updater(self, value, max_value):   
@@ -117,40 +118,51 @@ class TheLines(TheBars):
             )
         self.set_value(value)
 
+class TheIcons(ImageMobject):
+    def __init__(self, path, bar, **kwargs):
+        ImageMobject.__init__(self, path, **kwargs)
+        self.next_to(bar, RIGHT)
+        def image_updater(img, dt):
+            img.next_to(bar, RIGHT)
+            img.set_opacity(bar.get_opacity())
+        self.add_updater(image_updater)
+
 class BarChartRace(VGroup):
     CONFIG = {
             "bars_origin": 2.9*UP + 4.5*LEFT,
-            "bars_height" : 0.5,
+            "bars_height": 0.5,
             "spacing": 0.6,
             "datas_value_max": None,
             "value_max": 10000,
-            "bar_num": 5,
+            "bar_num": 10,
             "value_0": 1e-2,
             "lines_opacity": 0.3,
             "lightness": 0.9,
             "color_seed": 100,  
+            "star_anim": False,
+            "add_lines": True,
         }
     def __init__(  
             self,
             legends,
             data_0 = None,
-            star_anim=True,
             **kwargs
         ):
         VGroup.__init__(self, **kwargs)
-        self.init_bars(legends, data_0, star_anim)
-        self.line_nums = int(self.datas_value_max/self.value_max)
-        self.init_lines(data_0)
+        self.init_bars(legends, data_0,)
+        if self.add_lines:
+            self.init_lines(data_0)
 
-    def init_bars(self, legends, data_0, star_anim):
+    def init_bars(self, legends, data_0,):
         if data_0 is None:
             data_0 = [self.value_0]*len(legends)
         rand_serial =len(data_0)-ss.rankdata(data_0, method='ordinal')
         max_value = self.find_max_value(data_0)
         random.seed(self.color_seed)
+        icons = Group()
         for i,legend in enumerate(legends):
             cust_color = self.random_color()
-            if star_anim:
+            if self.star_anim:
                 one_bar = TheBars(
                         legend, 
                         self.value_0, 
@@ -168,16 +180,19 @@ class BarChartRace(VGroup):
                         bar_origin = self.bars_origin,
                         bar_color = cust_color,
                     )
+            path = "GNI_icon/"
+            the_icon = TheIcons(path+str(legend), one_bar[0], height = self.bars_height*0.86)
+            icons.add(the_icon)
             bottom_down = one_bar.bar_origin + DOWN*self.spacing*(rand_serial[i])
             if bottom_down[1] < (BOTTOM+self.bars_height*DOWN)[1]:
                 bottom_down = one_bar.bar_origin*RIGHT + BOTTOM + 2*self.bars_height*DOWN
-            one_bar.bar.move_to(
-                bottom_down,
-                aligned_edge=LEFT)
+            one_bar.bar.move_to(bottom_down, aligned_edge=LEFT)
             one_bar.set_opacity(0)
             self.add(one_bar)
+            self.icons = icons
 
     def init_lines(self, data_0):
+        self.line_nums = int(self.datas_value_max/self.value_max)
         max_value = self.find_max_value(data_0)
         num_x = [0, 1, 2, 3, 4]
         while num_x[-1]<self.line_nums:
@@ -252,7 +267,7 @@ class BarChartRace(VGroup):
                 )
             )
         return "#%s%s%s"%(col[0],col[1],col[2])
-
+ 
 class PlotBarChart(Scene):
     def construct(self):
         data = get_coords_from_csvdata("Ag/data_files/GNI-data")
@@ -262,7 +277,7 @@ class PlotBarChart(Scene):
         print(row,column)
         n_row = row
         star = 0
-        end = 30
+        end = 10
         
         title = dataArray[1:n_row, 1]
         years = dataArray[0, 2:column].astype(np.float)
@@ -282,21 +297,16 @@ class PlotBarChart(Scene):
             ).to_corner(DR).shift(UP*0.5)
         year_text.add_updater(lambda mob: mob.set_value(year_val.get_value()))
 
-        bars = BarChartRace(
-                title,
-                data_nums[0],
-                star_anim = False,
-                add_lines = True,
-                datas_value_max = datas_nums_max,
-            )
-
-        self.add(bars, year_text)
+        bars = BarChartRace(title, data_nums[0], datas_value_max = datas_nums_max,)
+        self.add(bars, year_text, bars.icons,)
+        
+        dur_time = 2
         for i,data_num in enumerate(data_nums):
             self.play(
                     bars.rank_lines_anim, data_num,
                     bars.rank_bars_anim, data_num,
                     year_val.set_value, year_nums[i],
                     rate_func=linear,
-                    run_time=2,
+                    run_time=dur_time,
                 )
         self.wait(1)

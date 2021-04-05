@@ -1,6 +1,16 @@
 from manimlib import *
 import numpy.linalg as LA
 
+def get_coords_from_csvdata(file_name):
+    import csv
+    coords = []
+    with open(f'{file_name}.csv', 'r', encoding='UTF-8') as csvFile:
+        reader = csv.reader(csvFile)
+        for row in reader:
+            coords.append(row)
+    csvFile.close()
+    return coords
+
 class SquareLocTxt():
     CONFIG ={
         "grid_color":"#333333",
@@ -414,7 +424,9 @@ class LiSa(Scene):
             return text,arr
 
         self.add(background,)
-        n = 30     
+        # frame = self.camera.frame
+        # frame.scale(2)
+        n = 30   
         for i in range(n):
             model = li_sa_func(i+1)
             arr, text = formula_txt(model)
@@ -436,7 +448,7 @@ def PJcurvature(x,y):
     t_b = LA.norm([x[2]-x[1],y[2]-y[1]])
     M = np.array([
         [1, -t_a, t_a**2],
-        [1, 0,    0     ],
+        [1,    0,   0   ],
         [1,  t_b, t_b**2]
     ])
     a = np.matmul(LA.inv(M),x)
@@ -466,7 +478,7 @@ class Curvature(Scene):
             )
         self.add(curve, tan_line_and_vector_and_cirle)
         self.play(
-                vlu.set_value, 1-d,
+                vlu.set_value, 0.587,
                 run_time = 30,
                 rate_func = linear,
             )
@@ -480,11 +492,67 @@ class Curvature(Scene):
             ])
         x, y = curve_p[:,0], curve_p[:,1]
         kappa, norm = PJcurvature(x,y)
-        vector = Vector(norm*1/kappa,color=BLUE)
+        vector = Vector(norm*1/kappa, fill_color=BLUE)
         vector.move_to(curve_mob.pfp(alpha)+vector.get_end()/2)
         circle = Circle(radius = 1/kappa, stroke_width=10)
         circle.move_to(vector.get_end())
         return VGroup(tan_line, vector, circle)
-        
-        
-        
+
+class Table_mol(Scene):
+    CONFIG = {
+        "camera_config": {"background_color": BLACK},   
+    }
+    def construct(self):
+        data = get_coords_from_csvdata(r"Ag\data_files\mol_datas")
+        dataArray=np.array(data)
+        row = dataArray.shape[0]
+        column = dataArray.shape[1]
+        x, y, dx, dy = -column+1, 3, 2.1, 0.5
+        dataTxt = VGroup()
+        dataTxtBackground = VGroup()
+        for i in range(row):
+            for j in range(column):
+                target_ij = Text(str(dataArray[i,j]))
+                if i==0:
+                    target_ij.scale(0.5)
+                    target_ij.set_color(RED)
+                else:
+                    target_ij.scale(0.35)
+                target_ij.shift(np.array([x+j*dx,y-i*dy,0]))
+                dataTxt.add(target_ij)
+            if (i+1)%2:
+                target_i = Rectangle(
+                        width=column*dx,
+                        height=dy,
+                        color=BLUE,
+                        fill_color=BLUE,
+                        fill_opacity=0.236,
+                        stroke_opacity=0
+                    ).move_to(target_ij, coor_mask=np.array([0,1,0]))
+                dataTxtBackground.add(target_i)
+ 
+        allGroupHead = VGroup(
+                dataTxtBackground[0],
+                dataTxtBackground[0].copy(),
+                *dataTxt[:column]
+            )
+
+        allGroup = VGroup(
+                dataTxtBackground[0].copy(),
+                *dataTxtBackground,
+                *dataTxt,
+            )
+
+        self.play(
+                FadeIn(allGroup[0], scale=0.5),
+                FadeIn(dataTxtBackground[0], scale=0.5),
+                FadeIn(dataTxt[:column], scale=0.9)
+            )
+        self.play(
+                LaggedStartMap(FadeIn,dataTxtBackground[1:],lag_ratio=0.1),
+                LaggedStartMap(FadeIn,dataTxt[column:],lag_ratio=0.2),
+                run_time=3
+            )
+
+        self.wait(1)    
+
