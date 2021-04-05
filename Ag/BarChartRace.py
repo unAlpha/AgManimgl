@@ -20,7 +20,7 @@ class TheBars(ValueTracker, VGroup):
             "bar_opacity": 0.9,
             "bar_color": None,
             "min_length": 1e-2,
-            "num_txt_buff": 1.2,
+            "num_txt_buff": 0.96,
             "deci_config_nums": {
                     "num_decimal_places": 0,
                     "font_size": 20,
@@ -49,7 +49,7 @@ class TheBars(ValueTracker, VGroup):
                 height = self.bar_height,
                 width = length,
                 color = self.bar_color,
-                stroke_width = 0,
+                stroke_width = 0.05,
             ).set_opacity(self.bar_opacity)
 
     def text_updater(self, text):
@@ -121,9 +121,8 @@ class TheLines(TheBars):
 class TheIcons(ImageMobject):
     def __init__(self, path, bar, **kwargs):
         ImageMobject.__init__(self, path, **kwargs)
-        self.next_to(bar, RIGHT)
-        def image_updater(img, dt):
-            img.next_to(bar, RIGHT)
+        def image_updater(img, ):
+            img.next_to(bar, RIGHT, buff=0.1618)
             img.set_opacity(bar.get_opacity())
         self.add_updater(image_updater)
 
@@ -141,6 +140,8 @@ class BarChartRace(VGroup):
             "color_seed": 100,  
             "star_anim": False,
             "add_lines": True,
+            "add_icons": True,
+            "path": "GNI_icon/",
         }
     def __init__(  
             self,
@@ -180,9 +181,10 @@ class BarChartRace(VGroup):
                         bar_origin = self.bars_origin,
                         bar_color = cust_color,
                     )
-            path = "GNI_icon/"
-            the_icon = TheIcons(path+str(legend), one_bar[0], height = self.bars_height*0.86)
-            icons.add(the_icon)
+            if self.add_icons:
+                the_icon = TheIcons(self.path+str(legend), one_bar[0])
+                the_icon.set_width(0.65)
+                icons.add(the_icon)
             bottom_down = one_bar.bar_origin + DOWN*self.spacing*(rand_serial[i])
             if bottom_down[1] < (BOTTOM+self.bars_height*DOWN)[1]:
                 bottom_down = one_bar.bar_origin*RIGHT + BOTTOM + 2*self.bars_height*DOWN
