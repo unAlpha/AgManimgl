@@ -19,6 +19,7 @@ class TheBars(ValueTracker, VGroup):
             "bar_length": 9,
             "bar_opacity": 0.9,
             "bar_color": None,
+            "bar_stroke_width": 1.238,
             "min_length": 1e-2,
             "num_txt_buff": 0.96,
             "deci_config_nums": {
@@ -48,8 +49,9 @@ class TheBars(ValueTracker, VGroup):
         # return RRectangle( 
                 height = self.bar_height,
                 width = length,
-                color = self.bar_color,
-                stroke_width = 0.05,
+                fill_color = self.bar_color,
+                fill_opciaty = 1,
+                stroke_width = self.bar_stroke_width,
             ).set_opacity(self.bar_opacity)
 
     def text_updater(self, text):
@@ -135,7 +137,7 @@ class BarChartRace(VGroup):
             "value_max": 10000,
             "bar_num": 10,
             "value_0": 1e-2,
-            "lines_opacity": 0.3,
+            "lines_opacity": 0.236,
             "lightness": 0.9,
             "color_seed": 100,  
             "star_anim": False,
@@ -279,7 +281,7 @@ class PlotBarChart(Scene):
         print(row,column)
         n_row = row
         star = 0
-        end = 10
+        end = column-2
         
         title = dataArray[1:n_row, 1]
         years = dataArray[0, 2:column].astype(np.float)

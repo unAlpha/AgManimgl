@@ -93,3 +93,18 @@ class CubicBezierTest(Scene):
         self.add(cubic_bezier)
         self.wait()
 
+class ImageShift(Scene):
+    def construct(self):
+        us_image = ImageMobject("GNI_icon/United States", height=0.5).shift(LEFT_SIDE)
+        rect = Rectangle(
+                height=0.6,
+                color=BLUE,
+                # fill_color=BLUE,
+                # fill_opacity=1,
+            ).shift(LEFT_SIDE).set_opacity(0.68)
+        self.play(
+                rect.animate.move_to(ORIGIN),
+                us_image.animate.move_to(ORIGIN), 
+                rate_func = linear, 
+                run_time=5
+            )
