@@ -20,6 +20,7 @@ def srt_file_process():
             newFile.write(line)
     newFile.close()
 
+# pics rename
 def files_rename():
     data = get_coords_from_csvdata("Ag/data_files/GNI-data")
     dataArray = np.array(data)

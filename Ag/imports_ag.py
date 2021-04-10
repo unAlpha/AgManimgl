@@ -20,7 +20,7 @@ def ObjAndText(
                 text2 = None,
                 dframe=dframe,
                 txt_height=txt_height,
-                OS_font=Font
+                OS_font=Font,
             ):
 
     pic = ImageMobject(Obj)
@@ -28,13 +28,13 @@ def ObjAndText(
 
     if text2 is not None:
         picText1 = Text(text1,
-                        font=Font,
+                        font=OS_font,
                         color="#308032"
             )\
             .set_height(txt_height-0.068)\
             .next_to(pic,DOWN,buff=SMALL_BUFF)
         picText2 = Text(text2,
-                        font=Font, 
+                        font=OS_font, 
                         color=BLACK,
             )\
             .set_height(txt_height)\
