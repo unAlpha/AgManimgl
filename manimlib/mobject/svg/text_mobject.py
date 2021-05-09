@@ -215,7 +215,7 @@ class Text(SVGMobject):
         disable_liga = self.disable_ligatures
         return manimpango.text2svg(
             settings,
-            size,
+            size/4,
             lsh,
             disable_liga,
             file_name,

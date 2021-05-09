@@ -503,7 +503,7 @@ class Table_mol(Scene):
         "camera_config": {"background_color": BLACK},   
     }
     def construct(self):
-        data = get_coords_from_csvdata(r"Ag\data_files\mol_datas")
+        data = get_coords_from_csvdata(r"Ag/data_files/mol_datas")
         dataArray=np.array(data)
         row = dataArray.shape[0]
         column = dataArray.shape[1]

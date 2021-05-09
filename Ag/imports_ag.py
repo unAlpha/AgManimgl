@@ -120,3 +120,75 @@ def introduction(
             Write(all_txt)
             )  
     self.wait()
+    
+def get_coords_from_csvdata(file_name):
+    import csv
+    coords = []
+    with open(f'{file_name}.csv', 'r', encoding='UTF-8') as csvFile:
+        reader = csv.reader(csvFile)
+        for row in reader:
+            coords.append(row)
+    csvFile.close()
+    return coords
+
+class Table(object):
+    CONFIG = {
+        "camera_config": {"background_color": BLACK},   
+    }
+    def __init__(self, path):
+        self.read_csv(path)
+        
+    def read_csv(self, path=""):
+        data = get_coords_from_csvdata(path)
+        dataArray=np.array(data)
+        self.row = dataArray.shape[0]
+        self.column = dataArray.shape[1]
+        x, y, dx, dy = -self.column+1, 3, 2.1, 0.5
+        dataTxt = VGroup()
+        dataTxtBackground = VGroup()
+        for i in range(self.row):
+            for j in range(self.column):
+                target_ij = Text(str(dataArray[i,j]))
+                if i==0:
+                    target_ij.scale(0.5)
+                    target_ij.set_color(RED)
+                else:
+                    target_ij.scale(0.35)
+                target_ij.shift(np.array([x+j*dx,y-i*dy,0]))
+                dataTxt.add(target_ij)
+            if (i+1)%2:
+                target_i = Rectangle(
+                        width=self.column*dx,
+                        height=dy,
+                        color=BLUE,
+                        fill_color=BLUE,
+                        fill_opacity=0.236,
+                        stroke_opacity=0
+                    ).move_to(target_ij, coor_mask=np.array([0,1,0]))
+                dataTxtBackground.add(target_i)
+ 
+        self.dataTxtBackground = dataTxtBackground
+        self.dataTxt = dataTxt
+        self.allGroupHead = VGroup(
+                dataTxtBackground[0],
+                dataTxtBackground[0].copy(),
+                *dataTxt[:self.column]
+            )
+
+        self.allGroup = VGroup(
+                dataTxtBackground[0].copy(),
+                *dataTxtBackground,
+                *dataTxt,
+            )
+
+    def data_anim(self, scene):
+        scene.play(
+                FadeIn(self.allGroup[0], scale=0.5),
+                FadeIn(self.dataTxtBackground[0], scale=0.5),
+                FadeIn(self.dataTxt[:self.column], scale=0.9)
+            )
+        scene.play(
+                LaggedStartMap(FadeIn,self.dataTxtBackground[1:],lag_ratio=0.1),
+                LaggedStartMap(FadeIn,self.dataTxt[self.column:],lag_ratio=0.2),
+                run_time=3
+            )

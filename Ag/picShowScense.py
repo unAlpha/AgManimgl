@@ -1,5 +1,13 @@
 from Ag.imports_ag import *
 
+
+class suger1(Scene):
+    def construct(self):
+        path = r"Ag/data_files/2 代糖甜度表"
+        table = Table(path)
+        table.data_anim(self)
+        self.wait()
+
 class pic1(Scene):
     def construct(self):
         allParts = ObjAndText(
