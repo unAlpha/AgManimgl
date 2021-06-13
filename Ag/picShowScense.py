@@ -1,5 +1,49 @@
 from Ag.imports_ag import *
 
+class ZeroKnowledgeProof1(Scene):
+    def construct(self):
+        allParts = ObjAndText(
+                        "ZeroKnowledgeProof/Shafi_Goldwasser",
+                        "Shafrira Goldwasser",
+                        "莎菲·戈德瓦塞尔",
+            )
+        palyALL(self,allParts)
+
+class ZeroKnowledgeProof2(Scene):
+    def construct(self):
+        allParts = ObjAndText(
+                        "ZeroKnowledgeProof/艾维·维哥德尔森",
+                        "Avi Wigderson",
+                        "艾维·维哥德尔森",
+            )
+        palyALL(self,allParts)
+
+class ZeroKnowledgeProof3(Scene):
+    def construct(self):
+        allParts = ObjAndText(
+                        "ZeroKnowledgeProof/查尔斯·拉科夫",
+                        "Charles Rackoff",
+                        "查尔斯·拉科夫",
+            )
+        palyALL(self,allParts)
+
+class ZeroKnowledgeProof4(Scene):
+    def construct(self):
+        allParts = ObjAndText(
+                        "ZeroKnowledgeProof/希尔维奥·米卡利",
+                        "Silvio Micali",
+                        "希尔维奥·米卡利",
+            )
+        palyALL(self,allParts)
+
+class ZeroKnowledgeProof5(Scene):
+    def construct(self):
+        allParts = ObjAndText(
+                        "ZeroKnowledgeProof/姚期智",
+                        "Andrew Yao",
+                        "姚期智",
+            )
+        palyALL(self,allParts)
 
 class suger1(Scene):
     def construct(self):

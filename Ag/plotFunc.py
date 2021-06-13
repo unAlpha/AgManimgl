@@ -1,4 +1,4 @@
-from manimlib.imports import *
+from manimlib import *
 from numpy import mean
 from itertools import groupby
 

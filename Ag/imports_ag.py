@@ -70,7 +70,7 @@ def palyALL(self,allParts):
         )
     self.play(Write(allParts[3]))
     self.wait(10)
-    self.play(FadeOut(allParts,shift=TOP))
+    self.play(FadeOut(allParts,shift=DOWN))
 
 def introduction(
         self, 
