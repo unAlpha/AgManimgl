@@ -334,7 +334,7 @@ class UpdatersExample(Scene):
         now = self.time
         w0 = square.get_width()
         square.add_updater(
-            lambda m: m.set_width(w0 * math.cos(self.time - now))
+            lambda m: m.set_width(w0 * math.sin(self.time - now) + w0)
         )
         self.wait(4 * PI)
 
@@ -344,7 +344,7 @@ class CoordinateSystemExample(Scene):
         axes = Axes(
             # x-axis ranges from -1 to 10, with a default step size of 1
             x_range=(-1, 10),
-            # y-axis ranges from -2 to 10 with a step size of 0.5
+            # y-axis ranges from -2 to 2 with a step size of 0.5
             y_range=(-2, 2, 0.5),
             # The axes will be stretched so as to match the specified
             # height and width
