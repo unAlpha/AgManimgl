@@ -38,17 +38,17 @@ class Music2(Scene):
             "旧琴练习",
             font="Source Han Sans CN",
             weight='BOLD',
-            size=1.238
+            size=500,
             ).shift(0.238*UP)
 
         text2 = Text(
             "新琴练习",
             font="Source Han Sans CN",
             weight='BOLD',
-            size=1.238
+            size=500,
             ).shift(0.238*UP)
 
-        self.play(FadeIn(text1,scale=0.5))
+        self.play(Write(text1))
         self.wait()
         self.remove(text1)
         self.play(FadeIn(text2,scale=0.5))
