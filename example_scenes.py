@@ -47,12 +47,10 @@ class OpeningManimExample(Scene):
         moving_c_grid.prepare_for_nonlinear_transform()
         c_grid.set_stroke(BLUE_E, 1)
         c_grid.add_coordinate_labels(font_size=24)
-        complex_map_words = TexText(
-                """
-                Or thinking of the plane as $\\mathds{C}$,\\\\
-                this is the map $z \\rightarrow z^2$
-                """
-            )
+        complex_map_words = TexText("""
+            Or thinking of the plane as $\\mathds{C}$,\\\\
+            this is the map $z \\rightarrow z^2$
+        """)
         complex_map_words.to_corner(UR)
         complex_map_words.set_stroke(BLACK, 5, background=True)
 
@@ -641,14 +639,14 @@ class ControlsExample(Scene):
         self.checkbox = Checkbox()
         self.color_picker = ColorSliders()
         self.panel = ControlPanel(
-            Text("Text", size=0.5), self.textbox, Line(),
-            Text("Show/Hide Text", size=0.5), self.checkbox, Line(),
-            Text("Color of Text", size=0.5), self.color_picker
+            Text("Text", font_size=24), self.textbox, Line(),
+            Text("Show/Hide Text", font_size=24), self.checkbox, Line(),
+            Text("Color of Text", font_size=24), self.color_picker
         )
         self.add(self.panel)
 
     def construct(self):
-        text = Text("", size=2)
+        text = Text("text", font_size=96)
 
         def text_updater(old_text):
             assert(isinstance(old_text, Text))
