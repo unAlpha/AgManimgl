@@ -108,3 +108,10 @@ class ImageShift(Scene):
                 rate_func = linear, 
                 run_time=5
             )
+        
+class ValueTrackerTest(Scene):
+    def construct(self):
+        val = ValueTracker(1)
+        Txt = DecimalNumber(val.get_value(),font_size=150).add_updater(lambda v: v.set_value(val.get_value()))
+        self.add(Txt)
+        self.play(val.animate.set_value(10))

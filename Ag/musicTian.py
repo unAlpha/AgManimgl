@@ -8,7 +8,7 @@ class Music1(Scene):
             "三个层次",
             font="Source Han Sans CN",
             weight='BOLD',
-            size=1.68
+            # size=1.68
             )
         self.play(FadeIn(text1,scale=0.5))
         self.wait()

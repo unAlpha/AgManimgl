@@ -14,7 +14,7 @@ def get_coords_from_csvdata(file_name):
 class TheBars(ValueTracker, VGroup):
     CONFIG = {
             "bar_height" : None,
-            "name_size" : 0.5,
+            "name_size" : 30,
             "bar_origin" : 2.6*UP + 4.5*LEFT,
             "bar_length": 9,
             "bar_opacity": 0.9,
@@ -24,7 +24,7 @@ class TheBars(ValueTracker, VGroup):
             "num_txt_buff": 0.96,
             "deci_config_nums": {
                     "num_decimal_places": 0,
-                    "font_size": 20,
+                    "font_size": 100,
                 }
         }
     def __init__(self, name, value, max_val, **kwargs):
@@ -34,7 +34,7 @@ class TheBars(ValueTracker, VGroup):
 
     def init_bar(self, name, value, max_val):
         bar = self.the_bar(self.value_conversion(value, max_val))
-        text = Text(str(name), size=self.name_size)
+        text = Text(str(name), font_size=self.name_size)
         num_txt = DecimalNumber(value, **self.deci_config_nums)
         self.set_value(value)
         self.bar = bar
@@ -80,7 +80,7 @@ class TheLines(TheBars):
             "text_direction": UP,
             "deci_config_ruler": {
                     "num_decimal_places": 0,
-                    "font_size": 15,
+                    "font_size": 50,
                 }
         }
     def __init__(self, value, max_val, **kwargs):
@@ -281,7 +281,7 @@ class PlotBarChart(Scene):
         print(row,column)
         n_row = row
         star = 0
-        end = column-2
+        end = 3
         
         title = dataArray[1:n_row, 1]
         years = dataArray[0, 2:column].astype(np.float)
@@ -296,7 +296,7 @@ class PlotBarChart(Scene):
                 year_val.get_value(),
                 num_decimal_places = 0,
                 group_with_commas = False,
-                font_size = 100,
+                font_size = 250,
                 color = BLUE,
             ).to_corner(DR).shift(UP*0.5)
         year_text.add_updater(lambda mob: mob.set_value(year_val.get_value()))
