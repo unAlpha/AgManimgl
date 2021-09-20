@@ -1,8 +1,2 @@
-<<<<<<< HEAD
 [build-system]
 requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-=======
-[build-system]
-requires = ["setuptools", "wheel"]
->>>>>>> e359f520bc7010d4ce9c3ffa3668049b0d512b1d
