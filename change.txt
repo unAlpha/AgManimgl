@@ -1,0 +1,44 @@
+1 extract_scene
+删除
+        # return [
+        #     name_to_class[split_str] if not split_str.isnumeric() else scene_classes[int(split_str)-1]
+        #     for split_str in user_input.replace(" ", "").split(",")
+        # ]
+添加
+        class_num = [num_str for num_str in user_input.split(",")]
+        for cn in class_num:
+            if str.__contains__(str(cn), '-'):
+                num1=cn[:cn.rfind('-', 1)]
+                num2=cn[cn.rfind('-', 1)+1:]
+                class_num.remove(cn)
+                for tmp in range(int(num1),int(num2)+1):
+                    class_num.append(tmp)
+        return [scene_classes[int(num_str)-1] for num_str in class_num]
+
+2 支持中文
+改使用ctex
+
+3 ctex_template
+添加
+\usepackage{xeCJK}
+\setCJKmainfont{SOURCEHANSANSCN BOLD.OTF}
+
+4 Mac BigSur
+编辑PyOpenGL文件OpenGL / platform / ctypesloader.py
+# fullName = util.find_library( name )
+fullName = '/System/Library/Frameworks/OpenGL.framework/OpenGL'
+
+5 text_mobject
+  return manimpango.text2svg(
+            settings,
+            size/4,  # 增加/4
+            lsh,
+            disable_liga,
+            file_name,
+            START_X,
+            START_Y,
+            width,
+            height,
+            self.text,
+        )
+

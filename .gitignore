@@ -10,19 +10,13 @@ __pycache__/
 # C extensions
 *.so
 
-#Ag
-media/
-change.txt
-manimgl.pdf
-Ag/raster_images/
-Ag/sounds_files/
-_codes_3b1b/
-
 # Distribution / packaging
 .Python
 build/
 develop-eggs/
 dist/
+manimlib.egg-info/
+
 downloads/
 eggs/
 .eggs/
@@ -156,5 +150,3 @@ dmypy.json
 # For manim
 /videos
 /custom_config.yml
-.vscode/settings.json
-.gitignore
