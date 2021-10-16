@@ -4,6 +4,8 @@ import numpy as np
 from manimlib.utils.simple_functions import choose
 from manimlib.utils.space_ops import find_intersection
 from manimlib.utils.space_ops import cross2d
+from manimlib.utils.space_ops import midpoint
+from manimlib.logger import log
 
 CLOSED_THRESHOLD = 0.001
 
@@ -67,9 +69,9 @@ def interpolate(start, end, alpha):
     try:
         return (1 - alpha) * start + alpha * end
     except TypeError:
-        print(type(start), start.dtype)
-        print(type(end), start.dtype)
-        print(alpha)
+        log.debug(f"`start` parameter with type `{type(start)}` and dtype `{start.dtype}`")
+        log.debug(f"`end` parameter with type `{type(end)}` and dtype `{end.dtype}`")
+        log.debug(f"`alpha` parameter with value `{alpha}`")
         import sys
         sys.exit(2)
 
@@ -130,6 +132,8 @@ def get_smooth_quadratic_bezier_handle_points(points):
     another that would produce a parabola passing through P0, call it smooth_to_left,
     and use the midpoint between the two.
     """
+    if len(points) == 2:
+        return midpoint(*points)
     smooth_to_right, smooth_to_left = [
         0.25 * ps[0:-2] + ps[1:-1] - 0.25 * ps[2:]
         for ps in (points, points[::-1])
