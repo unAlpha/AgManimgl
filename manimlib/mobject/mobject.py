@@ -82,6 +82,14 @@ class Mobject(object):
     def __str__(self):
         return self.__class__.__name__
 
+    def __add__(self, other : 'Mobject') -> 'Mobject':
+        assert(isinstance(other, Mobject))
+        return self.get_group_class()(self, other)
+
+    def __mul__(self, other : 'int') -> 'Mobject':
+        assert(isinstance(other, int))
+        return self.replicate(other)
+
     def init_data(self):
         self.data = {
             "points": np.zeros((0, 3)),
@@ -767,7 +775,7 @@ class Mobject(object):
         return self.rescale_to_fit(height, 1, stretch=True, **kwargs)
 
     def stretch_to_fit_depth(self, depth, **kwargs):
-        return self.rescale_to_fit(depth, 1, stretch=True, **kwargs)
+        return self.rescale_to_fit(depth, 2, stretch=True, **kwargs)
 
     def set_width(self, width, stretch=False, **kwargs):
         return self.rescale_to_fit(width, 0, stretch=stretch, **kwargs)
@@ -1609,6 +1617,10 @@ class Group(Mobject):
             raise Exception("All submobjects must be of type Mobject")
         Mobject.__init__(self, **kwargs)
         self.add(*mobjects)
+        
+    def __add__(self, other : 'Mobject' or 'Group'):
+        assert(isinstance(other, Mobject))
+        return self.add(other)
 
 
 class Point(Mobject):

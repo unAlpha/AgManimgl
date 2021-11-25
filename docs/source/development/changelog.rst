@@ -1,6 +1,20 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+Fixed bugs 
+^^^^^^^^^^
+
+- `#1653 <https://github.com/3b1b/manim/pull/1653>`__: Fixed ``Mobject.stretch_to_fit_depth``
+
+New Features
+^^^^^^^^^^^^
+
+- `e10f850 <https://github.com/3b1b/manim/commit/e10f850d0d9f971931cc85d44befe67dc842af6d>`__: Added CLI flag ``--log-level`` to specify log level
+
+
 v1.2.0
 ------
 
