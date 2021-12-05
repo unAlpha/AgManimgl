@@ -470,15 +470,15 @@ class Curvature(Scene):
                 ( 7,  3, 0),
             ))
         curve = VMobject()
-        curve.set_points_smoothly(coords)
+        curve.set_points_smoothly(coords,true_smooth=True)
         curve.set_style(stroke_width=8)
-        tan_line_and_vector_and_cirle = self.curvature_vector(curve, vlu.get_value())
-        tan_line_and_vector_and_cirle.add_updater(
+        tan_line_and_vector_and_circle = self.curvature_vector(curve, vlu.get_value())
+        tan_line_and_vector_and_circle.add_updater(
                 lambda mob: mob.become(self.curvature_vector(curve, vlu.get_value()))
             )
-        self.add(curve, tan_line_and_vector_and_cirle)
+        self.add(curve, tan_line_and_vector_and_circle)
         self.play(
-                vlu.set_value, 0.587,
+                vlu.set_value, 0.98,
                 run_time = 30,
                 rate_func = linear,
             )
@@ -492,10 +492,15 @@ class Curvature(Scene):
             ])
         x, y = curve_p[:,0], curve_p[:,1]
         kappa, norm = PJcurvature(x,y)
-        vector = Vector(norm*1/kappa, fill_color=BLUE)
+        vector = Vector(norm*1/kappa, color=BLUE)
         vector.move_to(curve_mob.pfp(alpha)+vector.get_end()/2)
-        circle = Circle(radius = 1/kappa, stroke_width=10)
-        circle.move_to(vector.get_end())
+        circle=VMobject()
+        if abs(1/kappa)>50:
+            circle = circle.become(tan_line.copy().set_style(stroke_width=10,stroke_color=RED))
+            circle.move_to(vector.get_start())
+        else:
+            circle = circle.become(Circle(radius = abs(1/kappa), stroke_width=10))
+            circle.move_to(vector.get_end())
         return VGroup(tan_line, vector, circle)
 
 class Table_mol(Scene):

@@ -11,7 +11,7 @@ def get_coords_from_csvdata(file_name):
     csvFile.close()
     return coords
 
-class TheBars(ValueTracker, VGroup):
+class TheBars(VGroup,ValueTracker):
     CONFIG = {
             "bar_height" : None,
             "name_size" : 30,
@@ -24,7 +24,7 @@ class TheBars(ValueTracker, VGroup):
             "num_txt_buff": 0.96,
             "deci_config_nums": {
                     "num_decimal_places": 0,
-                    "font_size": 100,
+                    "font_size": 30,
                 }
         }
     def __init__(self, name, value, max_val, **kwargs):
@@ -35,8 +35,7 @@ class TheBars(ValueTracker, VGroup):
     def init_bar(self, name, value, max_val):
         bar = self.the_bar(self.value_conversion(value, max_val))
         text = Text(str(name), font_size=self.name_size)
-        num_txt = DecimalNumber(value, **self.deci_config_nums)
-        self.set_value(value)
+        num_txt = DecimalNumber(self.get_value(), **self.deci_config_nums)
         self.bar = bar
         self.text = text
         self.num_txt = num_txt
@@ -123,7 +122,7 @@ class TheLines(TheBars):
 class TheIcons(ImageMobject):
     def __init__(self, path, bar, **kwargs):
         ImageMobject.__init__(self, path, **kwargs)
-        def image_updater(img, ):
+        def image_updater(img):
             img.next_to(bar, RIGHT, buff=0.1618)
             img.set_opacity(bar.get_opacity())
         self.add_updater(image_updater)
@@ -135,7 +134,7 @@ class BarChartRace(VGroup):
             "spacing": 0.6,
             "datas_value_max": None,
             "value_max": 10000,
-            "bar_num": 10,
+            "bar_num": 1,
             "value_0": 1e-2,
             "lines_opacity": 0.236,
             "lightness": 0.9,
@@ -228,9 +227,7 @@ class BarChartRace(VGroup):
             bottom_down = the_bar.bar_origin + DOWN*self.spacing*(rand_serial[i])
             if bottom_down[1] < (BOTTOM+self.bars_height*DOWN)[1]:
                 bottom_down = the_bar.bar_origin*RIGHT + BOTTOM + 2*self.bars_height*DOWN
-            the_bar.move_to(
-                bottom_down,
-                coor_mask=np.array([0, 1 ,0]))
+            the_bar.move_to(bottom_down,coor_mask=np.array([0, 1 ,0]))
             mask_position = the_bar.bar_origin + DOWN*self.spacing*self.bar_num
             if the_bar.get_center()[1] > mask_position[1]:
                 the_bar.set_opacity(the_bar.bar_opacity)
@@ -307,7 +304,7 @@ class PlotBarChart(Scene):
         dur_time = 2
         for i,data_num in enumerate(data_nums):
             self.play(
-                    bars.rank_lines_anim, data_num,
+                    # bars.rank_lines_anim, data_num,
                     bars.rank_bars_anim, data_num,
                     year_val.set_value, year_nums[i],
                     rate_func=linear,
