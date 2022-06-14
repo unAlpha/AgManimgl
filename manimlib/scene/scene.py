@@ -34,7 +34,7 @@ class Scene(object):
         "random_seed": 0,
         "start_at_animation_number": None,
         "end_at_animation_number": None,
-        "leave_progress_bars": False,
+        "leave_progress_bars": True,
         "preview": True,
         "linger_after_completion": True,
     }

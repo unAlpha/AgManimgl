@@ -1,5 +1,12 @@
+from calendar import day_abbr
+from math import radians
+from cv2 import add
+from matplotlib.pyplot import title
+from sympy import Add, RisingFactorial
 from manimlib import *
 import numpy.linalg as LA
+
+from manimlib import constants
 
 def get_coords_from_csvdata(file_name):
     import csv
@@ -508,11 +515,12 @@ class Table_mol(Scene):
         "camera_config": {"background_color": BLACK},   
     }
     def construct(self):
-        data = get_coords_from_csvdata(r"Ag/data_files/mol_datas")
+        title = Text("城镇企业职工基本养老保险个人账户养老金计发月数表",font_size=30)
+        data = get_coords_from_csvdata(r"/Users/pengyinzhong/Downloads/6月份/养老金/素材/月数表")
         dataArray=np.array(data)
         row = dataArray.shape[0]
         column = dataArray.shape[1]
-        x, y, dx, dy = -column+1, 3, 2.1, 0.5
+        x, y, dx, dy = -column+1, 3, 2.1, 0.45
         dataTxt = VGroup()
         dataTxtBackground = VGroup()
         for i in range(row):
@@ -535,20 +543,15 @@ class Table_mol(Scene):
                         stroke_opacity=0
                     ).move_to(target_ij, coor_mask=np.array([0,1,0]))
                 dataTxtBackground.add(target_i)
- 
-        allGroupHead = VGroup(
-                dataTxtBackground[0],
-                dataTxtBackground[0].copy(),
-                *dataTxt[:column]
-            )
-
+        dataTxt.move_to(target_i,coor_mask=np.array([1,0,0]))
         allGroup = VGroup(
                 dataTxtBackground[0].copy(),
                 *dataTxtBackground,
                 *dataTxt,
-            )
-
+            ).scale(0.8).center()
+        title.next_to(allGroup,UP)
         self.play(
+                FadeIn(title,scale=0.5),
                 FadeIn(allGroup[0], scale=0.5),
                 FadeIn(dataTxtBackground[0], scale=0.5),
                 FadeIn(dataTxt[:column], scale=0.9)
@@ -560,4 +563,304 @@ class Table_mol(Scene):
             )
 
         self.wait(1)    
+class Table_alluse(Scene):
+    CONFIG = {
+        "camera_config": {"background_color": BLACK},   
+    }
+    def construct(self):
+        title = Text("缴费与领取待遇参照表",font_size=30)
+        data = get_coords_from_csvdata(r"/Users/pengyinzhong/Downloads/6月份/养老金/素材/缴费与领取待遇参照表")
+        dataArray=np.array(data)
+        row = dataArray.shape[0]
+        column = dataArray.shape[1]
+        print(row,column)
+        x, y, dx, dy = -column+1, 3, 2.4, 0.45
+        dataTxt = VGroup()
+        dataTxtBackground = VGroup()
+        for i in range(row):
+            dyy=1
+            for j in range(column):
+                target_ij = TexText(str(dataArray[i,j]))
+                if i==0:
+                    target_ij.scale(0.5)
+                    target_ij.set_color(RED)
+                else:
+                    target_ij.scale(0.35)
+                    dyy=dy
+                target_ij.shift(np.array([x+j*dx,y-(i-1/2)*dyy,0]))
+                dataTxt.add(target_ij)
+            if (i+1)%2:
+                target_i = Rectangle(
+                        width=column*dx,
+                        height=dyy,
+                        color=BLUE,
+                        fill_color=BLUE,
+                        fill_opacity=0.236,
+                        stroke_opacity=0
+                    ).move_to(target_ij, coor_mask=np.array([0,1,0]))
+                dataTxtBackground.add(target_i)
+        dataTxt.move_to(target_i,coor_mask=np.array([1,0,0]))
+        allGroup = VGroup(
+                dataTxtBackground[0].copy(),
+                *dataTxtBackground,
+                *dataTxt,
+            ).scale(0.8).center()
+        title.next_to(allGroup,UP)
+        self.play(
+                FadeIn(title,scale=0.5),
+                FadeIn(allGroup[0], scale=0.5),
+                FadeIn(dataTxtBackground[0], scale=0.5),
+                FadeIn(dataTxt[:column], scale=0.9)
+            )
+        self.play(
+                LaggedStartMap(FadeIn,dataTxtBackground[1:],lag_ratio=0.1),
+                LaggedStartMap(FadeIn,dataTxt[column:],lag_ratio=0.2),
+                run_time=3
+            )
 
+        self.wait(1)  
+    
+    
+class PrimalityTest(Scene):
+    def construct(self):
+        fz = 48
+        aText = Tex("a","=",font_size=fz)
+        PText = Tex("P","=",font_size=fz)
+        aPText = Tex(
+            "(","a","^P","-","a",")","\\ ","mod","\\ ","P",
+            font_size=fz,
+            )
+        VgText = VGroup(aText,PText,aPText)
+        for line in VgText:
+                line.set_color_by_tex_to_color_map({
+                "a": BLUE,
+                "P": GREEN,
+            })
+                
+        a = ValueTracker(1)
+        aTxt = DecimalNumber(
+            a.get_value(),
+            font_size=fz,
+            num_decimal_places=0,
+            ).add_updater(lambda v: v.set_value(a.get_value()))
+        aTVg = VGroup(aText,aTxt).arrange(RIGHT).shift(UP*2.5)
+        
+        P = ValueTracker(13)
+        PTxt = DecimalNumber(
+            P.get_value(),
+            font_size=fz,
+            num_decimal_places=0,
+            color = GREEN,
+            ).add_updater(lambda v: v.set_value(P.get_value()))
+        PTVg = VGroup(PText,PTxt).arrange(RIGHT).next_to(aTVg,DOWN,buff=MED_LARGE_BUFF)
+        NumX = Text("（质数）",color=RED,font_size=40).next_to(PTVg,RIGHT)
+        aPText.next_to(PTVg,DOWN,buff=LARGE_BUFF)
+        
+        pwText=DecimalNumber(
+                    math.pow(a.get_value(),P.get_value())-a.get_value(),
+                    font_size=fz,
+                    num_decimal_places=0,
+                )\
+                .add_updater(lambda v: v.set_value(
+                            math.pow(a.get_value(),P.get_value())-a.get_value(),
+                        )
+                    )
+        
+        eq = VGroup(Tex("="),pwText)\
+            .arrange(RIGHT)\
+            .next_to(aPText,DOWN,aligned_edge=LEFT,buff=MED_LARGE_BUFF)
+            
+        mod = Tex("mod").add_updater(lambda v: v.next_to(eq,RIGHT))
+        PTxtCp = PTxt.copy().add_updater(lambda v: v.next_to(mod,RIGHT))
+        
+        aPTxt = DecimalNumber(
+                (math.pow(a.get_value(),P.get_value())-a.get_value())\
+                    %P.get_value(),
+                font_size=fz,
+                num_decimal_places=0,
+                color = RED
+                )\
+            .add_updater(lambda v: v.set_value(
+                (math.pow(a.get_value(),P.get_value())-a.get_value())\
+                    %P.get_value(),
+                    )
+                )
+        aPTVg = VGroup(Tex("="),aPTxt)\
+                .arrange(RIGHT)\
+                .next_to(eq,DOWN,buff=MED_LARGE_BUFF,aligned_edge=LEFT)
+                
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        self.add(aTVg,PTVg,aPText,aPTVg,eq,PTxtCp,mod,NumX)
+        self.wait()
+        for val in range(1,17):
+            self.wait(0.5)
+            a.set_value(val)
+        self.wait()
+
+class CChess(Scene):
+    def construct(self):
+        from Ag.CChessClass import CCClass
+        ran = CCClass().pieces.astype(int)
+        print(ran)
+        ranloc = []
+        for i in range(1,ran.size+1):
+            ranloc.append(np.append(np.argwhere(ran == i),[0]))
+        print(ranloc)
+        ranloc.append(ranloc[0])
+        
+        sqrSVg=VGroup()
+        for loc in ranloc:
+            sqr = Square(
+                    fill_color=WHITE,
+                    fill_opacity=0.5,
+                    stroke_opacity=0,
+                ).scale(0.486).move_to(loc)
+            sqrSVg.add(sqr)
+        sqrSVg.scale(0.8).rotate(PI/2).center()
+        
+        polyline = VMobject(stroke_width=8,color=BLUE)
+        polyline.set_points_as_corners(ranloc).scale(0.8).rotate(PI/2).center()
+        
+        # ma = ImageMobject("LiPics/Xiangqi_hl1.png").scale(0.16)
+        ma = Dot().scale(2)
+        self.play(
+            LaggedStart(
+                ShowCreation(polyline),
+                MoveAlongPath(ma,polyline),
+                lag_ratio=-1,
+                ),
+            run_time=5,
+            rate_func=linear
+            )
+        self.wait()
+        
+
+class PieChart(VMobject):
+    CONFIG = {
+        "start_per" : 0,
+        "r" : 2,
+        "gap" : 0,
+        "stroke" : 100,
+        "legend_style" : "Dot",
+        "legend_loc" : 3.6*RIGHT + 0*UP,
+        "legend_scale" : 0.5,
+        "scale_k" : 1,
+        "y_buff" : MED_SMALL_BUFF 
+    }
+
+    def create_arc(self, percentage, arc_color):
+        arc = Arc(
+            radius = self.r,
+            start_angle = self.start_per/100*TAU,
+            angle = percentage/100*TAU-self.gap,
+            color = arc_color,
+            stroke_width = self.stroke,
+        )
+        # 很有启示
+        self.start_per += percentage
+        return arc
+
+    def craet_arcs(self, args):
+        arc_group = VGroup()
+        for per, color, name in args:
+            arc_group.add(self.create_arc(per, color))
+        self.arcs = arc_group
+        return self.arcs
+
+    def create_legend(self, per, arc_color, name):
+        per_text = Text(
+            str(per)+"%", 
+            font ='SimSun',
+            font_size=48,
+        )
+
+        name_text = Text(
+            name, 
+            font ='SimSun',
+            font_size=48,
+        )
+
+        if self.legend_style == "Dot":
+            dot_color = Dot(color = arc_color).scale(2.5)
+        elif self.legend_style == "Rect":
+            dot_color = Square(
+                color = arc_color,
+                fill_color = arc_color,
+                fill_opacity = 1,
+            ).scale(0.16)
+        
+        dot_color.shift(self.legend_loc)
+        name_text.next_to(dot_color, RIGHT)
+        per_text.next_to(dot_color, LEFT)
+        return VGroup(dot_color, name_text, per_text)
+
+    def create_legends(self, args):
+        legend_group = VGroup()
+        for per, dot, name in args:
+            legend_group.add(
+                self.create_legend(
+                    per, dot, name,
+                )
+            )
+        self.legends = legend_group.scale(self.legend_scale).arrange(
+                DOWN,
+                buff=self.y_buff,
+                index_of_submobject_to_align=0
+            )
+        return self.legends
+
+    def create_title(self, title):
+        return Text(title)
+    
+    def highlight_items_arcs(self, arcs, item=0):
+        arcs[item].scale(1.1,about_point=arcs.get_center())
+        return arcs
+
+    def highlight_items_legends(self, legends, item=0):
+        legends[item].scale(1.5,about_point=legends[item][0].get_center())
+        legends.arrange(
+            DOWN,
+            center=False,
+            buff=self.y_buff,
+            index_of_submobject_to_align=0
+        )
+        return legends
+
+class PieChartScene(Scene):
+    def construct(self):
+        pc_data = [
+            # 百分比形式
+            (7, BLUE, "第一支柱 联邦养老金 2.85万亿"),
+            (58, RED, "第二支柱 401k 22.8万亿"),
+            (35, GOLD, "第三支柱 IRA 13.9万亿"),
+            # (58.7, BLUE, "第一支柱 基本养老金 6.3万亿"),
+            # (41.3, RED, "第二支柱 企业/职业年金 4.4万亿"),
+            # (0.01, GOLD, "第三支柱 个人养老金账户 6亿"),
+        ]
+        pie_chart = PieChart()
+        pc_arcs = pie_chart.craet_arcs(pc_data)
+        pc_legends = pie_chart.create_legends(pc_data)
+        VGroup(pc_arcs,pc_legends).arrange(RIGHT, buff=LARGE_BUFF*1.5)
+            
+        self.play(
+            LaggedStartMap(ShowCreation,pc_arcs,lag_ratio=1),
+            LaggedStartMap(Write,pc_legends,lag_ratio=1),
+            run_time=5,
+        )
+
+        highlight_items = [0, 1, 2]
+        for item in highlight_items:
+            self.play(
+                Transform(
+                    pc_arcs,
+                    pie_chart.highlight_items_arcs(pc_arcs.copy(),item)
+                ),
+                Transform(
+                    pc_legends,
+                    pie_chart.highlight_items_legends(pc_legends.copy(),item)
+                ),
+                rate_func=there_and_back_with_pause,
+                run_time = 2,
+            )
+        self.wait()

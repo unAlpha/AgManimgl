@@ -42,3 +42,6 @@ fullName = '/System/Library/Frameworks/OpenGL.framework/OpenGL'
             self.text,
         )
 
+
+命令
+manimgl example_scenes.py OpeningManimExample
