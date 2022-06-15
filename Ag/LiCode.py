@@ -1,7 +1,7 @@
 from calendar import day_abbr
 from math import radians
 from cv2 import add
-from matplotlib.pyplot import title
+from matplotlib.pyplot import pink, title
 from sympy import Add, RisingFactorial
 from manimlib import *
 import numpy.linalg as LA
@@ -562,8 +562,9 @@ class Table_mol(Scene):
                 run_time=3
             )
 
-        self.wait(1)    
-class Table_alluse(Scene):
+        self.wait(1) 
+
+class Table_alluse0(Scene):
     CONFIG = {
         "camera_config": {"background_color": BLACK},   
     }
@@ -619,7 +620,65 @@ class Table_alluse(Scene):
             )
 
         self.wait(1)  
-    
+
+class Table_alluse1(Scene):
+    CONFIG = {
+        "camera_config": {"background_color": BLACK},   
+    }
+    def construct(self):
+        title = Text("爱因斯坦奇迹年",font_size=30)
+        data = get_coords_from_csvdata(r"/Users/pengyinzhong/Downloads/6月份/相对论/1/素材/发表日期")
+        dataArray=np.array(data)
+        row = dataArray.shape[0]
+        column = dataArray.shape[1]
+        print(row,column)
+        dx, dy = 2, 0.6
+        dx_list = [dx] * row
+        dy_list = [dy] * column
+        dx_list[0] = 5
+        dy_list[0] = 0.8
+        dataTxt = VGroup()
+        dataTxtBackground = VGroup()
+        for i,dyy in zip(range(row),dy_list):
+            for j,dxx in zip(range(column),dx_list):
+                target_ij = Text(str(dataArray[i,j]))
+                if i==0:
+                    target_ij.scale(0.5)
+                    target_ij.set_color(RED)
+                else:
+                    target_ij.scale(0.4)
+                target_ij.shift(np.array([(j-1/2)*dxx,-(i-1/2)*dyy,0]))
+                dataTxt.add(target_ij)
+            if (i+1)%2:
+                target_i = Rectangle(
+                        width=sum(dx_list),
+                        height=dyy,
+                        color=BLUE,
+                        fill_color=BLUE,
+                        fill_opacity=0.236,
+                        stroke_opacity=0
+                    ).move_to(target_ij, coor_mask=np.array([0,1,0]))
+                dataTxtBackground.add(target_i)
+        dataTxt.move_to(target_i,coor_mask=np.array([1,0,0]))
+        allGroup = VGroup(
+                dataTxtBackground[0].copy(),
+                *dataTxtBackground,
+                *dataTxt,
+            ).scale(0.9).center()
+        title.next_to(allGroup,UP)
+        self.play(
+                FadeIn(title,scale=0.618),
+                FadeIn(allGroup[0], scale=0.5),
+                FadeIn(dataTxtBackground[0], scale=0.5),
+                FadeIn(dataTxt[:column], scale=0.9)
+            )
+        self.play(
+                LaggedStartMap(FadeIn,dataTxtBackground[1:],lag_ratio=0.1),
+                LaggedStartMap(FadeIn,dataTxt[column:],lag_ratio=0.2),
+                run_time=3
+            )
+
+        self.wait(1)      
     
 class PrimalityTest(Scene):
     def construct(self):
@@ -734,7 +793,6 @@ class CChess(Scene):
             rate_func=linear
             )
         self.wait()
-        
 
 class PieChart(VMobject):
     CONFIG = {
