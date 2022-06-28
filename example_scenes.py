@@ -123,10 +123,11 @@ class TextExample(Scene):
         text = Text("Here is a text", font="Consolas", font_size=90)
         difference = Text(
             """
+            试下中文\n
             The most important difference between Text and TexText is that\n
             you can change the font more easily, but can't use the LaTeX grammar
             """,
-            font="Arial", font_size=24,
+            font="Source Han Sans CN Regular", font_size=24,
             # t2c is a dict that you can choose color for different text
             t2c={"Text": BLUE, "TexText": BLUE, "LaTeX": ORANGE}
         )

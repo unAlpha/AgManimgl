@@ -116,3 +116,17 @@ class ValueTrackerTest(Scene):
         self.add(Txt)
         # self.play(val.animate.set_value(10))
         self.play(val.set_value,10)
+        
+class demo(Scene):
+    def construct(self):
+        square = Square(side_length=2.0)
+        brace = BraceLabel(
+            obj=square,
+            text="a = 2.0",
+            brace_direction=UP
+        )
+        self.add(square, brace)
+
+if __name__ == "__main__":
+    from os import system
+    system("manimgl {} demo -os".format(__file__))

@@ -6,8 +6,6 @@ from sympy import Add, RisingFactorial
 from manimlib import *
 import numpy.linalg as LA
 
-from manimlib import constants
-
 def get_coords_from_csvdata(file_name):
     import csv
     coords = []
@@ -445,7 +443,6 @@ class LiSa(Scene):
                 self.remove(model, arr, text )
         self.wait(5)
 
-
 def PJcurvature(x,y):
     """
     input  : the coordinate of the three point
@@ -509,177 +506,7 @@ class Curvature(Scene):
             circle = circle.become(Circle(radius = abs(1/kappa), stroke_width=10))
             circle.move_to(vector.get_end())
         return VGroup(tan_line, vector, circle)
-
-class Table_mol(Scene):
-    CONFIG = {
-        "camera_config": {"background_color": BLACK},   
-    }
-    def construct(self):
-        title = Text("城镇企业职工基本养老保险个人账户养老金计发月数表",font_size=30)
-        data = get_coords_from_csvdata(r"/Users/pengyinzhong/Downloads/6月份/养老金/素材/月数表")
-        dataArray=np.array(data)
-        row = dataArray.shape[0]
-        column = dataArray.shape[1]
-        x, y, dx, dy = -column+1, 3, 2.1, 0.45
-        dataTxt = VGroup()
-        dataTxtBackground = VGroup()
-        for i in range(row):
-            for j in range(column):
-                target_ij = Text(str(dataArray[i,j]))
-                if i==0:
-                    target_ij.scale(0.5)
-                    target_ij.set_color(RED)
-                else:
-                    target_ij.scale(0.35)
-                target_ij.shift(np.array([x+j*dx,y-i*dy,0]))
-                dataTxt.add(target_ij)
-            if (i+1)%2:
-                target_i = Rectangle(
-                        width=column*dx,
-                        height=dy,
-                        color=BLUE,
-                        fill_color=BLUE,
-                        fill_opacity=0.236,
-                        stroke_opacity=0
-                    ).move_to(target_ij, coor_mask=np.array([0,1,0]))
-                dataTxtBackground.add(target_i)
-        dataTxt.move_to(target_i,coor_mask=np.array([1,0,0]))
-        allGroup = VGroup(
-                dataTxtBackground[0].copy(),
-                *dataTxtBackground,
-                *dataTxt,
-            ).scale(0.8).center()
-        title.next_to(allGroup,UP)
-        self.play(
-                FadeIn(title,scale=0.5),
-                FadeIn(allGroup[0], scale=0.5),
-                FadeIn(dataTxtBackground[0], scale=0.5),
-                FadeIn(dataTxt[:column], scale=0.9)
-            )
-        self.play(
-                LaggedStartMap(FadeIn,dataTxtBackground[1:],lag_ratio=0.1),
-                LaggedStartMap(FadeIn,dataTxt[column:],lag_ratio=0.2),
-                run_time=3
-            )
-
-        self.wait(1) 
-
-class Table_alluse0(Scene):
-    CONFIG = {
-        "camera_config": {"background_color": BLACK},   
-    }
-    def construct(self):
-        title = Text("缴费与领取待遇参照表",font_size=30)
-        data = get_coords_from_csvdata(r"/Users/pengyinzhong/Downloads/6月份/养老金/素材/缴费与领取待遇参照表")
-        dataArray=np.array(data)
-        row = dataArray.shape[0]
-        column = dataArray.shape[1]
-        print(row,column)
-        x, y, dx, dy = -column+1, 3, 2.4, 0.45
-        dataTxt = VGroup()
-        dataTxtBackground = VGroup()
-        for i in range(row):
-            dyy=1
-            for j in range(column):
-                target_ij = TexText(str(dataArray[i,j]))
-                if i==0:
-                    target_ij.scale(0.5)
-                    target_ij.set_color(RED)
-                else:
-                    target_ij.scale(0.35)
-                    dyy=dy
-                target_ij.shift(np.array([x+j*dx,y-(i-1/2)*dyy,0]))
-                dataTxt.add(target_ij)
-            if (i+1)%2:
-                target_i = Rectangle(
-                        width=column*dx,
-                        height=dyy,
-                        color=BLUE,
-                        fill_color=BLUE,
-                        fill_opacity=0.236,
-                        stroke_opacity=0
-                    ).move_to(target_ij, coor_mask=np.array([0,1,0]))
-                dataTxtBackground.add(target_i)
-        dataTxt.move_to(target_i,coor_mask=np.array([1,0,0]))
-        allGroup = VGroup(
-                dataTxtBackground[0].copy(),
-                *dataTxtBackground,
-                *dataTxt,
-            ).scale(0.8).center()
-        title.next_to(allGroup,UP)
-        self.play(
-                FadeIn(title,scale=0.5),
-                FadeIn(allGroup[0], scale=0.5),
-                FadeIn(dataTxtBackground[0], scale=0.5),
-                FadeIn(dataTxt[:column], scale=0.9)
-            )
-        self.play(
-                LaggedStartMap(FadeIn,dataTxtBackground[1:],lag_ratio=0.1),
-                LaggedStartMap(FadeIn,dataTxt[column:],lag_ratio=0.2),
-                run_time=3
-            )
-
-        self.wait(1)  
-
-class Table_alluse1(Scene):
-    CONFIG = {
-        "camera_config": {"background_color": BLACK},   
-    }
-    def construct(self):
-        title = Text("爱因斯坦奇迹年",font_size=30)
-        data = get_coords_from_csvdata(r"/Users/pengyinzhong/Downloads/6月份/相对论/1/素材/发表日期")
-        dataArray=np.array(data)
-        row = dataArray.shape[0]
-        column = dataArray.shape[1]
-        print(row,column)
-        dx, dy = 2, 0.6
-        dx_list = [dx] * row
-        dy_list = [dy] * column
-        dx_list[0] = 5
-        dy_list[0] = 0.8
-        dataTxt = VGroup()
-        dataTxtBackground = VGroup()
-        for i,dyy in zip(range(row),dy_list):
-            for j,dxx in zip(range(column),dx_list):
-                target_ij = Text(str(dataArray[i,j]))
-                if i==0:
-                    target_ij.scale(0.5)
-                    target_ij.set_color(RED)
-                else:
-                    target_ij.scale(0.4)
-                target_ij.shift(np.array([(j-1/2)*dxx,-(i-1/2)*dyy,0]))
-                dataTxt.add(target_ij)
-            if (i+1)%2:
-                target_i = Rectangle(
-                        width=sum(dx_list),
-                        height=dyy,
-                        color=BLUE,
-                        fill_color=BLUE,
-                        fill_opacity=0.236,
-                        stroke_opacity=0
-                    ).move_to(target_ij, coor_mask=np.array([0,1,0]))
-                dataTxtBackground.add(target_i)
-        dataTxt.move_to(target_i,coor_mask=np.array([1,0,0]))
-        allGroup = VGroup(
-                dataTxtBackground[0].copy(),
-                *dataTxtBackground,
-                *dataTxt,
-            ).scale(0.9).center()
-        title.next_to(allGroup,UP)
-        self.play(
-                FadeIn(title,scale=0.618),
-                FadeIn(allGroup[0], scale=0.5),
-                FadeIn(dataTxtBackground[0], scale=0.5),
-                FadeIn(dataTxt[:column], scale=0.9)
-            )
-        self.play(
-                LaggedStartMap(FadeIn,dataTxtBackground[1:],lag_ratio=0.1),
-                LaggedStartMap(FadeIn,dataTxt[column:],lag_ratio=0.2),
-                run_time=3
-            )
-
-        self.wait(1)      
-    
+ 
 class PrimalityTest(Scene):
     def construct(self):
         fz = 48
@@ -922,3 +749,162 @@ class PieChartScene(Scene):
                 run_time = 2,
             )
         self.wait()
+    
+class TexTextTransform1(Scene):
+    def construct(self):
+        tex = TexText(
+            "$$\\text { (1) } \\ t_{2}^{\\prime \\prime} \\ \\text {时间内} \\ v=v_{0}-\\frac{1}{2} \\cdot \\frac{a_{m}}{t_{2}^{\\prime \\prime}} \\cdot t^{2}$$",
+            "$$t_{2}^{\\prime \\prime} \\ \\text {末速度} \\ v_{2}=v_{0}-\\frac{1}{2} a_{m} t_{2}^{\\prime \\prime}$$",
+            "$$\\text { (2) } \\ t_{3} \\ \\text {时间内} \\ a=a_m,\\ \\text {末速度为}0，$$",
+            "$$\\text {由匀变速运动公式} $$",
+            "$$0^{2}-v_{2}^{2}=2(-a) \\cdot s_{3}$$",
+            "$$\\text {得} \\ s_{3}=\\frac{v_{2}^{2}}{2 a}=\\frac{\\left(v_{0}-\\frac{1}{2} a_{m} t_{2}{ }^{\\prime \\prime}\\right)^{2}}{2 a_{m}} $$",
+            "$$\\text {得} \\ s_{3}=\\frac{v_{0}^{2}}{2 a_{m}}-\\frac{v_{0} t_{2}^{\\prime \\prime}}{2}+\\frac{a_{m} t^{\\prime \\prime}_{2}{ }^{2}}{8} $$",
+            font ='SimSun',
+        ).arrange(DOWN, buff = 0.5,aligned_edge = LEFT)
+        tex[0].shift(LEFT)
+        tex[2].shift(LEFT)
+        tex.scale(0.6)
+        tex.center()
+        tex.shift(0.5*UP)
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        self.play(Write(tex))
+        self.wait()
+    
+class TexTextTransform2(Scene):
+    def construct(self):
+        tex = TexText(
+            "$$\\text { (1) } t_{2}^{\\prime} \\text { 时间 }: a=0,\\quad {  v=v_{0}}, \\quad s_{2}^{\\prime}=v_{0} t_{2}^{\\prime}$$",
+            "$$\\text { (2) } t_{2}^{\\prime \\prime} \\text { 时间 }: a=\\frac{t}{t_{2}^{\\prime \\prime}} a_{m}$$",
+            "$$\\frac{d v}{d t}=-a=-\\frac{t}{t_{2}^{\\prime \\prime}} a_{m} , \\quad d v=-\\frac{a_{m}}{t_{2}^{\\prime \\prime}} t \\cdot d t$$",
+            "$$ v=v_{0}-\\frac{1}{2} \\cdot \\frac{a_{m}}{t_{2}^{\\prime \\prime}} \\cdot t^{2}, \\quad \\frac{d s_{2}^{\\prime \\prime}}{d t}=v_{0}-\\frac{1}{2} \\frac{a_{m}}{t^{\\prime \\prime}_{2}} t^{2} $$",
+            "$$ds_{2}^{\\prime \\prime}=v_{0} d t-\\frac{1}{2} \\cdot \\frac{a_{m}}{t_{2}{ }^{\\prime \\prime}} t^{2} \\cdot d t$$",
+            "$$s_{2}^{\\prime \\prime}=v_{0} t_{2}^{\\prime \\prime}-\\frac{1}{6} \\frac{a_{m}}{t^{\\prime \\prime}_{2}} \\cdot t^{\\prime \\prime3 }_{2}=v_{0} t_{2}^{\\prime \\prime}-\\frac{1}{6} a_{m} {t^{\\prime \\prime}_{2}}$$",
+            "$$\\text { (3) } s_{2}=s_{2}^{\\prime}+s_{2}^{\\prime \\prime}=v_{0} t_{2}^{\\prime}+v_{0} t_{2}^{\\prime \\prime}-\\frac{1}{6} a_{m} t_{2}^{\\prime \\prime 2} $$",
+            font ='SimSun',
+        ).arrange(DOWN, buff = 0.5,aligned_edge = LEFT)
+        tex[0].shift(LEFT*0.8)
+        tex[1].shift(LEFT*0.8)
+        tex[6].shift(LEFT*0.8)
+        tex.scale(0.6)
+        tex.center()
+        tex.shift(0.3*UP)
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        self.play(Write(tex))
+        self.wait()
+        
+class TexTextTransform3(Scene):
+    def construct(self):
+        tex = TexText(
+            "$$s=v_{0}\\left(t_{1}+t_{2}{ }^{\\prime}+\\frac{1}{2} t_{2}{ }^{\\prime \\prime}\\right)+\\frac{v_{0}^{2}}{2 a_{m}}-\\frac{a_{m} t_{2}^{\\prime \\prime 2}}{24}$$",
+            "$$v_{0}:\\text{汽车初速度}$$",
+            "$$t_1:\\text{驾驶员反应时间}$$",
+            "$$t_2^{\prime}:\\text{制动系统反应时间}$$",
+            "$$t_2^{\prime \prime}:\\text{制动力增加时间}$$",
+            "$$a_m=\\varphi_m g:\\text{最大制动力加速度}$$",
+            "$$\\varphi_m:\\text{峰值附着系数}$$",
+            font ='SimSun',
+        )
+        tex[0].scale(0.7)
+        tex[1:].arrange(DOWN, buff = 0.5,aligned_edge = LEFT)
+        tex[1:].scale(0.6)
+        tex.center()
+        tex.shift(0.3*UP)        
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        self.play(Write(tex))
+        self.wait()
+        
+class Graph1(Scene):
+    def construct(self):
+        axes = Axes(
+            (-1, 13), 
+            (-1, 6),
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 2,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                    },
+                }
+            )
+        x_label = Text("t").next_to(axes.x_axis.get_corner(UR),UP)
+        y_label = Text("a").next_to(axes.y_axis.get_corner(UR),RIGHT)
+        
+        def fun(x):
+            if x <= 5:
+                return 0
+            if x>5 and x<=7:
+                return 10*x/5-10
+            if x>7:
+                return 10*7/5-10
+            
+        step_graph = axes.get_graph(
+            fun,
+            x_range = [0,12],
+            use_smoothing=False,
+            color=RED,
+            stroke_width=10,
+        )
+        
+        # axes_merge = VGroup(axes,step_graph).scale(0.8)
+        point_text = [
+            [[0,0],[3,0],"t_1", DOWN],
+            [[3,0],[5,0],"t_2^{\prime}", UP],
+            [[5,0],[7,0],"t_2^{\prime \prime}", UP],
+            [[7,0],[12,0],"t_3", DOWN],
+            [[3,0],[7,0],"t_2", DOWN],
+        ]
+        
+        dot_points = [
+            [3,0],
+            [5,0],
+            [7,0],
+            [12,0],
+        ]
+        
+        BLG = VGroup()
+        
+        for pt in point_text:
+            BLG.add(
+                BraceLabel(
+                    Line(axes.c2p(*pt[0]),axes.c2p(*pt[1])),
+                    pt[2],
+                    brace_direction=pt[3],
+                    )
+                )
+        dots = VGroup()
+        for dt in dot_points:
+            dots.add(Dot(color=YELLOW).move_to(axes.c2p(*dt)))
+            
+            
+        lh7 = axes.get_v_line_to_graph(7,step_graph)
+        lh12 = axes.get_v_line_to_graph(12,step_graph)
+        
+        tex = TexText(
+            "$$t_{1} :\\text{驾驶员反应时间}$$",
+            "$$t_{2}^{\prime}:\\text{杀车系统反应时间}$$",
+            "$$t_{2}^{\prime \prime} :\\text{地面制动力增大时间}$$",
+            "$$t_{3} :\\text{匀减速制动时间}$$",
+            font ='SimSun',
+        ).arrange_in_grid(2,2,aligned_edge=LEFT)
+        tex.scale(0.6).to_edge(UP)
+
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        
+        self.play(Write(axes, lag_ratio=0.01, run_time=1))
+        self.play(
+            ShowCreation(step_graph),
+            LaggedStartMap(FadeIn,VGroup(dots,lh7,lh12,x_label,y_label,tex),lag_ratio=1),
+        )
+        self.add(BLG)
+        self.wait()
+        
+        
+if __name__ == "__main__":
+    from os import system
+    system("manimgl {} ConvolutionPic -o --hd".format(__file__))
