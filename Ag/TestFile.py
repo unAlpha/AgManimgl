@@ -129,4 +129,4 @@ class demo(Scene):
 
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} demo -os".format(__file__))
+    system("manimgl {} CubicBezierTest -os".format(__file__))

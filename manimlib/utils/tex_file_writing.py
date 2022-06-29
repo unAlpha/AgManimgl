@@ -4,7 +4,6 @@ from contextlib import contextmanager
 import hashlib
 import os
 import sys
-s
 from manimlib.config import get_custom_config
 from manimlib.config import get_manim_dir
 from manimlib.logger import log

@@ -893,8 +893,8 @@ class Graph1(Scene):
         ).arrange_in_grid(2,2,aligned_edge=LEFT)
         tex.scale(0.6).to_edge(UP)
 
-        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
-        self.add(bg)
+        # bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        # self.add(bg)
         
         self.play(Write(axes, lag_ratio=0.01, run_time=1))
         self.play(
@@ -907,4 +907,4 @@ class Graph1(Scene):
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} ConvolutionPic -o --hd".format(__file__))
+    system("manimgl {} Graph1 -wo --hd".format(__file__))
