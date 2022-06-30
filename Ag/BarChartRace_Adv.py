@@ -302,7 +302,7 @@ class PlotBarChart(Scene):
             ).to_corner(DR).shift(UP*0.5)
         year_text.add_updater(lambda mob: mob.set_value(year_val.get_value()))
 
-        the_bars = BarChartRace(title, data_nums[0], datas_value_max = datas_nums_max,)
+        the_bars = BarChartRace(title, data_nums[0], datas_value_max = datas_nums_max, bar_num=5)
         
         self.add(the_bars.bars, year_text, the_bars.icons,)
         
@@ -310,9 +310,13 @@ class PlotBarChart(Scene):
         for i,data_num in enumerate(data_nums):
             self.play(
                     # bars.rank_lines_anim, data_num,
-                    the_bars.rank_bars_anim, data_num,
-                    year_val.set_value, year_nums[i],
+                    the_bars.animate.rank_bars_anim(data_num),
+                    year_val.animate.set_value(year_nums[i]),
                     rate_func=linear,
                     run_time=dur_time,
                 )
         self.wait(1)
+        
+if __name__ == "__main__":
+    from os import system
+    system("manimgl {} PlotBarChart -ol".format(__file__))

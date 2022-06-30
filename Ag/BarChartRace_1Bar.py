@@ -83,7 +83,7 @@ class PlotBarChart(Scene):
         n_row = row
         star = 0
         end = 10
-        
+
         datas = dataArray[1:n_row, 2:column].astype(np.float)
         data_nums = [nums for nums in [datas[:,i] for i in range(star, end)]]
         datas_nums_max = data_nums[0].max()
@@ -95,8 +95,12 @@ class PlotBarChart(Scene):
         dur_time = 2
         for data_num in data_nums[0]:
             self.play(
-                    the_bar.bar.val.set_value, data_num,
+                    the_bar.bar.val.animate.set_value(data_num),
                     rate_func=linear,
                     run_time=dur_time,
                 )
         self.wait(1)
+
+if __name__ == "__main__":
+    from os import system
+    system("manimgl {} PlotBarChart -o --hd".format(__file__))

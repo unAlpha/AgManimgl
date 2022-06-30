@@ -10,6 +10,8 @@ __pycache__/
 # C extensions
 *.so
 
+media/
+_codes_3b1b/
 # Distribution / packaging
 .Python
 build/
@@ -17,8 +19,6 @@ develop-eggs/
 dist/
 manimlib.egg-info/
 
-Ag/_3b1bProj/
-media/
 downloads/
 eggs/
 .eggs/
