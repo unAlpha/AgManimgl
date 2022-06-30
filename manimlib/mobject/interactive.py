@@ -1,32 +1,18 @@
-from __future__ import annotations
-
 import numpy as np
 from pyglet.window import key as PygletWindowKeys
 
 from manimlib.constants import FRAME_HEIGHT, FRAME_WIDTH
-from manimlib.constants import DOWN, LEFT, ORIGIN, RIGHT, UP
-from manimlib.constants import MED_LARGE_BUFF, MED_SMALL_BUFF, SMALL_BUFF
-from manimlib.constants import BLACK, BLUE, GREEN, GREY_A, GREY_C, RED, WHITE
-from manimlib.mobject.mobject import Group
-from manimlib.mobject.mobject import Mobject
-from manimlib.mobject.geometry import Circle
-from manimlib.mobject.geometry import Dot
-from manimlib.mobject.geometry import Line
-from manimlib.mobject.geometry import Rectangle
-from manimlib.mobject.geometry import RoundedRectangle
-from manimlib.mobject.geometry import Square
-from manimlib.mobject.svg.text_mobject import Text
+from manimlib.constants import LEFT, RIGHT, UP, DOWN, ORIGIN
+from manimlib.constants import SMALL_BUFF, MED_SMALL_BUFF, MED_LARGE_BUFF
+from manimlib.constants import BLACK, GREY_A, GREY_C, RED, GREEN, BLUE, WHITE
+from manimlib.mobject.mobject import Mobject, Group
 from manimlib.mobject.types.vectorized_mobject import VGroup
+from manimlib.mobject.geometry import Dot, Line, Square, Rectangle, RoundedRectangle, Circle
+from manimlib.mobject.svg.text_mobject import Text
 from manimlib.mobject.value_tracker import ValueTracker
-from manimlib.utils.color import rgb_to_hex
 from manimlib.utils.config_ops import digest_config
-from manimlib.utils.space_ops import get_closest_point_on_line
-from manimlib.utils.space_ops import get_norm
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Callable
+from manimlib.utils.space_ops import get_norm, get_closest_point_on_line
+from manimlib.utils.color import rgb_to_color, color_to_rgba, rgb_to_hex
 
 
 # Interactive Mobjects
@@ -35,7 +21,8 @@ class MotionMobject(Mobject):
     """
         You could hold and drag this object to any position
     """
-    def __init__(self, mobject: Mobject, **kwargs):
+
+    def __init__(self, mobject, **kwargs):
         super().__init__(**kwargs)
         assert(isinstance(mobject, Mobject))
         self.mobject = mobject
@@ -44,7 +31,7 @@ class MotionMobject(Mobject):
         self.mobject.add_updater(lambda mob: None)
         self.add(mobject)
 
-    def mob_on_mouse_drag(self, mob: Mobject, event_data: dict[str, np.ndarray]) -> bool:
+    def mob_on_mouse_drag(self, mob, event_data):
         mob.move_to(event_data["point"])
         return False
 
@@ -56,7 +43,7 @@ class Button(Mobject):
         The on_click method takes mobject as argument like updater
     """
 
-    def __init__(self, mobject: Mobject, on_click: Callable[[Mobject]], **kwargs):
+    def __init__(self, mobject, on_click, **kwargs):
         super().__init__(**kwargs)
         assert(isinstance(mobject, Mobject))
         self.on_click = on_click
@@ -64,7 +51,7 @@ class Button(Mobject):
         self.mobject.add_mouse_press_listner(self.mob_on_mouse_press)
         self.add(self.mobject)
 
-    def mob_on_mouse_press(self, mob: Mobject, event_data) -> bool:
+    def mob_on_mouse_press(self, mob, event_data):
         self.on_click(mob)
         return False
 
@@ -72,7 +59,7 @@ class Button(Mobject):
 # Controls
 
 class ControlMobject(ValueTracker):
-    def __init__(self, value: float, *mobjects: Mobject, **kwargs):
+    def __init__(self, value, *mobjects, **kwargs):
         super().__init__(value=value, **kwargs)
         self.add(*mobjects)
 
@@ -80,7 +67,7 @@ class ControlMobject(ValueTracker):
         self.add_updater(lambda mob: None)
         self.fix_in_frame()
 
-    def set_value(self, value: float):
+    def set_value(self, value):
         self.assert_value(value)
         self.set_value_anim(value)
         return ValueTracker.set_value(self, value)
@@ -106,25 +93,25 @@ class EnableDisableButton(ControlMobject):
         "disable_color": RED
     }
 
-    def __init__(self, value: bool = True, **kwargs):
+    def __init__(self, value=True, **kwargs):
         digest_config(self, kwargs)
         self.box = Rectangle(**self.rect_kwargs)
         super().__init__(value, self.box, **kwargs)
         self.add_mouse_press_listner(self.on_mouse_press)
 
-    def assert_value(self, value: bool) -> None:
+    def assert_value(self, value):
         assert(isinstance(value, bool))
 
-    def set_value_anim(self, value: bool) -> None:
+    def set_value_anim(self, value):
         if value:
             self.box.set_fill(self.enable_color)
         else:
             self.box.set_fill(self.disable_color)
 
-    def toggle_value(self) -> None:
+    def toggle_value(self):
         super().set_value(not self.get_value())
 
-    def on_mouse_press(self, mob: Mobject, event_data) -> bool:
+    def on_mouse_press(self, mob, event_data):
         mob.toggle_value()
         return False
 
@@ -149,32 +136,32 @@ class Checkbox(ControlMobject):
         "box_content_buff": SMALL_BUFF
     }
 
-    def __init__(self, value: bool = True, **kwargs):
+    def __init__(self, value=True, **kwargs):
         digest_config(self, kwargs)
         self.box = Rectangle(**self.rect_kwargs)
         self.box_content = self.get_checkmark() if value else self.get_cross()
         super().__init__(value, self.box, self.box_content, **kwargs)
         self.add_mouse_press_listner(self.on_mouse_press)
 
-    def assert_value(self, value: bool) -> None:
+    def assert_value(self, value):
         assert(isinstance(value, bool))
 
-    def toggle_value(self) -> None:
+    def toggle_value(self):
         super().set_value(not self.get_value())
 
-    def set_value_anim(self, value: bool) -> None:
+    def set_value_anim(self, value):
         if value:
             self.box_content.become(self.get_checkmark())
         else:
             self.box_content.become(self.get_cross())
 
-    def on_mouse_press(self, mob: Mobject, event_data) -> None:
+    def on_mouse_press(self, mob, event_data):
         mob.toggle_value()
         return False
 
     # Helper methods
 
-    def get_checkmark(self) -> VGroup:
+    def get_checkmark(self):
         checkmark = VGroup(
             Line(UP / 2 + 2 * LEFT, DOWN + LEFT, **self.checkmark_kwargs),
             Line(DOWN + LEFT, UP + RIGHT, **self.checkmark_kwargs)
@@ -186,7 +173,7 @@ class Checkbox(ControlMobject):
         checkmark.move_to(self.box)
         return checkmark
 
-    def get_cross(self) -> VGroup:
+    def get_cross(self):
         cross = VGroup(
             Line(UP + LEFT, DOWN + RIGHT, **self.cross_kwargs),
             Line(UP + RIGHT, DOWN + LEFT, **self.cross_kwargs)
@@ -219,7 +206,7 @@ class LinearNumberSlider(ControlMobject):
         }
     }
 
-    def __init__(self, value: float = 0, **kwargs):
+    def __init__(self, value=0, **kwargs):
         digest_config(self, kwargs)
         self.bar = RoundedRectangle(**self.rounded_rect_kwargs)
         self.slider = Circle(**self.circle_kwargs)
@@ -232,22 +219,22 @@ class LinearNumberSlider(ControlMobject):
 
         self.slider.add_mouse_drag_listner(self.slider_on_mouse_drag)
 
-        super().__init__(value, self.bar, self.slider, self.slider_axis, **kwargs)
+        super().__init__(value, self.bar, self.slider, self.slider_axis, ** kwargs)
 
-    def assert_value(self, value: float) -> None:
+    def assert_value(self, value):
         assert(self.min_value <= value <= self.max_value)
 
-    def set_value_anim(self, value: float) -> None:
+    def set_value_anim(self, value):
         prop = (value - self.min_value) / (self.max_value - self.min_value)
         self.slider.move_to(self.slider_axis.point_from_proportion(prop))
 
-    def slider_on_mouse_drag(self, mob, event_data: dict[str, np.ndarray]) -> bool:
+    def slider_on_mouse_drag(self, mob, event_data):
         self.set_value(self.get_value_from_point(event_data["point"]))
         return False
 
     # Helper Methods
 
-    def get_value_from_point(self, point: np.ndarray) -> float:
+    def get_value_from_point(self, point):
         start, end = self.slider_axis.get_start_and_end()
         point_on_line = get_closest_point_on_line(start, end, point)
         prop = get_norm(point_on_line - start) / get_norm(end - start)
@@ -313,7 +300,7 @@ class ColorSliders(Group):
 
         self.arrange(DOWN)
 
-    def get_background(self) -> VGroup:
+    def get_background(self):
         single_square_len = self.background_grid_kwargs["single_square_len"]
         colors = self.background_grid_kwargs["colors"]
         width = self.rect_kwargs["width"]
@@ -335,24 +322,24 @@ class ColorSliders(Group):
 
         return grid
 
-    def set_value(self, r: float, g: float, b: float, a: float):
+    def set_value(self, r, g, b, a):
         self.r_slider.set_value(r)
         self.g_slider.set_value(g)
         self.b_slider.set_value(b)
         self.a_slider.set_value(a)
 
-    def get_value(self) -> np.ndarary:
+    def get_value(self):
         r = self.r_slider.get_value() / 255
         g = self.g_slider.get_value() / 255
         b = self.b_slider.get_value() / 255
         alpha = self.a_slider.get_value()
-        return np.array((r, g, b, alpha))
+        return color_to_rgba(rgb_to_color((r, g, b)), alpha=alpha)
 
-    def get_picked_color(self) -> str:
+    def get_picked_color(self):
         rgba = self.get_value()
         return rgb_to_hex(rgba[:3])
 
-    def get_picked_opacity(self) -> float:
+    def get_picked_opacity(self):
         rgba = self.get_value()
         return rgba[3]
 
@@ -376,7 +363,7 @@ class Textbox(ControlMobject):
         "deactive_color": RED,
     }
 
-    def __init__(self, value: str = "", **kwargs):
+    def __init__(self, value="", **kwargs):
         digest_config(self, kwargs)
         self.isActive = self.isInitiallyActive
         self.box = Rectangle(**self.box_kwargs)
@@ -387,10 +374,10 @@ class Textbox(ControlMobject):
         self.active_anim(self.isActive)
         self.add_key_press_listner(self.on_key_press)
 
-    def set_value_anim(self, value: str) -> None:
+    def set_value_anim(self, value):
         self.update_text(value)
 
-    def update_text(self, value: str) -> None:
+    def update_text(self, value):
         text = self.text
         self.remove(text)
         text.__init__(value, **self.text_kwargs)
@@ -402,18 +389,18 @@ class Textbox(ControlMobject):
         text.fix_in_frame()
         self.add(text)
 
-    def active_anim(self, isActive: bool) -> None:
+    def active_anim(self, isActive):
         if isActive:
             self.box.set_stroke(self.active_color)
         else:
             self.box.set_stroke(self.deactive_color)
 
-    def box_on_mouse_press(self, mob, event_data) -> bool:
+    def box_on_mouse_press(self, mob, event_data):
         self.isActive = not self.isActive
         self.active_anim(self.isActive)
         return False
 
-    def on_key_press(self, mob: Mobject, event_data: dict[str, int]) -> bool | None:
+    def on_key_press(self, mob, event_data):
         symbol = event_data["symbol"]
         modifiers = event_data["modifiers"]
         char = chr(symbol)
@@ -456,7 +443,7 @@ class ControlPanel(Group):
         }
     }
 
-    def __init__(self, *controls: ControlMobject, **kwargs):
+    def __init__(self, *controls, **kwargs):
         digest_config(self, kwargs)
 
         self.panel = Rectangle(**self.panel_kwargs)
@@ -485,7 +472,7 @@ class ControlPanel(Group):
         self.move_panel_and_controls_to_panel_opener()
         self.fix_in_frame()
 
-    def move_panel_and_controls_to_panel_opener(self) -> None:
+    def move_panel_and_controls_to_panel_opener(self):
         self.panel.next_to(
             self.panel_opener_rect,
             direction=UP,
@@ -501,11 +488,11 @@ class ControlPanel(Group):
 
         self.controls.set_x(controls_old_x)
 
-    def add_controls(self, *new_controls: ControlMobject) -> None:
+    def add_controls(self, *new_controls):
         self.controls.add(*new_controls)
         self.move_panel_and_controls_to_panel_opener()
 
-    def remove_controls(self, *controls_to_remove: ControlMobject) -> None:
+    def remove_controls(self, *controls_to_remove):
         self.controls.remove(*controls_to_remove)
         self.move_panel_and_controls_to_panel_opener()
 
@@ -523,13 +510,13 @@ class ControlPanel(Group):
         self.move_panel_and_controls_to_panel_opener()
         return self
 
-    def panel_opener_on_mouse_drag(self, mob, event_data: dict[str, np.ndarray]) -> bool:
+    def panel_opener_on_mouse_drag(self, mob, event_data):
         point = event_data["point"]
         self.panel_opener.match_y(Dot(point))
         self.move_panel_and_controls_to_panel_opener()
         return False
 
-    def panel_on_mouse_scroll(self, mob, event_data: dict[str, np.ndarray]) -> bool:
+    def panel_on_mouse_scroll(self, mob, event_data):
         offset = event_data["offset"]
         factor = 10 * offset[1]
         self.controls.set_y(self.controls.get_y() + factor)

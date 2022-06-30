@@ -1,17 +1,13 @@
-from __future__ import annotations
-
 import numpy as np
-
-from manimlib.constants import BLUE_B, BLUE_D, BLUE_E, GREY_BROWN, WHITE
+from manimlib.constants import BLUE_D
+from manimlib.constants import BLUE_B
+from manimlib.constants import BLUE_E
+from manimlib.constants import GREY_BROWN
+from manimlib.constants import WHITE
 from manimlib.mobject.mobject import Mobject
-from manimlib.mobject.types.vectorized_mobject import VGroup
 from manimlib.mobject.types.vectorized_mobject import VMobject
+from manimlib.mobject.types.vectorized_mobject import VGroup
 from manimlib.utils.rate_functions import smooth
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Callable
 
 
 class AnimatedBoundary(VGroup):
@@ -24,10 +20,10 @@ class AnimatedBoundary(VGroup):
         "fade_rate_func": smooth,
     }
 
-    def __init__(self, vmobject: VMobject, **kwargs):
+    def __init__(self, vmobject, **kwargs):
         super().__init__(**kwargs)
-        self.vmobject: VMobject = vmobject
-        self.boundary_copies: list[VMobject] = [
+        self.vmobject = vmobject
+        self.boundary_copies = [
             vmobject.copy().set_style(
                 stroke_width=0,
                 fill_opacity=0
@@ -35,12 +31,12 @@ class AnimatedBoundary(VGroup):
             for x in range(2)
         ]
         self.add(*self.boundary_copies)
-        self.total_time: float = 0
+        self.total_time = 0
         self.add_updater(
             lambda m, dt: self.update_boundary_copies(dt)
         )
 
-    def update_boundary_copies(self, dt: float) -> None:
+    def update_boundary_copies(self, dt):
         # Not actual time, but something which passes at
         # an altered rate to make the implementation below
         # cleaner
@@ -71,13 +67,7 @@ class AnimatedBoundary(VGroup):
 
         self.total_time += dt
 
-    def full_family_become_partial(
-        self,
-        mob1: VMobject,
-        mob2: VMobject,
-        a: float,
-        b: float
-    ):
+    def full_family_become_partial(self, mob1, mob2, a, b):
         family1 = mob1.family_members_with_points()
         family2 = mob2.family_members_with_points()
         for sm1, sm2 in zip(family1, family2):
@@ -94,14 +84,14 @@ class TracedPath(VMobject):
         "time_per_anchor": 1 / 15,
     }
 
-    def __init__(self, traced_point_func: Callable[[], np.ndarray], **kwargs):
+    def __init__(self, traced_point_func, **kwargs):
         super().__init__(**kwargs)
         self.traced_point_func = traced_point_func
-        self.time: float = 0
-        self.traced_points: list[np.ndarray] = []
+        self.time = 0
+        self.traced_points = []
         self.add_updater(lambda m, dt: m.update_path(dt))
 
-    def update_path(self, dt: float):
+    def update_path(self, dt):
         if dt == 0:
             return self
         point = self.traced_point_func().copy()
@@ -143,11 +133,7 @@ class TracingTail(TracedPath):
         "time_traced": 1.0,
     }
 
-    def __init__(
-        self,
-        mobject_or_func: Mobject | Callable[[], np.ndarray],
-        **kwargs
-    ):
+    def __init__(self, mobject_or_func, **kwargs):
         if isinstance(mobject_or_func, Mobject):
             func = mobject_or_func.get_center
         else:

@@ -1,8 +1,6 @@
 #version 330
 
 uniform vec3 light_source_position;
-uniform vec3 camera_position;
-uniform float reflectiveness;
 uniform float gloss;
 uniform float shadow;
 uniform float focal_distance;
@@ -73,8 +71,6 @@ void main() {
         xyz_coords,
         vec3(0.0, 0.0, 1.0),
         light_source_position,
-        camera_position,
-        reflectiveness,
         gloss,
         shadow
     );

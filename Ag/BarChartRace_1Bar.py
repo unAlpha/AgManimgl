@@ -103,4 +103,4 @@ class PlotBarChart(Scene):
 
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} PlotBarChart -o --hd".format(__file__))
+    system("manimgl {} PlotBarChart -ol".format(__file__))

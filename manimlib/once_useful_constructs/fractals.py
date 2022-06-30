@@ -1,5 +1,4 @@
 from functools import reduce
-import random
 
 from manimlib.constants import *
 # from manimlib.for_3b1b_videos.pi_creature import PiCreature

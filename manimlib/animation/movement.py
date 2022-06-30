@@ -1,16 +1,5 @@
-from __future__ import annotations
-
 from manimlib.animation.animation import Animation
 from manimlib.utils.rate_functions import linear
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Callable, Sequence
-
-    import numpy as np
-
-    from manimlib.mobject.mobject import Mobject
 
 
 class Homotopy(Animation):
@@ -19,12 +8,7 @@ class Homotopy(Animation):
         "apply_function_kwargs": {},
     }
 
-    def __init__(
-        self,
-        homotopy: Callable[[float, float, float, float], Sequence[float]],
-        mobject: Mobject,
-        **kwargs
-    ):
+    def __init__(self, homotopy, mobject, **kwargs):
         """
         Homotopy is a function from
         (x, y, z, t) to (x', y', z')
@@ -32,18 +16,10 @@ class Homotopy(Animation):
         self.homotopy = homotopy
         super().__init__(mobject, **kwargs)
 
-    def function_at_time_t(
-        self,
-        t: float
-    ) -> Callable[[np.ndarray], Sequence[float]]:
+    def function_at_time_t(self, t):
         return lambda p: self.homotopy(*p, t)
 
-    def interpolate_submobject(
-        self,
-        submob: Mobject,
-        start: Mobject,
-        alpha: float
-    ) -> None:
+    def interpolate_submobject(self, submob, start, alpha):
         submob.match_points(start)
         submob.apply_function(
             self.function_at_time_t(alpha),
@@ -58,12 +34,7 @@ class SmoothedVectorizedHomotopy(Homotopy):
 
 
 class ComplexHomotopy(Homotopy):
-    def __init__(
-        self,
-        complex_homotopy: Callable[[complex, float], Sequence[float]],
-        mobject: Mobject,
-        **kwargs
-    ):
+    def __init__(self, complex_homotopy, mobject, **kwargs):
         """
         Given a function form (z, t) -> w, where z and w
         are complex numbers and t is time, this animates
@@ -82,16 +53,11 @@ class PhaseFlow(Animation):
         "suspend_mobject_updating": False,
     }
 
-    def __init__(
-        self,
-        function: Callable[[np.ndarray], np.ndarray],
-        mobject: Mobject,
-        **kwargs
-    ):
+    def __init__(self, function, mobject, **kwargs):
         self.function = function
         super().__init__(mobject, **kwargs)
 
-    def interpolate_mobject(self, alpha: float) -> None:
+    def interpolate_mobject(self, alpha):
         if hasattr(self, "last_alpha"):
             dt = self.virtual_time * (alpha - self.last_alpha)
             self.mobject.apply_function(
@@ -105,10 +71,10 @@ class MoveAlongPath(Animation):
         "suspend_mobject_updating": False,
     }
 
-    def __init__(self, mobject: Mobject, path: Mobject, **kwargs):
+    def __init__(self, mobject, path, **kwargs):
         self.path = path
         super().__init__(mobject, **kwargs)
 
-    def interpolate_mobject(self, alpha: float) -> None:
+    def interpolate_mobject(self, alpha):
         point = self.path.point_from_proportion(alpha)
         self.mobject.move_to(point)

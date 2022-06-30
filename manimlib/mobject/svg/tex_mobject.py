@@ -1,79 +1,65 @@
-from __future__ import annotations
-
 from functools import reduce
 import operator as op
 import re
 
-from manimlib.constants import BLACK, WHITE
-from manimlib.constants import DOWN, LEFT, RIGHT, UP
-from manimlib.constants import FRAME_WIDTH
-from manimlib.constants import MED_LARGE_BUFF, MED_SMALL_BUFF, SMALL_BUFF
+from manimlib.constants import *
 from manimlib.mobject.geometry import Line
 from manimlib.mobject.svg.svg_mobject import SVGMobject
+from manimlib.mobject.types.vectorized_mobject import VMobject
 from manimlib.mobject.types.vectorized_mobject import VGroup
 from manimlib.utils.config_ops import digest_config
-from manimlib.utils.tex_file_writing import display_during_execution
-from manimlib.utils.tex_file_writing import get_tex_config
 from manimlib.utils.tex_file_writing import tex_to_svg_file
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from colour import Color
-    from typing import Iterable, Union
-
-    ManimColor = Union[str, Color]
+from manimlib.utils.tex_file_writing import get_tex_config
+from manimlib.utils.tex_file_writing import display_during_execution
 
 
 SCALE_FACTOR_PER_FONT_POINT = 0.001
 
 
-class SingleStringTex(SVGMobject):
+tex_string_to_mob_map = {}
+
+
+class SingleStringTex(VMobject):
     CONFIG = {
-        "height": None,
         "fill_opacity": 1.0,
         "stroke_width": 0,
-        "svg_default": {
-            "fill_color": WHITE,
-        },
-        "path_string_config": {
-            "should_subdivide_sharp_curves": True,
-            "should_remove_null_curves": True,
-        },
+        "should_center": True,
         "font_size": 48,
+        "height": None,
+        "organize_left_to_right": False,
         "alignment": "\\centering",
         "math_mode": True,
-        "organize_left_to_right": False,
     }
 
-    def __init__(self, tex_string: str, **kwargs):
-        assert isinstance(tex_string, str)
-        self.tex_string = tex_string
+    def __init__(self, tex_string, **kwargs):
         super().__init__(**kwargs)
+        assert(isinstance(tex_string, str))
+        self.tex_string = tex_string
+        if tex_string not in tex_string_to_mob_map:
+            with display_during_execution(f" Writing \"{tex_string}\""):
+                full_tex = self.get_tex_file_body(tex_string)
+                filename = tex_to_svg_file(full_tex)
+                svg_mob = SVGMobject(
+                    filename,
+                    height=None,
+                    path_string_config={
+                        "should_subdivide_sharp_curves": True,
+                        "should_remove_null_curves": True,
+                    }
+                )
+                tex_string_to_mob_map[tex_string] = svg_mob
+        self.add(*(
+            sm.copy()
+            for sm in tex_string_to_mob_map[tex_string]
+        ))
+        self.init_colors()
 
         if self.height is None:
             self.scale(SCALE_FACTOR_PER_FONT_POINT * self.font_size)
         if self.organize_left_to_right:
             self.organize_submobjects_left_to_right()
 
-    @property
-    def hash_seed(self) -> tuple:
-        return (
-            self.__class__.__name__,
-            self.svg_default,
-            self.path_string_config,
-            self.tex_string,
-            self.alignment,
-            self.math_mode
-        )
-
-    def get_file_path(self) -> str:
-        full_tex = self.get_tex_file_body(self.tex_string)
-        with display_during_execution(f"Writing \"{self.tex_string}\""):
-            file_path = tex_to_svg_file(full_tex)
-        return file_path
-
-    def get_tex_file_body(self, tex_string: str) -> str:
+    def get_tex_file_body(self, tex_string):
         new_tex = self.get_modified_expression(tex_string)
         if self.math_mode:
             new_tex = "\\begin{align*}\n" + new_tex + "\n\\end{align*}"
@@ -86,10 +72,10 @@ class SingleStringTex(SVGMobject):
             new_tex
         )
 
-    def get_modified_expression(self, tex_string: str) -> str:
+    def get_modified_expression(self, tex_string):
         return self.modify_special_strings(tex_string.strip())
 
-    def modify_special_strings(self, tex: str) -> str:
+    def modify_special_strings(self, tex):
         tex = tex.strip()
         should_add_filler = reduce(op.or_, [
             # Fraction line needs something to be over
@@ -105,18 +91,6 @@ class SingleStringTex(SVGMobject):
         ])
         if should_add_filler:
             filler = "{\\quad}"
-            tex += filler
-
-        should_add_double_filler = reduce(op.or_, [
-            tex == "\\overset",
-            # TODO: these can't be used since they change
-            # the latex draw order.
-            # tex == "\\frac", # you can use \\over as a alternative 
-            # tex == "\\dfrac",
-            # tex == "\\binom",
-        ])
-        if should_add_double_filler:
-            filler = "{\\quad}{\\quad}"
             tex += filler
 
         if tex == "\\substack":
@@ -153,16 +127,12 @@ class SingleStringTex(SVGMobject):
                 tex = ""
         return tex
 
-    def balance_braces(self, tex: str) -> str:
+    def balance_braces(self, tex):
         """
         Makes Tex resiliant to unmatched braces
         """
         num_unclosed_brackets = 0
-        for i in range(len(tex)):
-            if i > 0 and tex[i - 1] == "\\":
-                # So as to not count '\{' type expressions
-                continue
-            char = tex[i]
+        for char in tex:
             if char == "{":
                 num_unclosed_brackets += 1
             elif char == "}":
@@ -173,7 +143,7 @@ class SingleStringTex(SVGMobject):
         tex += num_unclosed_brackets * "}"
         return tex
 
-    def get_tex(self) -> str:
+    def get_tex(self):
         return self.tex_string
 
     def organize_submobjects_left_to_right(self):
@@ -188,7 +158,7 @@ class Tex(SingleStringTex):
         "tex_to_color_map": {},
     }
 
-    def __init__(self, *tex_strings: str, **kwargs):
+    def __init__(self, *tex_strings, **kwargs):
         digest_config(self, kwargs)
         self.tex_strings = self.break_up_tex_strings(tex_strings)
         full_string = self.arg_separator.join(self.tex_strings)
@@ -199,7 +169,7 @@ class Tex(SingleStringTex):
         if self.organize_left_to_right:
             self.organize_submobjects_left_to_right()
 
-    def break_up_tex_strings(self, tex_strings: Iterable[str]) -> Iterable[str]:
+    def break_up_tex_strings(self, tex_strings):
         # Separate out any strings specified in the isolate
         # or tex_to_color_map lists.
         substrings_to_isolate = [*self.isolate, *self.tex_to_color_map.keys()]
@@ -247,12 +217,7 @@ class Tex(SingleStringTex):
         self.set_submobjects(new_submobjects)
         return self
 
-    def get_parts_by_tex(
-        self,
-        tex: str,
-        substring: bool = True,
-        case_sensitive: bool = True
-    ) -> VGroup:
+    def get_parts_by_tex(self, tex, substring=True, case_sensitive=True):
         def test(tex1, tex2):
             if not case_sensitive:
                 tex1 = tex1.lower()
@@ -267,36 +232,27 @@ class Tex(SingleStringTex):
             self.submobjects
         ))
 
-    def get_part_by_tex(self, tex: str, **kwargs) -> SingleStringTex | None:
+    def get_part_by_tex(self, tex, **kwargs):
         all_parts = self.get_parts_by_tex(tex, **kwargs)
         return all_parts[0] if all_parts else None
 
-    def set_color_by_tex(self, tex: str, color: ManimColor, **kwargs):
+    def set_color_by_tex(self, tex, color, **kwargs):
         self.get_parts_by_tex(tex, **kwargs).set_color(color)
         return self
 
-    def set_color_by_tex_to_color_map(
-        self,
-        tex_to_color_map: dict[str, ManimColor],
-        **kwargs
-    ):
+    def set_color_by_tex_to_color_map(self, tex_to_color_map, **kwargs):
         for tex, color in list(tex_to_color_map.items()):
             self.set_color_by_tex(tex, color, **kwargs)
         return self
 
-    def index_of_part(self, part: SingleStringTex, start: int = 0) -> int:
+    def index_of_part(self, part, start=0):
         return self.submobjects.index(part, start)
 
-    def index_of_part_by_tex(self, tex: str, start: int = 0, **kwargs) -> int:
+    def index_of_part_by_tex(self, tex, start=0, **kwargs):
         part = self.get_part_by_tex(tex, **kwargs)
         return self.index_of_part(part, start)
 
-    def slice_by_tex(
-        self,
-        start_tex: str | None = None,
-        stop_tex: str | None = None,
-        **kwargs
-    ) -> VGroup:
+    def slice_by_tex(self, start_tex=None, stop_tex=None, **kwargs):
         if start_tex is None:
             start_index = 0
         else:
@@ -308,10 +264,10 @@ class Tex(SingleStringTex):
             stop_index = self.index_of_part_by_tex(stop_tex, start=start_index, **kwargs)
             return self[start_index:stop_index]
 
-    def sort_alphabetically(self) -> None:
+    def sort_alphabetically(self):
         self.submobjects.sort(key=lambda m: m.get_tex())
 
-    def set_bstroke(self, color: ManimColor = BLACK, width: float = 4):
+    def set_bstroke(self, color=BLACK, width=4):
         self.set_stroke(color, width, background=True)
         return self
 
@@ -330,7 +286,7 @@ class BulletedList(TexText):
         "alignment": "",
     }
 
-    def __init__(self, *items: str, **kwargs):
+    def __init__(self, *items, **kwargs):
         line_separated_items = [s + "\\\\" for s in items]
         TexText.__init__(self, *line_separated_items, **kwargs)
         for part in self:
@@ -343,7 +299,7 @@ class BulletedList(TexText):
             buff=self.buff
         )
 
-    def fade_all_but(self, index_or_string: int | str, opacity: float = 0.5) -> None:
+    def fade_all_but(self, index_or_string, opacity=0.5):
         arg = index_or_string
         if isinstance(arg, str):
             part = self.get_part_by_tex(arg)
@@ -381,7 +337,7 @@ class Title(TexText):
         "underline_buff": MED_SMALL_BUFF,
     }
 
-    def __init__(self, *text_parts: str, **kwargs):
+    def __init__(self, *text_parts, **kwargs):
         TexText.__init__(self, *text_parts, **kwargs)
         self.scale(self.scale_factor)
         self.to_edge(UP)

@@ -1,13 +1,6 @@
-from __future__ import annotations
+import operator as op
 
 from manimlib.animation.animation import Animation
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Callable
-
-    from manimlib.mobject.mobject import Mobject
 
 
 class UpdateFromFunc(Animation):
@@ -20,36 +13,29 @@ class UpdateFromFunc(Animation):
         "suspend_mobject_updating": False,
     }
 
-    def __init__(
-        self,
-        mobject: Mobject,
-        update_function: Callable[[Mobject]],
-        **kwargs
-    ):
+    def __init__(self, mobject, update_function, **kwargs):
         self.update_function = update_function
         super().__init__(mobject, **kwargs)
 
-    def interpolate_mobject(self, alpha: float) -> None:
+    def interpolate_mobject(self, alpha):
         self.update_function(self.mobject)
 
 
 class UpdateFromAlphaFunc(UpdateFromFunc):
-    def interpolate_mobject(self, alpha: float) -> None:
+    def interpolate_mobject(self, alpha):
         self.update_function(self.mobject, alpha)
 
 
 class MaintainPositionRelativeTo(Animation):
-    def __init__(
-        self,
-        mobject: Mobject,
-        tracked_mobject: Mobject,
-        **kwargs
-    ):
+    def __init__(self, mobject, tracked_mobject, **kwargs):
         self.tracked_mobject = tracked_mobject
-        self.diff = mobject.get_center() - tracked_mobject.get_center()
+        self.diff = op.sub(
+            mobject.get_center(),
+            tracked_mobject.get_center(),
+        )
         super().__init__(mobject, **kwargs)
 
-    def interpolate_mobject(self, alpha: float) -> None:
+    def interpolate_mobject(self, alpha):
         target = self.tracked_mobject.get_center()
         location = self.mobject.get_center()
         self.mobject.shift(target - location + self.diff)

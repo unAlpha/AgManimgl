@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from calendar import day_abbr
 from math import radians
 from cv2 import add
@@ -907,4 +908,4 @@ class Graph1(Scene):
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Graph1 -wo --hd".format(__file__))
+    system("manimgl {} Graph1 -o --hd".format(__file__))

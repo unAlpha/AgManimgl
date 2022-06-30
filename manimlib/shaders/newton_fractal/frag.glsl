@@ -1,8 +1,6 @@
 #version 330
 
 uniform vec3 light_source_position;
-uniform vec3 camera_position;
-uniform float reflectiveness;
 uniform float gloss;
 uniform float shadow;
 uniform float focal_distance;
@@ -77,7 +75,7 @@ vec2 seek_root(vec2 z, vec2[MAX_DEGREE + 1] coefs, int max_steps, out float n_it
         }
         z = z - step;
     }
-    n_iters -= log(curr_len) / log(threshold);
+    n_iters -= clamp((threshold - curr_len) / (last_len - curr_len), 0.0, 1.0);
 
     return z;
 }
@@ -120,7 +118,7 @@ void main() {
             color = colors[i];
         }
     }
-    color *= 1.0 + (0.01 * saturation_factor) * (n_iters - 2 * saturation_factor);
+    color *= 1.0 + (0.01 * saturation_factor) * (n_iters - 5 * saturation_factor);
 
     if(black_for_cycles > 0 && min_dist > CLOSE_ENOUGH){
         color = vec4(0.0, 0.0, 0.0, 1.0);
@@ -153,8 +151,6 @@ void main() {
         xyz_coords,
         vec3(0.0, 0.0, 1.0),
         light_source_position,
-        camera_position,
-        reflectiveness,
         gloss,
         shadow
     );

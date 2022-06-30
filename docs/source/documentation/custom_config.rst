@@ -98,9 +98,6 @@ Import line that need to execute when entering interactive mode directly.
 - ``font`` 
     Default font of Text
 
-- ``text_alignment``
-    Default text alignment for LaTeX
-
 - ``background_color``
     Default background color
 
@@ -116,11 +113,6 @@ means left(L) / middle(O) / right(R)).
 
 The number of the monitor you want the preview window to pop up on. (default is 0)
 
-``full_screen``
----------------
-
-Whether open the window in full screen. (default is false)
-
 ``break_into_partial_movies``
 -----------------------------
 
@@ -131,27 +123,22 @@ to form the full scene.
 Sometimes video-editing is made easier when working with the broken up scene, which
 effectively has cuts at all the places you might want.
 
-``camera_resolutions``
-----------------------
+``camera_qualities``
+--------------------
 
-Export resolutions
+Export quality
 
 - ``low``
-    Low resolutions (default is 480p)
+    Low quality (default is 480p15)
 
 - ``medium``
-    Medium resolutions (default is 720p)
+    Medium quality (default is 720p30)
 
 - ``high``
-    High resolutions (default is 1080p)
+    High quality (default is 1080p30)
 
 - ``ultra_high``
-    Ultra high resolutions (default is 4K)
+    Ultra high quality (default is 4K60)
 
-- ``default_resolutions``
-    Default resolutions (one of the above four, default is high)
-
-``fps``
--------
-
-Export frame rate. (default is 30)
+- ``default_quality``
+    Default quality (one of the above four)

@@ -1,53 +1,50 @@
-from __future__ import annotations
-
-from colour import Color
-
+import itertools as it
 import numpy as np
 
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from typing import Callable, Iterable, Sequence, TypeVar
-
-    T = TypeVar("T")
-    S = TypeVar("S")
-
-
-def remove_list_redundancies(lst: Sequence[T]) -> list[T]:
+def remove_list_redundancies(l):
     """
     Used instead of list(set(l)) to maintain order
     Keeps the last occurrence of each element
     """
-    return list(reversed(dict.fromkeys(reversed(lst))))
+    reversed_result = []
+    used = set()
+    for x in reversed(l):
+        if x not in used:
+            reversed_result.append(x)
+            used.add(x)
+    reversed_result.reverse()
+    return reversed_result
 
 
-def list_update(l1: Iterable[T], l2: Iterable[T]) -> list[T]:
+def list_update(l1, l2):
     """
     Used instead of list(set(l1).update(l2)) to maintain order,
     making sure duplicates are removed from l1, not l2.
     """
-    return remove_list_redundancies([*l1, *l2])
+    return [e for e in l1 if e not in l2] + list(l2)
 
 
-def list_difference_update(l1: Iterable[T], l2: Iterable[T]) -> list[T]:
+def list_difference_update(l1, l2):
     return [e for e in l1 if e not in l2]
 
 
-def adjacent_n_tuples(objects: Sequence[T], n: int) -> zip[tuple[T, T]]:
+def all_elements_are_instances(iterable, Class):
+    return all([isinstance(e, Class) for e in iterable])
+
+
+def adjacent_n_tuples(objects, n):
     return zip(*[
         [*objects[k:], *objects[:k]]
         for k in range(n)
     ])
 
 
-def adjacent_pairs(objects: Sequence[T]) -> zip[tuple[T, T]]:
+def adjacent_pairs(objects):
     return adjacent_n_tuples(objects, 2)
 
 
-def batch_by_property(
-    items: Iterable[T],
-    property_func: Callable[[T], S]
-) -> list[tuple[T, S]]:
+def batch_by_property(items, property_func):
     """
     Takes in a list, and returns a list of tuples, (batch, prop)
     such that all items in a batch have the same output when
@@ -74,7 +71,7 @@ def batch_by_property(
     return batch_prop_pairs
 
 
-def listify(obj: object) -> list:
+def listify(obj):
     if isinstance(obj, str):
         return [obj]
     try:
@@ -83,13 +80,13 @@ def listify(obj: object) -> list:
         return [obj]
 
 
-def resize_array(nparray: np.ndarray, length: int) -> np.ndarray:
+def resize_array(nparray, length):
     if len(nparray) == length:
         return nparray
     return np.resize(nparray, (length, *nparray.shape[1:]))
 
 
-def resize_preserving_order(nparray: np.ndarray, length: int) -> np.ndarray:
+def resize_preserving_order(nparray, length):
     if len(nparray) == 0:
         return np.zeros((length, *nparray.shape[1:]))
     if len(nparray) == length:
@@ -98,7 +95,7 @@ def resize_preserving_order(nparray: np.ndarray, length: int) -> np.ndarray:
     return nparray[indices]
 
 
-def resize_with_interpolation(nparray: np.ndarray, length: int) -> np.ndarray:
+def resize_with_interpolation(nparray, length):
     if len(nparray) == length:
         return nparray
     if length == 0:
@@ -111,10 +108,7 @@ def resize_with_interpolation(nparray: np.ndarray, length: int) -> np.ndarray:
     ])
 
 
-def make_even(
-    iterable_1: Sequence[T],
-    iterable_2: Sequence[S]
-) -> tuple[list[T], list[S]]:
+def make_even(iterable_1, iterable_2):
     len1 = len(iterable_1)
     len2 = len(iterable_2)
     if len1 == len2:
@@ -126,19 +120,22 @@ def make_even(
     )
 
 
-def hash_obj(obj: object) -> int:
-    if isinstance(obj, dict):
-        return hash(tuple(sorted([
-            (hash_obj(k), hash_obj(v)) for k, v in obj.items()
-        ])))
+def make_even_by_cycling(iterable_1, iterable_2):
+    length = max(len(iterable_1), len(iterable_2))
+    cycle1 = it.cycle(iterable_1)
+    cycle2 = it.cycle(iterable_2)
+    return (
+        [next(cycle1) for x in range(length)],
+        [next(cycle2) for x in range(length)]
+    )
 
-    if isinstance(obj, set):
-        return hash(tuple(sorted(hash_obj(e) for e in obj)))
 
-    if isinstance(obj, (tuple, list)):
-        return hash(tuple(hash_obj(e) for e in obj))
+def remove_nones(sequence):
+    return [x for x in sequence if x]
 
-    if isinstance(obj, Color):
-        return hash(obj.get_rgb())
 
-    return hash(obj)
+# Note this is redundant with it.chain
+
+
+def concatenate_lists(*list_of_lists):
+    return [item for l in list_of_lists for item in l]
