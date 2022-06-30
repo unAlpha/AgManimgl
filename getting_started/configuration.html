@@ -9,8 +9,8 @@
       <link rel="stylesheet" href="../_static/copybutton.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/manim-kindergarten/CDN@master/manimgl_assets/custom.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/manim-kindergarten/CDN@master/manimgl_assets/colors.css" />
-    <link rel="stylesheet" href="../_static/styles/default.css?8844ad72cd24144a05601f00">
-    <link rel="stylesheet" href="../_static/pygments.css?8844ad72cd24144a05601f00">
+    <link rel="stylesheet" href="../_static/styles/default.css?3206570516c82edeb2e6edcc">
+    <link rel="stylesheet" href="../_static/pygments.css?3206570516c82edeb2e6edcc">
     
 <style>
   :root {
@@ -27,7 +27,7 @@
         <script src="../_static/language_data.js" defer></script>
       
         <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script><script src="../_static/scripts/main.js?8844ad72cd24144a05601f00"></script></head>
+        <script src="../_static/copybutton.js"></script><script src="../_static/scripts/main.js?3206570516c82edeb2e6edcc"></script></head>
   <body dir="">
     
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -165,47 +165,39 @@ manim-render &lt;code&gt;.py &lt;Scene&gt; &lt;flags&gt;
 <td><p><code class="docutils literal notranslate"><span class="pre">-h</span></code></p></td>
 <td><p>Show the help message and exit</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--version</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">-v</span></code></p></td>
-<td><p>Display the version of manimgl</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--write_file</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--write_file</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">-w</span></code></p></td>
 <td><p>Render the scene as a movie file</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--skip_animations</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--skip_animations</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">-s</span></code></p></td>
 <td><p>Skip to the last frame</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--low_quality</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--low_quality</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">-l</span></code></p></td>
 <td><p>Render at a low quality (for faster rendering)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--medium_quality</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--medium_quality</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">-m</span></code></p></td>
 <td><p>Render at a medium quality</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--hd</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--hd</span></code></p></td>
 <td></td>
 <td><p>Render at a 1080p quality</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--uhd</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--uhd</span></code></p></td>
 <td></td>
 <td><p>Render at a 4k quality</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--full_screen</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--full_screen</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">-f</span></code></p></td>
 <td><p>Show window in full screen</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--presenter_mode</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">-p</span></code></p></td>
-<td><p>Scene will stay paused during wait calls until space bar or right arrow is hit, like a slide show</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--save_pngs</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">-g</span></code></p></td>
 <td><p>Save each frame as a png</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--gif</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--save_as_gif</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">-i</span></code></p></td>
 <td><p>Save the video as gif</p></td>
 </tr>
@@ -241,37 +233,29 @@ manim-render &lt;code&gt;.py &lt;Scene&gt; &lt;flags&gt;
 <td><p><code class="docutils literal notranslate"><span class="pre">-n</span></code></p></td>
 <td><p>Start rendering not from the first animation, but from another, specified by its index. If you passing two comma separated values, e.g. “3,6”, it will end the rendering at the second value.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--embed</span> <span class="pre">[EMBED]</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">-e</span></code></p></td>
-<td><p>Creates a new file where the line <code class="docutils literal notranslate"><span class="pre">self.embed</span></code> is inserted into the Scenes construct method. If a string is passed in, the line will be inserted below the last line of code including that string.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--resolution</span> <span class="pre">RESOLUTION</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--resolution</span> <span class="pre">RESOLUTION</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">-r</span></code></p></td>
 <td><p>Resolution, passed as “WxH”, e.g. “1920x1080”</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--fps</span> <span class="pre">FPS</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--frame_rate</span> <span class="pre">FRAME_RATE</span></code></p></td>
 <td></td>
 <td><p>Frame rate, as an integer</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--color</span> <span class="pre">COLOR</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--color</span> <span class="pre">COLOR</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">-c</span></code></p></td>
 <td><p>Background color</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--leave_progress_bars</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--leave_progress_bars</span></code></p></td>
 <td></td>
 <td><p>Leave progress bars displayed in terminal</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--video_dir</span> <span class="pre">VIDEO_DIR</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--video_dir</span> <span class="pre">VIDEO_DIR</span></code></p></td>
 <td></td>
-<td><p>Directory to write video</p></td>
+<td><p>directory to write video</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--config_file</span> <span class="pre">CONFIG_FILE</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--config_file</span> <span class="pre">CONFIG_FILE</span></code></p></td>
 <td></td>
 <td><p>Path to the custom configuration file</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--log-level</span> <span class="pre">LOG_LEVEL</span></code></p></td>
-<td></td>
-<td><p>Level of messages to Display, can be DEBUG / INFO / WARNING / ERROR / CRITICAL</p></td>
 </tr>
 </tbody>
 </table></div>
