@@ -672,3 +672,6 @@ class ControlsExample(Scene):
 
 
 # See https://github.com/3b1b/videos for many, many more
+if __name__ == "__main__":
+    from os import system
+    system("manimgl {} InteractiveDevelopment -ol".format(__file__))

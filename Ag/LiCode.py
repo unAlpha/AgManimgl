@@ -630,8 +630,7 @@ class PieChart(VMobject):
         "stroke" : 100,
         "legend_style" : "Dot",
         "legend_loc" : 3.6*RIGHT + 0*UP,
-        "legend_scale" : 0.5,
-        "scale_k" : 1,
+        "legend_scale" : 1,
         "y_buff" : MED_SMALL_BUFF 
     }
 
@@ -904,8 +903,81 @@ class Graph1(Scene):
         )
         self.add(BLG)
         self.wait()
-        
+
+class PieChartElec1(Scene):
+    def construct(self):
+        pc_data = [
+            # 百分比形式
+            (67.4, BLUE, "火电 56463亿"),
+            (16.0, RED, "水电 13401亿"),
+            (4.9, GOLD, "核电 4075亿"),
+            (7.8, TEAL_D, "风电 6556亿"),
+            (3.9, PURPLE_C, "太阳能 3270亿"),
+        ]
+        pie_chart = PieChart()
+        pc_arcs = pie_chart.craet_arcs(pc_data)
+        pc_legends = pie_chart.create_legends(pc_data)
+        VGroup(pc_arcs,pc_legends).arrange(RIGHT, buff=LARGE_BUFF*1.5)
+            
+        self.play(
+            LaggedStartMap(ShowCreation,pc_arcs,lag_ratio=1),
+            LaggedStartMap(Write,pc_legends,lag_ratio=1),
+            run_time=5,
+        )
+
+        highlight_items = [0, 1, 2]
+        for item in highlight_items:
+            self.play(
+                Transform(
+                    pc_arcs,
+                    pie_chart.highlight_items_arcs(pc_arcs.copy(),item)
+                ),
+                Transform(
+                    pc_legends,
+                    pie_chart.highlight_items_legends(pc_legends.copy(),item)
+                ),
+                rate_func=there_and_back_with_pause,
+                run_time = 2,
+            )
+        self.wait()
+
+class PieChartElec2(Scene):
+    def construct(self):
+        pc_data = [
+            # 百分比形式
+            (15.3, BLUE, "火电 663亿"),
+            (81.6, RED, "水电 3531.4亿"),
+            (0, GOLD, "核电 0亿"),
+            (2.4, TEAL_D, "风电 106.2亿"),
+            (0.7, PURPLE_C, "太阳能 28.8亿"),
+        ]
+        pie_chart = PieChart()
+        pc_arcs = pie_chart.craet_arcs(pc_data)
+        pc_legends = pie_chart.create_legends(pc_data)
+        VGroup(pc_arcs,pc_legends).arrange(RIGHT, buff=LARGE_BUFF*1.5)
+            
+        self.play(
+            LaggedStartMap(ShowCreation,pc_arcs,lag_ratio=1),
+            LaggedStartMap(Write,pc_legends,lag_ratio=1),
+            run_time=5,
+        )
+
+        highlight_items = [0, 1, 2]
+        for item in highlight_items:
+            self.play(
+                Transform(
+                    pc_arcs,
+                    pie_chart.highlight_items_arcs(pc_arcs.copy(),item)
+                ),
+                Transform(
+                    pc_legends,
+                    pie_chart.highlight_items_legends(pc_legends.copy(),item)
+                ),
+                rate_func=there_and_back_with_pause,
+                run_time = 2,
+            )
+        self.wait()
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Graph1 -o --hd".format(__file__))
+    system("manimgl {} PieChartElec2 -o --hd".format(__file__))
