@@ -16,17 +16,9 @@ directories:
   # return whatever is at to the TMPDIR environment variable.  If you want to
   # specify them elsewhere,
   temporary_storage: ""
-tex:
-  executable: "latex"
-  template_file: "tex_template.tex" 
-  intermediate_filetype: "dvi"
-  text_to_replace: "[tex_expression]"
-  # For ctex, use the following configuration
-  # executable: "xelatex -no-pdf"
-  # template_file: "ctex_template.tex"
-  # intermediate_filetype: "xdv"
 universal_import_line: "from manimlib import *"
 style:
+  tex_template: "default"
   font: "Consolas"
   background_color: "#333333"
 # Set the position of preview window, you can use directions, e.g. UL/DR/OL/OO/...
@@ -41,6 +33,7 @@ window_monitor: 0
 # easier when working with the broken up scene, which
 # effectively has cuts at all the places you might want.
 break_into_partial_movies: False
+<<<<<<< HEAD
 camera_qualities:
   low:
     resolution: "854x480"
@@ -55,3 +48,12 @@ camera_qualities:
     resolution: "3840x2160"
     frame_rate: 60
   default_quality: "high"
+=======
+camera_resolutions:
+  low: "854x480"
+  med: "1280x720"
+  high: "1920x1080"
+  4k: "3840x2160"
+  default_resolution: "high"
+fps: 30
+>>>>>>> fb50e4eb55e05c91c01e55fa1713b3ad69fa42e3
