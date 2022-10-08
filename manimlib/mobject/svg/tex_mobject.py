@@ -8,9 +8,22 @@ from manimlib.mobject.svg.svg_mobject import SVGMobject
 from manimlib.mobject.types.vectorized_mobject import VMobject
 from manimlib.mobject.types.vectorized_mobject import VGroup
 from manimlib.utils.config_ops import digest_config
+<<<<<<< HEAD
 from manimlib.utils.tex_file_writing import tex_to_svg_file
 from manimlib.utils.tex_file_writing import get_tex_config
 from manimlib.utils.tex_file_writing import display_during_execution
+=======
+from manimlib.utils.tex_file_writing import display_during_execution
+from manimlib.utils.tex_file_writing import tex_content_to_svg_file
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from colour import Color
+    from typing import Iterable, Union
+
+    ManimColor = Union[str, Color]
+>>>>>>> fb50e4eb55e05c91c01e55fa1713b3ad69fa42e3
 
 
 SCALE_FACTOR_PER_FONT_POINT = 0.001
@@ -29,6 +42,12 @@ class SingleStringTex(VMobject):
         "organize_left_to_right": False,
         "alignment": "\\centering",
         "math_mode": True,
+<<<<<<< HEAD
+=======
+        "organize_left_to_right": False,
+        "template": "",
+        "additional_preamble": "",
+>>>>>>> fb50e4eb55e05c91c01e55fa1713b3ad69fa42e3
     }
 
     def __init__(self, tex_string, **kwargs):
@@ -59,18 +78,36 @@ class SingleStringTex(VMobject):
         if self.organize_left_to_right:
             self.organize_submobjects_left_to_right()
 
+<<<<<<< HEAD
     def get_tex_file_body(self, tex_string):
+=======
+    @property
+    def hash_seed(self) -> tuple:
+        return (
+            self.__class__.__name__,
+            self.svg_default,
+            self.path_string_config,
+            self.tex_string,
+            self.alignment,
+            self.math_mode,
+            self.template,
+            self.additional_preamble
+        )
+
+    def get_file_path(self) -> str:
+        content = self.get_tex_file_body(self.tex_string)
+        with display_during_execution(f"Writing \"{self.tex_string}\""):
+            file_path = tex_content_to_svg_file(
+                content, self.template, self.additional_preamble
+            )
+        return file_path
+
+    def get_tex_file_body(self, tex_string: str) -> str:
+>>>>>>> fb50e4eb55e05c91c01e55fa1713b3ad69fa42e3
         new_tex = self.get_modified_expression(tex_string)
         if self.math_mode:
             new_tex = "\\begin{align*}\n" + new_tex + "\n\\end{align*}"
-
-        new_tex = self.alignment + "\n" + new_tex
-
-        tex_config = get_tex_config()
-        return tex_config["tex_body"].replace(
-            tex_config["text_to_replace"],
-            new_tex
-        )
+        return self.alignment + "\n" + new_tex
 
     def get_modified_expression(self, tex_string):
         return self.modify_special_strings(tex_string.strip())

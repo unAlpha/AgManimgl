@@ -199,11 +199,19 @@ class Camera(object):
         fbo_msaa = self.get_fbo(ctx, self.samples)
         fbo_msaa.use()
 
+<<<<<<< HEAD
         ctx.enable(moderngl.BLEND)
         ctx.blend_func = (
             moderngl.SRC_ALPHA, moderngl.ONE_MINUS_SRC_ALPHA,
             moderngl.ONE, moderngl.ONE
         )
+=======
+    def set_ctx_blending(self, enable: bool = True) -> None:
+        if enable:
+            self.ctx.enable(moderngl.BLEND)
+        else:
+            self.ctx.disable(moderngl.BLEND)
+>>>>>>> fb50e4eb55e05c91c01e55fa1713b3ad69fa42e3
 
         self.ctx = ctx
         self.fbo = fbo

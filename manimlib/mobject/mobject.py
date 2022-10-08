@@ -378,7 +378,195 @@ class Mobject(object):
             *(self.copy() for x in range(n))
         )
 
+<<<<<<< HEAD
     def get_grid(self, n_rows, n_cols, height=None, **kwargs):
+=======
+    def arrange_to_fit_width(self, width: float, about_edge=ORIGIN):
+        return self.arrange_to_fit_dim(width, 0, about_edge)
+
+    def arrange_to_fit_height(self, height: float, about_edge=ORIGIN):
+        return self.arrange_to_fit_dim(height, 1, about_edge)
+
+    def arrange_to_fit_depth(self, depth: float, about_edge=ORIGIN):
+        return self.arrange_to_fit_dim(depth, 2, about_edge)
+
+    def sort(
+        self,
+        point_to_num_func: Callable[[np.ndarray], float] = lambda p: p[0],
+        submob_func: Callable[[Mobject]] | None = None
+    ):
+        if submob_func is not None:
+            self.submobjects.sort(key=submob_func)
+        else:
+            self.submobjects.sort(key=lambda m: point_to_num_func(m.get_center()))
+        self.assemble_family()
+        return self
+
+    def shuffle(self, recurse: bool = False):
+        if recurse:
+            for submob in self.submobjects:
+                submob.shuffle(recurse=True)
+        random.shuffle(self.submobjects)
+        self.assemble_family()
+        return self
+
+    # Copying and serialization
+
+    def stash_mobject_pointers(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            uncopied_attrs = ["parents", "target", "saved_state"]
+            stash = dict()
+            for attr in uncopied_attrs:
+                if hasattr(self, attr):
+                    value = getattr(self, attr)
+                    stash[attr] = value
+                    null_value = [] if isinstance(value, list) else None
+                    setattr(self, attr, null_value)
+            result = func(self, *args, **kwargs)
+            self.__dict__.update(stash)
+            return result
+        return wrapper
+
+    @stash_mobject_pointers
+    def serialize(self):
+        return pickle.dumps(self)
+
+    def deserialize(self, data: bytes):
+        self.become(pickle.loads(data))
+        return self
+
+    def deepcopy(self):
+        try:
+            # Often faster than deepcopy
+            return pickle.loads(pickle.dumps(self))
+        except AttributeError:
+            return copy.deepcopy(self)
+
+    @stash_mobject_pointers
+    def copy(self, deep: bool = False):
+        if deep:
+            return self.deepcopy()
+
+        result = copy.copy(self)
+
+        # The line above is only a shallow copy, so the internal
+        # data which are numpyu arrays or other mobjects still
+        # need to be further copied.
+        result.data = {
+            key: np.array(value)
+            for key, value in self.data.items()
+        }
+        result.uniforms = {
+            key: np.array(value)
+            for key, value in self.uniforms.items()
+        }
+
+        # Instead of adding using result.add, which does some checks for updating
+        # updater statues and bounding box, just directly modify the family-related
+        # lists
+        result.submobjects = [sm.copy() for sm in self.submobjects]
+        for sm in result.submobjects:
+            sm.parents = [result]
+        result.family = [result, *it.chain(*(sm.get_family() for sm in result.submobjects))]
+
+        # Similarly, instead of calling match_updaters, since we know the status
+        # won't have changed, just directly match.
+        result.non_time_updaters = list(self.non_time_updaters)
+        result.time_based_updaters = list(self.time_based_updaters)
+
+        family = self.get_family()
+        for attr, value in list(self.__dict__.items()):
+            if isinstance(value, Mobject) and value is not self:
+                if value in family:
+                    setattr(result, attr, result.family[self.family.index(value)])
+            if isinstance(value, np.ndarray):
+                setattr(result, attr, value.copy())
+            if isinstance(value, ShaderWrapper):
+                setattr(result, attr, value.copy())
+        return result
+
+    def generate_target(self, use_deepcopy: bool = False):
+        self.target = self.copy(deep=use_deepcopy)
+        self.target.saved_state = self.saved_state
+        return self.target
+
+    def save_state(self, use_deepcopy: bool = False):
+        self.saved_state = self.copy(deep=use_deepcopy)
+        self.saved_state.target = self.target
+        return self
+
+    def restore(self):
+        if not hasattr(self, "saved_state") or self.saved_state is None:
+            raise Exception("Trying to restore without having saved")
+        self.become(self.saved_state)
+        return self
+
+    def save_to_file(self, file_path: str, supress_overwrite_warning: bool = False):
+        with open(file_path, "wb") as fp:
+            fp.write(self.serialize())
+        log.info(f"Saved mobject to {file_path}")
+        return self
+
+    @staticmethod
+    def load(file_path):
+        if not os.path.exists(file_path):
+            log.error(f"No file found at {file_path}")
+            sys.exit(2)
+        with open(file_path, "rb") as fp:
+            mobject = pickle.load(fp)
+        return mobject
+
+    def become(self, mobject: Mobject):
+        """
+        Edit all data and submobjects to be idential
+        to another mobject
+        """
+        self.align_family(mobject)
+        family1 = self.get_family()
+        family2 = mobject.get_family()
+        for sm1, sm2 in zip(family1, family2):
+            sm1.set_data(sm2.data)
+            sm1.set_uniforms(sm2.uniforms)
+            sm1.shader_folder = sm2.shader_folder
+            sm1.texture_paths = sm2.texture_paths
+            sm1.depth_test = sm2.depth_test
+            sm1.render_primitive = sm2.render_primitive
+        # Make sure named family members carry over
+        for attr, value in list(mobject.__dict__.items()):
+            if isinstance(value, Mobject) and value in family2:
+                setattr(self, attr, family1[family2.index(value)])
+        self.refresh_bounding_box(recurse_down=True)
+        self.match_updaters(mobject)
+        return self
+
+    def looks_identical(self, mobject: Mobject):
+        fam1 = self.family_members_with_points()
+        fam2 = mobject.family_members_with_points()
+        if len(fam1) != len(fam2):
+            return False
+        for m1, m2 in zip(fam1, fam2):
+            for d1, d2 in [(m1.data, m2.data), (m1.uniforms, m2.uniforms)]:
+                if set(d1).difference(d2):
+                    return False
+                for key in d1:
+                    eq = (d1[key] == d2[key])
+                    if isinstance(eq, bool):
+                        if not eq:
+                            return False
+                    else:
+                        if not eq.all():
+                            return False
+        return True
+
+    # Creating new Mobjects from this one
+
+    def replicate(self, n: int) -> Group:
+        group_class = self.get_group_class()
+        return group_class(*(self.copy() for _ in range(n)))
+
+    def get_grid(self, n_rows: int, n_cols: int, height: float | None = None, **kwargs) -> Group:
+>>>>>>> fb50e4eb55e05c91c01e55fa1713b3ad69fa42e3
         """
         Returns a new mobject containing multiple copies of this one
         arranged in a grid
@@ -1655,7 +1843,9 @@ class _AnimationBuilder:
         self.overridden_animation = None
         self.mobject.generate_target()
         self.is_chaining = False
-        self.methods = []
+        self.methods: list[Callable] = []
+        self.anim_args = {}
+        self.can_pass_args = True
 
     def __getattr__(self, method_name):
         method = getattr(self.mobject.target, method_name)
@@ -1680,13 +1870,40 @@ class _AnimationBuilder:
         self.is_chaining = True
         return update_target
 
+    def __call__(self, **kwargs):
+        return self.set_anim_args(**kwargs)
+
+    def set_anim_args(self, **kwargs):
+        '''
+        You can change the args of :class:`~manimlib.animation.transform.Transform`, such as
+
+        - ``run_time``
+        - ``time_span``
+        - ``rate_func``
+        - ``lag_ratio``
+        - ``path_arc``
+        - ``path_func``
+
+        and so on.
+        '''
+
+        if not self.can_pass_args:
+            raise ValueError(
+                "Animation arguments can only be passed by calling ``animate`` "
+                "or ``set_anim_args`` and can only be passed once",
+            )
+
+        self.anim_args = kwargs
+        self.can_pass_args = False
+        return self
+
     def build(self):
         from manimlib.animation.transform import _MethodAnimation
 
         if self.overridden_animation:
             return self.overridden_animation
 
-        return _MethodAnimation(self.mobject, self.methods)
+        return _MethodAnimation(self.mobject, self.methods, **self.anim_args)
 
 
 def override_animate(method):

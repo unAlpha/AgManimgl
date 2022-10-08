@@ -139,3 +139,124 @@ class TransformMatchingTex(TransformMatchingParts):
     @staticmethod
     def get_mobject_key(mobject):
         return mobject.get_tex()
+<<<<<<< HEAD
+=======
+
+
+class TransformMatchingStrings(AnimationGroup):
+    CONFIG = {
+        "key_map": {},
+        "transform_mismatches": False,
+    }
+
+    def __init__(self,
+        source: StringMobject,
+        target: StringMobject,
+        **kwargs
+    ):
+        digest_config(self, kwargs)
+        assert isinstance(source, StringMobject)
+        assert isinstance(target, StringMobject)
+
+        def get_matched_indices_lists(*part_items_list):
+            part_items_list_len = len(part_items_list)
+            indexed_part_items = sorted(it.chain(*[
+                [
+                    (substr, items_index, indices_list)
+                    for substr, indices_list in part_items
+                ]
+                for items_index, part_items in enumerate(part_items_list)
+            ]))
+            grouped_part_items = [
+                (substr, [
+                    [indices_lists for _, _, indices_lists in grouper_2]
+                    for _, grouper_2 in it.groupby(
+                        grouper_1, key=lambda t: t[1]
+                    )
+                ])
+                for substr, grouper_1 in it.groupby(
+                    indexed_part_items, key=lambda t: t[0]
+                )
+            ]
+            return [
+                tuple(indices_lists_list)
+                for _, indices_lists_list in sorted(filter(
+                    lambda t: t[0] and len(t[1]) == part_items_list_len,
+                    grouped_part_items
+                ), key=lambda t: len(t[0]), reverse=True)
+            ]
+
+        def get_filtered_indices_lists(indices_lists, used_indices):
+            result = []
+            used = []
+            for indices_list in indices_lists:
+                if not all(
+                    index not in used_indices and index not in used
+                    for index in indices_list
+                ):
+                    continue
+                result.append(indices_list)
+                used.extend(indices_list)
+            return result, used
+
+        anim_class_items = [
+            (ReplacementTransform, [
+                (
+                    source.get_submob_indices_lists_by_selector(k),
+                    target.get_submob_indices_lists_by_selector(v)
+                )
+                for k, v in self.key_map.items()
+            ]),
+            (FadeTransformPieces, get_matched_indices_lists(
+                source.get_specified_part_items(),
+                target.get_specified_part_items()
+            )),
+            (FadeTransformPieces, get_matched_indices_lists(
+                source.get_group_part_items(),
+                target.get_group_part_items()
+            ))
+        ]
+
+        anims = []
+        source_used_indices = []
+        target_used_indices = []
+        for anim_class, pairs in anim_class_items:
+            for source_indices_lists, target_indices_lists in pairs:
+                source_filtered, source_used = get_filtered_indices_lists(
+                    source_indices_lists, source_used_indices
+                )
+                target_filtered, target_used = get_filtered_indices_lists(
+                    target_indices_lists, target_used_indices
+                )
+                if not source_filtered or not target_filtered:
+                    continue
+                anims.append(anim_class(
+                    source.build_parts_from_indices_lists(source_filtered),
+                    target.build_parts_from_indices_lists(target_filtered),
+                    **kwargs
+                ))
+                source_used_indices.extend(source_used)
+                target_used_indices.extend(target_used)
+
+        rest_source = VGroup(*[
+            submob for index, submob in enumerate(source.submobjects)
+            if index not in source_used_indices
+        ])
+        rest_target = VGroup(*[
+            submob for index, submob in enumerate(target.submobjects)
+            if index not in target_used_indices
+        ])
+        if self.transform_mismatches:
+            anims.append(
+                ReplacementTransform(rest_source, rest_target, **kwargs)
+            )
+        else:
+            anims.append(
+                FadeOutToPoint(rest_source, target.get_center(), **kwargs)
+            )
+            anims.append(
+                FadeInFromPoint(rest_target, source.get_center(), **kwargs)
+            )
+
+        super().__init__(*anims)
+>>>>>>> fb50e4eb55e05c91c01e55fa1713b3ad69fa42e3

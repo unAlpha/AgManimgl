@@ -150,9 +150,13 @@ class MoveToTarget(Transform):
 
 
 class _MethodAnimation(MoveToTarget):
+<<<<<<< HEAD
     def __init__(self, mobject, methods):
+=======
+    def __init__(self, mobject: Mobject, methods: list[Callable], **kwargs):
+>>>>>>> fb50e4eb55e05c91c01e55fa1713b3ad69fa42e3
         self.methods = methods
-        super().__init__(mobject)
+        super().__init__(mobject, **kwargs)
 
 
 class ApplyMethod(Transform):

@@ -611,9 +611,20 @@ class Scene(object):
         if propagate_event is not None and propagate_event is False:
             return
 
+<<<<<<< HEAD
         if char == "r":
             self.camera.frame.to_default_state()
         elif char == "q":
+=======
+        if char == RESET_FRAME_KEY:
+            self.play(self.camera.frame.animate.to_default_state())
+        elif char == "z" and modifiers == COMMAND_MODIFIER:
+            self.undo()
+        elif char == "z" and modifiers == COMMAND_MODIFIER | SHIFT_MODIFIER:
+            self.redo()
+        # command + q
+        elif char == QUIT_KEY and modifiers == COMMAND_MODIFIER:
+>>>>>>> fb50e4eb55e05c91c01e55fa1713b3ad69fa42e3
             self.quit_interaction = True
 
     def on_resize(self, width: int, height: int):
