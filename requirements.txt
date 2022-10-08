@@ -15,14 +15,7 @@ pygments
 pyyaml
 rich
 screeninfo
-<<<<<<< HEAD
 pyreadline; sys_platform == 'win32'
-=======
-skia-pathops
-svgelements>=1.8.1
-sympy
-tqdm
->>>>>>> fb50e4eb55e05c91c01e55fa1713b3ad69fa42e3
 validators
 ipython
 PyOpenGL

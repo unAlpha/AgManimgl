@@ -241,7 +241,6 @@ class CoordinateSystem():
             x_range = [*x_range, dx]
 
         rects = []
-        x_range[1] = x_range[1] + dx
         xs = np.arange(*x_range)
         for x0, x1 in zip(xs, xs[1:]):
             if input_sample_type == "left":

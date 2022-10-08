@@ -11,15 +11,7 @@ from manimlib.animation.creation import ShowPartial
 from manimlib.animation.fading import FadeOut
 from manimlib.animation.fading import FadeIn
 from manimlib.animation.transform import Transform
-<<<<<<< HEAD
 from manimlib.mobject.types.vectorized_mobject import VMobject
-=======
-from manimlib.constants import FRAME_X_RADIUS, FRAME_Y_RADIUS
-from manimlib.constants import ORIGIN, RIGHT, UP
-from manimlib.constants import SMALL_BUFF
-from manimlib.constants import TAU
-from manimlib.constants import GREY, YELLOW
->>>>>>> fb50e4eb55e05c91c01e55fa1713b3ad69fa42e3
 from manimlib.mobject.geometry import Circle
 from manimlib.mobject.geometry import Dot
 from manimlib.mobject.shape_matchers import SurroundingRectangle

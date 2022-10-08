@@ -1,9 +1,4 @@
-<<<<<<< HEAD
 from functools import reduce
-=======
-from functools import lru_cache
-import hashlib
->>>>>>> fb50e4eb55e05c91c01e55fa1713b3ad69fa42e3
 import inspect
 import numpy as np
 import operator as op
@@ -102,9 +97,3 @@ def binary_search(function,
         else:
             return None
     return mh
-
-
-def hash_string(string):
-    # Truncating at 16 bytes for cleanliness
-    hasher = hashlib.sha256(string.encode())
-    return hasher.hexdigest()[:16]
