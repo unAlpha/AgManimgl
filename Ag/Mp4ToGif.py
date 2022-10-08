@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 import os
-file_path = 'Z:\\LiFiles\\2022年\\7月份\\阿波罗\\mp4togif'
+file_path = 'Z:\\LiFiles\\2022年\\9月份\\羊了个羊\\out'
 files_names = os.listdir(file_path)
 for files_name in files_names:
     # if files_name == "Thumbs.db": continue
@@ -12,8 +12,8 @@ for files_name in files_names:
         # order = "ffmpeg -f gif -i %s.gif %s.mp4"%(name,name)
         
         # mp4转gif
-        order = "ffmpeg -i %s.mp4 -an -y -r 20 -vf scale=-1:720 %s.gif"%(name,name)
-        # order = "ffmpeg -i %s.mp4 -an -y -r 6 -maxrate 2K -vf scale=480:-1 %s.gif"%(name,name)
+        # order = "ffmpeg -i %s.mp4 -an -y -r 20 -vf scale=-1:720 %s.gif"%(name,name)
+        order = "ffmpeg -i %s.mp4 -an -y -r 20 -maxrate 2K -vf scale=480:-1 %s.gif"%(name,name)
         # # 压缩视频
         # order = "ffmpeg -i %s.mp4 -vf scale=1280:-1 -c:v libx264 -preset veryslow -crf 24 %s%s.mp4"%(name,name,"low")
         print(order)

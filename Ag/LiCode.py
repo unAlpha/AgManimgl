@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from calendar import day_abbr
 from math import radians
+from turtle import left, right
 from cv2 import add
 from matplotlib.pyplot import pink, title
 from sympy import Add, RisingFactorial
@@ -540,7 +541,7 @@ class PrimalityTest(Scene):
             color = GREEN,
             ).add_updater(lambda v: v.set_value(P.get_value()))
         PTVg = VGroup(PText,PTxt).arrange(RIGHT).next_to(aTVg,DOWN,buff=MED_LARGE_BUFF)
-        NumX = Text("（质数）",color=RED,font_size=40).next_to(PTVg,RIGHT)
+        NumX = Text("（质数）",font ='SimSun',color=RED,font_size=40).next_to(PTVg,RIGHT)
         aPText.next_to(PTVg,DOWN,buff=LARGE_BUFF)
         
         pwText=DecimalNumber(
@@ -977,7 +978,50 @@ class PieChartElec2(Scene):
                 run_time = 2,
             )
         self.wait()
+
+class TexTextTransform4(Scene):
+    def construct(self):
+        tex = TexText(
+            "$$\\text{求证：三角形内角和等于}180^{\\circ}$$",
+            "$$\\text{证明：需证C,D,E三点共线，即}(x-x_2)(y_1-y)-(x_1-x)(y-y_2)=0$$",
+            "$$\\text{由于M是BC中点},x_M=\\frac{1}{2}(x+1), y_{M}=\\frac{1}{2}(y+0)$$",
+            "$$\\text{由于M是AD中点}x_1=2x_M-0, y_1=2y_M-0$$",
+            "$$\\text{可见: }x_1\\text{是}x\\text{的一次函数、}y_1\\text{是}y\\text{的一次函数。}$$",
+            "$$\\text{同理：}x_2\\text{是}x\\text{的一次函数、}y_2\\text{是}y\\text{的一次函数。}$$",
+            "$$(x-x_{2})(y_{1}-y)-(x_{1}-x)(y-y_{2})=0\\ \\text{中的}x,y\\text{最高次都是1次。}$$",
+            "$$\\text{只需要}2\\times2=4\\text{个例证，即}(x,y)=(0,0),(1,0),(0,1),(1,1)\\text{即可。}$$",
+            font ='SimSun',
+        )
+        tex.scale(0.7)
+        tex.arrange(DOWN, buff = 0.2,aligned_edge = LEFT)
+        tex[0:2].shift(LEFT*0.9)
+        tex.to_edge(RIGHT)
+        tex.shift(0.3*UP)        
+        # bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        # self.add(bg)
+        self.play(Write(tex))
+        self.wait()
+        
+class TexTextTransform5(Scene):
+    def construct(self):
+        tex = TexText(
+            "$$\\text{代数基本定理：}$$",
+            "$$\\text{任何一个非零的一元n次复系数多项式}$$",
+            "$$a_{n}x^{n}+a_{n-1} x^{n-1}+a_{n-2} x^{n-2}+\ldots+a_{1} x+a_{0}=0,$$",
+            "$$\\text{都正好有n个复数根。}$$",
+
+            font ='SimSun',
+        )
+        tex[1:].scale(0.7)
+        tex.arrange(DOWN, buff = 0.5,aligned_edge = LEFT)
+        tex.to_edge(RIGHT*2)
+        tex.shift(0.3*UP)        
+        # bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        # self.add(bg)
+        self.play(Write(tex))
+        self.wait()
+
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} PieChartElec2 -o --hd".format(__file__))
+    system("manimgl {} PrimalityTest -o --hd".format(__file__))
