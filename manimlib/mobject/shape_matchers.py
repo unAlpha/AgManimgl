@@ -6,7 +6,7 @@ from manimlib.constants import BLACK, RED, YELLOW
 from manimlib.constants import DL, DOWN, DR, LEFT, RIGHT, UL, UR
 from manimlib.constants import SMALL_BUFF
 from manimlib.mobject.geometry import Line
-from manimlib.mobject.geometry import Rectangle
+from manimlib.mobject.geometry import RoundedRectangle
 from manimlib.mobject.types.vectorized_mobject import VGroup
 from manimlib.mobject.types.vectorized_mobject import VMobject
 from manimlib.utils.config_ops import digest_config
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     ManimColor = Union[str, Color]
 
 
-class SurroundingRectangle(Rectangle):
+class SurroundingRectangle(RoundedRectangle):
     CONFIG = {
         "color": YELLOW,
         "buff": SMALL_BUFF,
@@ -32,7 +32,7 @@ class SurroundingRectangle(Rectangle):
         digest_config(self, kwargs)
         kwargs["width"] = mobject.get_width() + 2 * self.buff
         kwargs["height"] = mobject.get_height() + 2 * self.buff
-        Rectangle.__init__(self, **kwargs)
+        RoundedRectangle.__init__(self, **kwargs)
         self.move_to(mobject)
 
 

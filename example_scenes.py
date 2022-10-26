@@ -8,6 +8,9 @@ import numpy as np
 # Use -o to write it to a file and open it once done
 # Use -n <number> to skip ahead to the n'th animation of a scene.
 
+if __name__ == "__main__":
+    from os import system
+    system("manimgl {} OpeningManimExample -o --hd".format(__file__))
 
 class OpeningManimExample(Scene):
     def construct(self):
