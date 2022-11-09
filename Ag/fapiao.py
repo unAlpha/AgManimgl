@@ -1,8 +1,7 @@
 import os
 import fitz
-import shutil
 
-root_dir = "/Users/pengyinzhong/Downloads/发票/10月份/原始发票/"
+root_dir = r'E:\Dropbox\发票\11月份'
  
 def fapiao_read(text):
     money = 0
@@ -46,5 +45,6 @@ for file in os.listdir(root_dir):
             else:
                 out_file_name = out_file_name + "(" + str(repeat_num-1) + ")"
         dst = os.path.join(root_dir, out_file_name+".pdf")
+        doc.close()
         os.rename(src, dst)
 print(Money_sum)

@@ -2,19 +2,19 @@ from Ag._3b1bProj.manim_imports_ext import *
 
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} CenterPoint -o --hd".format(__file__))
+    # system("manimgl {} CenterPoint -o --hd".format(__file__))
     system("manimgl {} PairOfPoints -o --hd".format(__file__))
-    system("manimgl {} RadialPoint -o --hd".format(__file__))
+    # system("manimgl {} RadialPoint -ol".format(__file__))
 
 class RandomChordScene(Scene):
     title = ""
     radius = 3
-    n_samples = 1000
+    n_samples = 500
     long_color = RED
     short_color = WHITE
     chord_width = 1
     chord_opacity = 0.618
-    run_time = 20
+    run_time = 10
     include_triangle = True
 
     def construct(self):
@@ -27,7 +27,7 @@ class RandomChordScene(Scene):
         flash_chords.set_stroke(width=3, opacity=1)
         indicators = Group(*map(self.get_method_indicator, chords))
 
-        title = Text(self.title,font_size=68,gradient=[RED,YELLOW],weight=BOLD)
+        title = Text(self.title,font_size=68,font="思源黑体",gradient=[RED,YELLOW],weight=BOLD)
         title.set_x(FRAME_WIDTH / 5).to_edge(UP)
 
         triangle = self.get_triangle(circle)
@@ -77,8 +77,8 @@ class RandomChordScene(Scene):
         textba = Tex("b>a").next_to(nl_cpy,1.6*UP)
         textab = Tex("b<a").next_to(ns_cpy,1.6*UP)
         
-        texta = Text("a：正三角形边长",font_size=30)
-        textb = Text("b：随机弦长",font_size=30)
+        texta = Text("a：正三角形边长",font_size=30,font="Source Han Sans")
+        textb = Text("b：随机弦长",font_size=30,font="Source Han Sans")
         ab = VGroup(texta,textb).arrange(UP,aligned_edge=LEFT,buff=MED_SMALL_BUFF).next_to(tex,10*UP)
         
         ns = Integer(999, edge_to_fix=LEFT)  # Number of short chords

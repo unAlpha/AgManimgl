@@ -1021,7 +1021,50 @@ class TexTextTransform5(Scene):
         self.play(Write(tex))
         self.wait()
 
+class Graph2(Scene):
+    def construct(self):
+        axes = Axes(
+            (-1, 13), 
+            (-1, 6),
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 2,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                    },
+                }
+            )
+        x_label = Text("t").next_to(axes.x_axis.get_corner(UR),UP)
+        y_label = Text("a").next_to(axes.y_axis.get_corner(UR),RIGHT)
+        
+        def fun(x):
+            if x <= 5:
+                return 0
+            if x>5 and x<=7:
+                return 10*x/5-10
+            if x>7:
+                return 10*7/5-10
+            
+        step_graph = axes.get_graph(
+            fun,
+            x_range = [0,12],
+            use_smoothing=False,
+            color=RED,
+            stroke_width=10,
+        )
+        
+        # bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        # self.add(bg)
+        
+        self.play(Write(axes, lag_ratio=0.01, run_time=1))
+        self.play(
+            ShowCreation(step_graph),
+            LaggedStartMap(FadeIn,VGroup(x_label,y_label),lag_ratio=1),
+        )
+        self.wait()
+
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} PrimalityTest -o --hd".format(__file__))
+    system("manimgl {} Graph2 -os".format(__file__))
