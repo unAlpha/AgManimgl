@@ -1067,4 +1067,4 @@ class Graph2(Scene):
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Graph2 -os".format(__file__))
+    system("manimgl {} TexTextTransform5 -os".format(__file__))

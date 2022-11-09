@@ -6,16 +6,11 @@ if __name__ == "__main__":
 
 class CoinFlips(Scene):
     def construct(self):
-
-        # eq = Tex(
-        #     "{\\# \\text{Heads} \\over \\# \\text{Flips}} = ",
-        #     "{Num \\over Den}", "=", "0.500",
-        #     # isolate={"Num", "Den", "\\# \\text{Heads}"}
-        # )
-        # for s, rt in (slice(0, 16), 8), (slice(18, None), 20):
-        #     print(s)
-        #     print(rt)
-            
-        print(slice(0, 16))    
-        # self.add(eq)
-        # self.wait()
+        eq = TexText(
+            "{\\# \\text{Heads} \\over \\# \\text{Flips}} = ",
+            "{Num \\over Den}", "=", "0.500",
+            "{\\text{132}}",
+            isolate={"Num", "Den", "\\# \\text{Heads}"}
+        )
+        self.add(eq)
+        self.wait()
