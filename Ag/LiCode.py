@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-from calendar import day_abbr
-from math import radians
-from turtle import left, right
-from cv2 import add
-from matplotlib.pyplot import pink, title
-from sympy import Add, RisingFactorial
 from manimlib import *
 import numpy.linalg as LA
 
@@ -18,6 +12,29 @@ def get_coords_from_csvdata(file_name):
     csvFile.close()
     return coords
 
+def get_coords_from_csv(file_name):
+    import csv
+    coords = []
+    with open(f'{file_name}.csv', 'r') as csvFile:
+        reader = csv.reader(csvFile)
+        for row in reader:
+            x,y = row
+            coord = [float(x),float(y)]
+            coords.append(coord)
+    csvFile.close()
+    return coords
+
+# This classes returns graphs
+class DiscreteGraphFromSetPoints(VMobject):
+    def __init__(self,set_of_points,**kwargs):
+        super().__init__(**kwargs)
+        self.set_points_as_corners(set_of_points)
+
+class SmoothGraphFromSetPoints(VMobject):
+    def __init__(self,set_of_points,**kwargs):
+        super().__init__(**kwargs)
+        self.set_points_smoothly(set_of_points)
+        
 class SquareLocTxt():
     CONFIG ={
         "grid_color":"#333333",
@@ -1082,9 +1099,7 @@ class Formula2(Scene):
     def construct(self):
         text =Text("哈代-李特伍德猜想",font_size=68,font="思源黑体",gradient=[RED,YELLOW],weight=BOLD)
         tex1 =TexText("$$\\pi_{2}(x) \\sim 2 C_{2} \\int_{2}^{x} \\frac{d t}{\\ln ^{2} t} \\sim 2 C_{2} \\frac{x}{\\ln ^{2}(x)}$$")
-        tex2 =TexText("$$\\text{其中} \\ C_{2}=\\prod_{\\substack{prime \\\ p \\geq 3}}\\left (1-\\frac{1}{(p-1)^{2}}\\right)=0.6601618158 \\ldots$$",
-                      template="basic_ctex"
-                      )
+        tex2 =TexText("$$\\text{其中} \\ C_{2}=\\prod_{\\substack{prime \\\ p \\geq 3}}\\left (1-\\frac{1}{(p-1)^{2}}\\right)=0.6601618158 \\ldots$$",)
         tex = VGroup(text,tex1,tex2).arrange(DOWN)
         text.shift(UP*0.5)
         # bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
@@ -1093,7 +1108,52 @@ class Formula2(Scene):
             ShowCreation(tex),
         )
         self.wait()
+
+class CustomGraph4(Scene):
+    def construct(self):
+        axes = Axes(
+            (0,12000000,2000000), 
+            (0,72000,12000,),
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 2,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                    },
+                "include_tip":True,
+                },
+            )
+        axes.add_coordinate_labels()
+        axes.scale(0.9618)
+        x_label = Text("自然数N",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
+        y_label = Text("对数",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
+        self.add(axes,x_label,y_label)
+        # Get coords
+        text1 = Text("小于自然数N的孪生素数对(白线)",font="思源黑体",font_size=36)
+        text2 = Text("哈-李猜想估计出的孪生素数对(红线)",font="思源黑体",font_size=36,color=RED)
+        text = VGroup(text1,text2).arrange(DOWN,aligned_edge=LEFT).shift(RIGHT)
+        coords1 = get_coords_from_csv(r"Ag\data_files\Littlewood_conjecture1")
+        coords2 = get_coords_from_csv(r"Ag\data_files\Littlewood_conjecture2")
+        points1 = [axes.c2p(px,py) for px,py in coords1]
+        points2 = [axes.c2p(px,py) for px,py in coords2]
+        # Set graph
+        graph1 = DiscreteGraphFromSetPoints(points1,color=WHITE,stroke_width=10)
+        graph2 = DiscreteGraphFromSetPoints(points2,color=RED,stroke_width=10,stroke_opacity=0.68)
+        # Set dots
+        dots1 = VGroup(*[
+            Dot(radius=0.06,color=WHITE).move_to([px,py,pz])
+            for px,py,pz in points1])
+        dots2 = VGroup(*[
+            Dot(radius=0.06,color=RED).move_to([px,py,pz])
+            for px,py,pz in points2])
+        self.add(text.to_corner(UP))
+        self.play(ShowCreation(dots1,run_time=2))
+        self.play(ShowCreation(graph1,run_time=1))
+        self.play(ShowCreation(dots2,run_time=1))
+        self.play(ShowCreation(graph2,run_time=4))
+        self.wait(3)
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Formula2 -os".format(__file__))
+    system("manimgl {} CustomGraph4 -os".format(__file__))

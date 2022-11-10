@@ -410,6 +410,9 @@ class CoordinateSystemExample(Scene):
         # Other coordinate systems you can play around with include
         # ThreeDAxes, NumberPlane, and ComplexPlane.
 
+if __name__ == "__main__":
+    from os import system
+    system("manimgl {} GraphExample -om".format(__file__))
 
 class GraphExample(Scene):
     def construct(self):
