@@ -2,15 +2,16 @@ from manimlib import *
 
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} CoinFlips -o".format(__file__))
+    system("manimgl {} CoinFlips -os".format(__file__))
 
 class CoinFlips(Scene):
     def construct(self):
         eq = TexText(
-            "{\\# \\text{Heads} \\over \\# \\text{Flips}} = ",
-            "{Num \\over Den}", "=", "0.500",
-            "{\\text{132}}",
-            isolate={"Num", "Den", "\\# \\text{Heads}"}
+            "$${\\# \\text{试下} adf \\over \\# \\text{一二三}} = $$", template="basic_ctex",
+            # "{Num \\over Den}", "=", "0.500",
+            # "{\\text{132}}",
+            # isolate={"Num", "Den", "\\# \\text{Heads}"}
         )
-        self.add(eq)
+        words = TexText("$$Vector...$$").next_to(eq,DOWN)
+        self.add(eq,words)
         self.wait()

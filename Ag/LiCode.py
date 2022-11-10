@@ -1064,7 +1064,36 @@ class Graph2(Scene):
         )
         self.wait()
 
+class Formula1(Scene):
+    def construct(self):
+        text =Text("目前找到的最大孪生素数对",font_size=68,font="思源黑体",gradient=[RED,YELLOW],weight=BOLD)
+        tex1 =Tex("2996863034895 \\times 2^{1290000}+1")
+        tex2 =Tex("2996863034895 \\times 2^{1290000}-1")
+        tex = VGroup(text,tex1,tex2).arrange(DOWN)
+        text.shift(UP*0.5)
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        self.play(
+            ShowCreation(tex),
+        )
+        self.wait()
+
+class Formula2(Scene):
+    def construct(self):
+        text =Text("哈代-李特伍德猜想",font_size=68,font="思源黑体",gradient=[RED,YELLOW],weight=BOLD)
+        tex1 =TexText("$$\\pi_{2}(x) \\sim 2 C_{2} \\int_{2}^{x} \\frac{d t}{\\ln ^{2} t} \\sim 2 C_{2} \\frac{x}{\\ln ^{2}(x)}$$")
+        tex2 =TexText("$$\\text{其中} \\ C_{2}=\\prod_{\\substack{prime \\\ p \\geq 3}}\\left (1-\\frac{1}{(p-1)^{2}}\\right)=0.6601618158 \\ldots$$",
+                      template="basic_ctex"
+                      )
+        tex = VGroup(text,tex1,tex2).arrange(DOWN)
+        text.shift(UP*0.5)
+        # bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        # self.add(bg)
+        self.play(
+            ShowCreation(tex),
+        )
+        self.wait()
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} TexTextTransform5 -os".format(__file__))
+    system("manimgl {} Formula2 -os".format(__file__))
