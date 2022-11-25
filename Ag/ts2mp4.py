@@ -9,6 +9,8 @@ for files_name in files_names:
         os.rename(the_file,new_file)
         print(new_file)
         name = new_file.split('.')[0]
+        if os.path.exists(name+".mp4"):
+            continue
         order = f"ffmpeg -i {name}.ts -c:v libx264 {name}.mp4"
         print(order)
         os.system(order)

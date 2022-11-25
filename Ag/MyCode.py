@@ -86,37 +86,7 @@ class InterBool1(Scene):
         
         self.play(slider.animate.shift(UP*4),run_time=4)
         self.wait()
-
-class InterBool2(Scene):
-    def construct(self):
-        pre_text = Text("Before",color=ORANGE)
-        pos_text = Text("After",color=TEAL)
-        line = Line(2*LEFT, 2*RIGHT, color=RED)\
-            .rotate(PI/2).next_to(pre_text,LEFT,buff=1)
-        pre_bk = Square(side_length=10,fill_color=PINK, fill_opacity=0)\
-            .next_to(line,RIGHT,buff=0)
-        pos_bk = Square(side_length=10,fill_color=ORANGE, fill_opacity=0)\
-            .next_to(line,LEFT,buff=0)
-        slider = VGroup(pre_bk, pos_bk, line)
-
-        def get_intersection_updater(pre_mob,bk):
-            def updater(pos_mob):
-                pos_mob.become(
-                    VGroup(*[
-                        Intersection(submob,bk).match_style(submob)
-                        for submob in pre_mob.submobjects
-                        ])      
-                    )
-            return updater
-        
-        pre_mob = VMobject().add_updater(get_intersection_updater(pre_text,pre_bk))
-        pos_mob = VMobject().add_updater(get_intersection_updater(pos_text,pos_bk))
-        self.add(pre_mob,pos_mob)
-        
-        self.play(slider.animate.shift(RIGHT*4),run_time=4)
-        self.wait() 
-
     
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Formula2 -ost --hd".format(__file__))
+    system("manimgl {} InterBool2 -om".format(__file__))

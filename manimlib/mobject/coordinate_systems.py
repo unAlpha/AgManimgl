@@ -384,7 +384,6 @@ class CoordinateSystem(ABC):
         # TODO
         pass
 
-
 class Axes(VGroup, CoordinateSystem):
     CONFIG = {
         "axis_config": {

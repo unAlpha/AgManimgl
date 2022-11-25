@@ -390,9 +390,6 @@ class Table_alluse1(Scene):
         self.wait(1)
     
 class Table_alluse2(Scene):
-    CONFIG = {
-        "camera_config": {"background_color": BLACK},   
-    }
     def construct(self):
         title = Text(
             "不同路面的附着系数",
@@ -443,8 +440,8 @@ class Table_alluse2(Scene):
                 *dataTxt,
             ).scale(0.9).center()
         title.next_to(allGroup,UP)
-        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
-        self.add(bg)        
+        # bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        # self.add(bg)        
         self.play(
                 FadeIn(title,scale=0.618),
                 FadeIn(allGroup[0], scale=0.5),
@@ -458,5 +455,105 @@ class Table_alluse2(Scene):
             )
 
         self.wait(1)    
- 
+
+class Table():
+    CONFIG = {
+            "dx": 2.6,
+            "dy": 0.6,
+        }
+    def __init__(self, text, file_path, **kwargs):
+        digest_config(self, kwargs)
+        self.title = Text(
+                text,
+                font_size=36,
+                font ='Source Han Sans CN Regular',
+            )
+        data = get_coords_from_csvdata(file_path)
+        self.dataArray=np.array(data)
+        self.row = self.dataArray.shape[0]
+        self.column = self.dataArray.shape[1]
+        # 统一设置高度
+        self.dx_list = [self.dx] * self.column
+        self.dy_list = [self.dy] * self.row
         
+    def arrange_table(self):
+        dataTxt = VGroup()
+        dataTxtBackground = VGroup()
+        for i,dyy in zip(range(self.row),self.dy_list):
+            for j,dxx in zip(range(self.column),self.dx_list):
+                target_ij = Text(
+                    str(self.dataArray[i,j]),
+                    font ='Source Han Sans CN',
+                    )
+                if i==0:
+                    target_ij.scale(0.6)
+                    target_ij.set_color(RED)
+                else:
+                    target_ij.scale(0.5)
+                target_ij.shift(np.array([(j-1/2)*dxx,-(i-1/2)*dyy,0]))
+                dataTxt.add(target_ij)
+            if (i+1)%2:
+                target_i = Rectangle(
+                        width=sum(self.dx_list),
+                        height=dyy,
+                        color=BLUE,
+                        fill_color=BLUE,
+                        fill_opacity=0.236,
+                        stroke_opacity=0
+                    ).move_to(target_ij, coor_mask=np.array([0,1,0]))
+                dataTxtBackground.add(target_i)
+        dataTxt.move_to(dataTxtBackground[-1],coor_mask=np.array([1,0,0]))
+        dataTxtBackground[0].set_style(fill_opacity=0.5)
+        self.table = VGroup(dataTxtBackground,dataTxt).scale(1).center()
+        
+        self.tex_column = VGroup()
+        for i in range(0,len(dataTxt),self.column):
+            self.tex_column.add(dataTxt[i:i+self.column])
+            
+        self.bg = dataTxtBackground
+        
+        self.title.next_to(self.table,UP)
+        
+class Table_use1(Scene):
+    def construct(self):
+        ble = Table(
+                "不同路面的附着系数",
+                r"Z:\LiFiles\2022年\6月份\刹车\素材\附着系数"
+            )
+        ble.dx_list[0] = 3
+        ble.dy_list[0] = 0.8
+        ble.arrange_table()
+        self.play(FadeIn(ble.title,scale=0.618),
+                  FadeIn(ble.bg[0], scale=0.5),
+                  FadeIn(ble.tex_column[0], scale=0.9)
+            )
+        self.play(
+                LaggedStartMap(FadeIn,ble.bg[1:],scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column[1:],scale=0.9,lag_ratio=0.1),
+                run_time=3
+            )
+
+class Table_use2(Scene):
+    def construct(self):
+        ble = Table(
+                "德国与日本队数据对比",
+                r"E:\Dropbox\manim\AgManimgl\Ag\data_files\FIFA"
+            )
+        ble.dx_list[0] = 3
+        ble.dy_list[0] = 0.8
+        ble.arrange_table()
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)   
+        self.play(FadeIn(ble.title,scale=0.618),
+                  FadeIn(ble.bg[0], scale=0.5),
+                  FadeIn(ble.tex_column[0], scale=0.9)
+            )
+        self.play(
+                LaggedStartMap(FadeIn,ble.bg[1:],scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column[1:],scale=0.9,lag_ratio=0.1),
+                run_time=3
+            )
+        
+if __name__ == "__main__":
+    from os import system
+    system("manimgl {} Table_use2 -o".format(__file__))

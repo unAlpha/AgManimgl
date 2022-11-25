@@ -53,3 +53,7 @@ class Music2(Scene):
         self.remove(text1)
         self.play(FadeIn(text2,scale=0.5))
         self.wait()
+
+if __name__ == "__main__":
+    from os import system
+    system("manimgl {} Music1 -om".format(__file__))

@@ -1070,7 +1070,6 @@ class Graph2(Scene):
             color=RED,
             stroke_width=10,
         )
-        
         # bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
         # self.add(bg)
         
@@ -1153,7 +1152,365 @@ class CustomGraph4(Scene):
         self.play(ShowCreation(dots2,run_time=1))
         self.play(ShowCreation(graph2,run_time=4))
         self.wait(3)
+
+class TexTextTransform4(Scene):
+    def construct(self):
+        tex = TexText(
+                "$$\\text{黎曼Zeta函数:}$$",
+                "$$\\zeta(s)=\\frac{1}{\\Gamma(s)} \\int_{0}^{\\infty} \\frac{x^{s-1}}{e^{x}-1} dx$$",
+                "$$\\text{其中伽马函数}$$",
+                "$$\\Gamma(s)=\\int_{0}^{\\infty} t^{s-1} e^{-t} dt$$",
+                font ='SimSun',
+            )
+
+        text = TexText(
+            "$$\\text{复平面中一矩形区域的黎曼}\\zeta\\text{函数}$$",
+            font_size=30,
+            font ='SimSun',
+            )
+        
+        tex.arrange(DOWN, buff = 0.5,aligned_edge = LEFT)
+        tex.scale(0.618).shift(UP*0.618)
+        tex[1].shift(RIGHT)
+        tex[3].shift(RIGHT)
+        text.to_corner(UR).shift(LEFT*1.5)
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+
+        self.play(
+            tex.animate.to_corner(LEFT*3),
+            FadeIn(text,scale=0.618)
+            )
+        self.wait()
+
+# 把优化空间改进：百分比
+class CustomGraph5(Scene):
+    def construct(self):
+        axes = Axes(
+            (0,6,1), 
+            (0,1.1,0.2,),
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 4,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                    },
+                "include_tip":True,},
+            y_axis_config={ 
+                "decimal_number_config": {
+                    "num_decimal_places": 2,
+                },
+            },
+            )
+        
+        axes.add_coordinate_labels()
+        axes.scale(0.86)
+        x_label = Text("进球数",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
+        y_label = Text("概率",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
+        
+        # Get coords
+        title = Text("奇数个进球情况",font="思源黑体",font_size=60)
+        title.to_corner(UP)
+        text1 = Text("日本队获胜",font="思源黑体",font_size=36)
+        text2 = Text("德国队获胜",font="思源黑体",font_size=36,color=RED)
+        coords1 = [
+            [1,0.3],
+            [3,0.22],
+            [5,0.16]
+            ]
+        coords2 = [
+            [1,0.7],
+            [3,0.78],
+            [5,0.84]
+            ]
+        points1 = [axes.c2p(px,py) for px,py in coords1]
+        points2 = [axes.c2p(px,py) for px,py in coords2]
+        # Set graph
+        graph1 = DiscreteGraphFromSetPoints(points1,color=WHITE,stroke_width=10)
+        graph2 = DiscreteGraphFromSetPoints(points2,color=RED,stroke_width=10)
+        # Set dots
+        dots1 = VGroup(*[
+            Dot(radius=0.1,color=WHITE).move_to([px,py,pz])
+            for px,py,pz in points1])
+        dots2 = VGroup(*[
+            Dot(radius=0.1,color=RED).move_to([px,py,pz])
+            for px,py,pz in points2])
+        
+        axes.lines_x_axis=VGroup()
+        axes.lines_y_axis=VGroup()
+        x_p=[x for x in np.arange(*axes.x_range)]
+        y_p=[x for x in np.arange(*axes.y_range)]
+        for x_point in list(zip(x_p, [axes.y_axis.x_max]*len(x_p), [0]*len(x_p))):
+            axes.lines_x_axis.add(axes.get_v_line(axes.c2p(*x_point),color=GREY_D))
+        for y_point in list(zip([axes.x_axis.x_max]*len(y_p), y_p, [0]*len(y_p))):
+            axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point),color=GREY_D))
+        
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        self.add(axes.lines_x_axis[1:],axes.lines_y_axis[1:],axes,x_label,y_label)
+        text1.next_to(graph1,RIGHT).shift(LEFT+UP*0.2)
+        text2.next_to(graph2,RIGHT).shift(LEFT+DOWN*0.2)
+        self.play(
+                Write(title),
+                ShowCreation(graph1),
+                ShowCreation(dots1),
+                ShowCreation(graph2),
+                ShowCreation(dots2),
+                GrowFromCenter(text1),
+                GrowFromCenter(text2),
+                run_time=4,
+                )
+        self.wait(3)
+
+class CustomGraph6(Scene):
+    def construct(self):
+        axes = Axes(
+            (0,7,1), 
+            (0,1.1,0.2,),
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 4,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                    },
+                "include_tip":True,},
+            y_axis_config={ 
+                "decimal_number_config": {
+                    "num_decimal_places": 2,
+                },
+            },
+            )
+        
+        axes.add_coordinate_labels()
+        axes.scale(0.86)
+        
+        x_label = Text("进球数",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
+        y_label = Text("概率",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
+        
+        # Get coords
+        title = Text("偶数个进球情况",font="思源黑体",font_size=60)
+        title.to_corner(UP)
+        text1 = Text("日本队获胜",font="思源黑体",font_size=36)
+        text2 = Text("德国队获胜",font="思源黑体",font_size=36,color=RED)
+        textm = Text("平局",font="思源黑体",font_size=36,color=YELLOW)
+        coords1 = [
+            [0,0],
+            [2,0.09],
+            [4,0.08],
+            [6,0.07],
+            ]
+        coords2 = [
+            [0,0],
+            [2,0.49],
+            [4,0.65],
+            [6,0.74]
+            ]
+        coordsm = [
+            [0,1],
+            [2,0.42],
+            [4,0.27],
+            [6,0.19]
+        ]
+        
+        points1 = [axes.c2p(px,py) for px,py in coords1]
+        points2 = [axes.c2p(px,py) for px,py in coords2]
+        pointsm = [axes.c2p(px,py) for px,py in coordsm]
+        # Set graph
+        graph1 = DiscreteGraphFromSetPoints(points1,color=WHITE,stroke_width=10)
+        graph2 = DiscreteGraphFromSetPoints(points2,color=RED,stroke_width=10)
+        graphm = DiscreteGraphFromSetPoints(pointsm,color=YELLOW,stroke_width=10)
+        
+        # Set dots
+        dots1 = VGroup(*[
+            Dot(radius=0.1,color=WHITE).move_to([px,py,pz])
+            for px,py,pz in points1])
+        dots2 = VGroup(*[
+            Dot(radius=0.1,color=RED).move_to([px,py,pz])
+            for px,py,pz in points2])
+        dotsm = VGroup(*[
+            Dot(radius=0.1,color=YELLOW).move_to([px,py,pz])
+            for px,py,pz in pointsm])
+        
+        axes.lines_x_axis=VGroup()
+        axes.lines_y_axis=VGroup()
+        x_p=[x for x in np.arange(*axes.x_range)]
+        y_p=[y for y in np.arange(*axes.y_range)]
+        for x_point in list(zip(x_p, [axes.y_axis.x_max]*len(x_p), [0]*len(x_p))):
+            axes.lines_x_axis.add(axes.get_v_line(axes.c2p(*x_point),color=GREY_D))
+        for y_point in list(zip([axes.x_axis.x_max]*len(y_p), y_p, [0]*len(y_p))):
+            axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point),color=GREY_D))
+        
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        # self.add(axes,x_label,y_label)
+        self.add(axes.lines_x_axis[1:],axes.lines_y_axis[1:],axes,x_label,y_label)
+        text1.next_to(graph1.get_points()[2],UP)
+        text2.next_to(graph2.get_points()[-1],UP)
+        textm.next_to(graphm.get_points()[-1],UP)
+        self.add(text1,text2,textm,title)
+        self.play(
+                Write(title),
+                GrowFromCenter(text1),
+                GrowFromCenter(text2),
+                GrowFromCenter(textm),
+                ShowCreation(graph1),
+                ShowCreation(dots1),
+                ShowCreation(graph2),
+                ShowCreation(dots2),
+                ShowCreation(dotsm),
+                ShowCreation(graphm),
+                run_time=4,
+                )
+        self.wait(3)
+
+class Property1(Scene):
+    def construct(self):
+        def gen_imgs(text, list_n, row, col, tex=None, x_buff = 1.1, y_buff = 1.2, scl_boat=0.86):
+            objs = []
+            for lin in list_n:
+                if lin == 1:
+                    obj = ImageMobject("日本进球",height=1)
+                if lin == 0:
+                    obj = ImageMobject("德国进球",height=1)
+                objs.append(obj)
+                
+            for i in range(row):
+                for j in range(col):
+                    objs[i*col+j].move_to(np.array([j*x_buff,i*y_buff,0]))
+            
+            objvg = Group(*objs).scale(scl_boat)
+            txt = Text(text,font_size=70).next_to(objvg,LEFT,buff=MED_LARGE_BUFF)
+            
+            if tex is not None:
+                brace = Brace(objvg,RIGHT)
+                brace_text = brace.get_tex(tex)
+                return Group(txt, *objs, brace, brace_text)
+            else:
+                return Group(*objs)
+            
+        list_110 = [1]        
+        obj_110 = gen_imgs("1:0", list_110, 1 , 1, tex="P=30\\%")
+        title1 = Text(
+                    "总进球数是1个 日本获胜的概率",
+                    font="思源黑体",
+                    font_size=50,
+                    t2c={"1": RED} 
+                ).to_edge(UP)
+        
+        list_330 = [1,1,1]
+        obj_330 = gen_imgs("3:0", list_330, 1 , 3, tex="P_1=(30\\%)^3=2.7\\%")
+        
+        title3 = Text(
+                    "总进球数是3个 日本获胜的概率",
+                    font="思源黑体",
+                    font_size=50,
+                    t2c={"3": RED} 
+                ).to_edge(UP)
+        
+        list_321 = [
+                1,0,1,
+                0,1,1,
+                1,1,0,
+                ]
+        obj_321 = gen_imgs("2:1", list_321, 3 , 3, tex="P_2=3\\times(30\\%)^2\\times 70 \\%=18.9\\%")
+        Group(obj_330,obj_321).arrange(DOWN,buff=0.6,aligned_edge=LEFT).center().scale(0.8).shift(UP*0.36)
+        
+        P3_tex = Tex("P = P_1+P_2 = 21.6 \\%",font_size=55).next_to(obj_321,DOWN,buff=MED_LARGE_BUFF)
+        
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+
+        self.play(Write(title1))
+        self.play(FadeIn(obj_110[0],scale=0.5))
+        self.play(*[FadeIn(ob,scale=0.8) for ob in obj_110[1:]])
+        self.wait()        
+        
+        self.remove(*obj_110)
+        
+        self.play(ReplacementTransform(title1,title3))
+        self.play(FadeIn(obj_330[0],scale=0.5))
+        self.play(*[FadeIn(ob,scale=0.8) for ob in obj_330[1:]])
+        self.wait()
+
+        self.play(FadeIn(obj_321[0],shift=UP))
+        self.play(*[FadeIn(ob,shift=UP) for ob in obj_321[1:-2]])
+        self.play(*[FadeIn(ob,shift=LEFT) for ob in obj_321[-2:]])
+        self.wait()
+        self.play(Write(P3_tex))
+        self.wait(3)
+        
+        self.remove(*obj_330,*obj_321,P3_tex)
+        
+        title5 = Text(
+                    "总进球数是5个 日本获胜的概率",
+                    font="思源黑体",
+                    font_size=50,
+                    t2c={"5": RED} 
+                ).to_edge(UP)
+        
+        self.play(ReplacementTransform(title3,title5))
+        
+        scale_boat = 0.6
+        list_550 = [1,1,1,1,1]
+        obj_550 = gen_imgs("5:0", list_550, 1 , 5, tex="P_1=(30\\%)^5=0.243\\%", scl_boat=scale_boat)
+        
+        list_541 = [
+                1,1,1,1,0,
+                1,1,1,0,1, 
+                1,1,0,1,1, 
+                1,0,1,1,1, 
+                0,1,1,1,1, 
+                ]
+        obj_541 = gen_imgs("4:1", list_541, 5 , 5, tex="P_2=5\\times (30\\%)^4\\times 70 \\%=2.835\\%", scl_boat=scale_boat)
+        
+        
+        list_532_1 = [
+                1,1,1,0,0,
+                1,1,0,1,0, 
+                1,0,1,1,0, 
+                0,1,1,1,0, 
+                1,1,0,0,1, 
+                ]
+        list_532_2 = [
+                1,0,1,0,1,
+                0,1,1,0,1, 
+                1,0,0,1,1, 
+                0,1,0,1,1, 
+                0,0,1,1,1, 
+                ]
+        
+        obj_532_1 = gen_imgs("3:2", list_532_1, 5 , 5, tex=None, scl_boat=scale_boat)
+        obj_532_2 = gen_imgs("3:2", list_532_2, 5 , 5, tex=None, scl_boat=scale_boat)
+        obj_532 = Group(obj_532_1, obj_532_2).arrange(LEFT,buff=0.5,aligned_edge=UP).center().shift(UP*0.8)
+        
+        txt_532 = Text("3:2",font_size=70).next_to(obj_532,LEFT,buff=MED_LARGE_BUFF)
+        brace532 = Brace(obj_532,RIGHT)
+        brace532_text = brace532.get_tex("P_3=10\\times(30\\%)^3 \\times (70\\%) ^2=13.23\\%")
+        obj_532.add(txt_532, brace532, brace532_text)
+        
+        obj_5 = Group(obj_550,obj_541,obj_532).arrange(DOWN,buff=0.5,aligned_edge=LEFT).center().scale(0.6).shift(UP*0.1)
+        
+        P5_tex = Tex("P = P_1+P_2+P_3 = 16.308 \\%",font_size=36).next_to(obj_5,DOWN,buff=MED_SMALL_BUFF)
+        
+        self.play(*[FadeIn(ob,scale=0.8) for ob in obj_550])
+        self.play(*[FadeIn(ob,scale=0.8) for ob in obj_541[0:-2]])
+        self.wait()
+        self.play(*[FadeIn(ob,shift=LEFT) for ob in obj_541[-2:]])
+        self.wait()
+        self.play(FadeIn(txt_532,scale=0.8),
+                  *[FadeIn(ob,scale=0.8) for ob in obj_532_1],
+                  *[FadeIn(ob,scale=0.8) for ob in obj_532_2],)
+        self.play(
+                  FadeIn(brace532,shift=LEFT),
+                  FadeIn(brace532_text,shift=LEFT),
+                  )
+        self.wait()
+        self.play(Write(P5_tex))
+        
+        self.wait(5)
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} CustomGraph4 -os".format(__file__))
+    system("manimgl {} CustomGraph6 -o".format(__file__))
