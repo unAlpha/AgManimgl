@@ -1233,9 +1233,18 @@ class CustomGraph5(Scene):
         dots1 = VGroup(*[
             Dot(radius=0.1,color=WHITE).move_to([px,py,pz])
             for px,py,pz in points1])
+        
+        p1 = VGroup(*[
+            Tex(str(coords[1]*100)+"\\%").scale(0.618).next_to([px,py,pz],DOWN,buff=0.2)
+            for [px,py,pz],coords in zip(points1,coords1)])
+        
         dots2 = VGroup(*[
             Dot(radius=0.1,color=RED).move_to([px,py,pz])
             for px,py,pz in points2])
+
+        p2 = VGroup(*[
+            Tex(str(coords[1]*100)+"\\%",color=RED).scale(0.618).next_to([px,py,pz],UP,buff=0.2)
+            for [px,py,pz],coords in zip(points2,coords2)])
         
         axes.lines_x_axis=VGroup()
         axes.lines_y_axis=VGroup()
@@ -1255,8 +1264,10 @@ class CustomGraph5(Scene):
                 Write(title),
                 ShowCreation(graph1),
                 ShowCreation(dots1),
+                ShowCreation(p1),
                 ShowCreation(graph2),
                 ShowCreation(dots2),
+                ShowCreation(p2),
                 GrowFromCenter(text1),
                 GrowFromCenter(text2),
                 run_time=4,
@@ -1326,12 +1337,43 @@ class CustomGraph6(Scene):
         dots1 = VGroup(*[
             Dot(radius=0.1,color=WHITE).move_to([px,py,pz])
             for px,py,pz in points1])
+        
+        p1=VGroup()
+        for i,([px,py,pz],coords) in enumerate(zip(points1,coords1)):
+            if i==0:
+                direct = DL
+            else:
+                direct = UP
+            tex1 = Tex(str(round(coords[1]*100,2))+"\\%",color=WHITE).scale(0.618).next_to([px,py,pz],direct,buff=0.2)
+            p1.add(tex1)
+        
         dots2 = VGroup(*[
             Dot(radius=0.1,color=RED).move_to([px,py,pz])
             for px,py,pz in points2])
+        
+        p2=VGroup()
+        for i,([px,py,pz],coords) in enumerate(zip(points2,coords2)):
+            if i==0:
+                direct = UL
+            else:
+                direct = UP
+            tex2 = Tex(str(round(coords[1]*100,2))+"\\%",color=RED).scale(0.618).next_to([px,py,pz],direct,buff=0.2)
+            p2.add(tex2)
+        
         dotsm = VGroup(*[
             Dot(radius=0.1,color=YELLOW).move_to([px,py,pz])
             for px,py,pz in pointsm])
+        
+        pm=VGroup()
+        for i,([px,py,pz],coords) in enumerate(zip(pointsm,coordsm)):
+            if i==0 or i==1:
+                direct = RIGHT
+            else:
+                direct = UP
+            texm = Tex(str(round(coords[1]*100,2))+"\\%",color=YELLOW).scale(0.618).next_to([px,py,pz],direct,buff=0.2)
+            if i==1:
+                texm.shift(UP*0.22)
+            pm.add(texm)
         
         axes.lines_x_axis=VGroup()
         axes.lines_y_axis=VGroup()
@@ -1346,9 +1388,9 @@ class CustomGraph6(Scene):
         self.add(bg)
         # self.add(axes,x_label,y_label)
         self.add(axes.lines_x_axis[1:],axes.lines_y_axis[1:],axes,x_label,y_label)
-        text1.next_to(graph1.get_points()[2],UP)
-        text2.next_to(graph2.get_points()[-1],UP)
-        textm.next_to(graphm.get_points()[-1],UP)
+        text1.next_to(graph1.get_points()[2],UP,buff=0.55)
+        text2.next_to(graph2.get_points()[-1],UP,buff=0.55)
+        textm.next_to(graphm.get_points()[-1],UP,buff=0.55)
         self.add(text1,text2,textm,title)
         self.play(
                 Write(title),
@@ -1357,6 +1399,9 @@ class CustomGraph6(Scene):
                 GrowFromCenter(textm),
                 ShowCreation(graph1),
                 ShowCreation(dots1),
+                ShowCreation(p1),
+                ShowCreation(p2),
+                ShowCreation(pm),
                 ShowCreation(graph2),
                 ShowCreation(dots2),
                 ShowCreation(dotsm),

@@ -127,6 +127,51 @@ class demo(Scene):
         )
         self.add(square, brace)
 
+class AxesTxt(Axes):    
+    def add_coordinate_labels(
+        self,
+        **kwargs
+    ):
+        x_numbers = self.get_x_axis().get_tick_range()
+        y_numbers = self.get_y_axis().get_tick_range()
+        self.coordinate_labels = VGroup()
+        for number in x_numbers:
+            axis = self.get_x_axis()
+            value = number
+            number_mob = axis.get_number_mobject(value, **kwargs)
+            self.coordinate_labels.add(number_mob)
+        for number in y_numbers:
+            value = number
+            axis = self.get_y_axis()
+            kwargs["unit_tex"] = "\\%"
+            number_mob = axis.get_number_mobject(value, **kwargs)
+            self.coordinate_labels.add(number_mob)
+        self.add(self.coordinate_labels)
+        return self
+
+class CustomGraph(Scene):
+    def construct(self):
+        axes = AxesTxt(
+            (0,7,1), 
+            (0,110,20,),
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 4,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                    },
+                "include_tip":True,},
+            y_axis_config={ 
+                "decimal_number_config": {
+                    "num_decimal_places": 0,
+                },
+            },
+            )
+        
+        axes.add_coordinate_labels()
+        self.add(axes.scale(0.8))
+        
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} CubicBezierTest -os".format(__file__))
+    system("manimgl {} CustomGraph -os".format(__file__))
