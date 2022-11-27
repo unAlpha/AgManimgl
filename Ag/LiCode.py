@@ -1590,7 +1590,7 @@ class BarChartRectangle(VGroup):
                 bar.stretch_to_fit_height(-bar_height)
                 bar.move_to(bar_bottom, DOWN)
 
-class PlotBarChart1(Scene):
+class PlotBarChart(Scene):
     def construct(self):
         axes = Axes(
             (0,8,1), 
@@ -1653,6 +1653,88 @@ class PlotBarChart1(Scene):
             axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point),color=GREY_D))
             
         x = axes.get_x_axis().get_tick_range()[1:]
+        y = [2, 4, 6, 8, 10, 20, 25]
+
+        coords = [[px,py] for px,py in zip(x,y)]
+
+        bars = BarChartRectangle(axes, coords, 0.618)
+        bars.set_color_by_gradient(BLUE, YELLOW)
+        self.add(axes.lines_x_axis,axes.lines_y_axis,axes,x_label,y_label)
+        self.play(
+            LaggedStart(
+                *[FadeIn(bar) for bar in bars], 
+            lag_ratio = 0.1618,
+            run_time = 2
+        ))
+        self.wait()
+
+class PlotBarChart1(Scene):
+    def construct(self):
+        axes = Axes(
+            (10,18,1), 
+            (0,30,5,),
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 4,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                    },
+                "include_tip":True,
+                "numbers_to_exclude": [0],
+                },
+            y_axis_config={ 
+                "decimal_number_config": {
+                    "num_decimal_places": 0,
+                },
+            },
+        )
+        axes.scale(0.86)
+        
+        y_shift = (axes.c2p(1,0)[0]-axes.c2p(0,0)[0])*axes.x_axis.x_min
+        axes.y_axis.shift(np.array([y_shift,0,0]))
+        axes.center()
+        
+        def add_coordinate_labels(axes,**kwargs):
+            x_numbers = axes.get_x_axis().get_tick_range()
+            y_numbers = axes.get_y_axis().get_tick_range()
+            axes.coordinate_labels = VGroup()
+            for number in x_numbers:
+                if axes.axis_config["numbers_to_exclude"] is not None and number in axes.axis_config["numbers_to_exclude"]:
+                    continue
+                axis = axes.get_x_axis()
+                value = number
+                number_mob = axis.get_number_mobject(value, **kwargs)
+                axes.coordinate_labels.add(number_mob)
+            for number in y_numbers:
+                if axes.axis_config["numbers_to_exclude"] is not None and number in axes.axis_config["numbers_to_exclude"]:
+                    continue
+                value = number
+                axis = axes.get_y_axis()
+                kwargs["unit_tex"] = "\\%"
+                number_mob = axis.get_number_mobject(value, **kwargs)
+                axes.coordinate_labels.add(number_mob)
+            axes.add(axes.coordinate_labels)
+            return axes
+        
+        add_coordinate_labels(axes)
+        
+        x_label = Text("x",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
+        y_label = Text("y",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
+        
+         # 加入网络线
+        axes.lines_x_axis=VGroup()
+        axes.lines_y_axis=VGroup()
+        x_p=[x-axes.x_axis.x_min for x in np.arange(*axes.x_range)]
+        x_p.append(axes.x_axis.x_max-axes.x_axis.x_min)
+        y_p=[x for x in np.arange(*axes.y_range)]
+        y_p.append(axes.y_axis.x_max)
+        for x_point in list(zip(x_p, [axes.y_axis.x_max]*len(x_p), [0]*len(x_p))):
+            axes.lines_x_axis.add(axes.get_v_line(axes.c2p(*x_point),color=GREY_D))
+        for y_point in list(zip([axes.x_axis.x_max-axes.x_axis.x_min]*len(y_p), y_p, [0]*len(y_p))):
+            axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point),color=GREY_D))
+            
+        x = [x-axes.x_axis.x_min for x in axes.get_x_axis().get_tick_range()][1:]
         y = [2, 4, 6, 8, 10, 20, 25]
 
         coords = [[px,py] for px,py in zip(x,y)]
