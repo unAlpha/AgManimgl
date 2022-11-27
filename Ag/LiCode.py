@@ -1564,19 +1564,17 @@ class BarChartRectangle(VGroup):
         VGroup.__init__(self, **kwargs)
         self.graph_origin_y = axes.x_axis.number_to_point(0)[1]
         self.axes = axes
-        points = [axes.c2p(px,py) for px,py in coords]
-        for coord,point in zip(coords, points):
+        points_zero = [axes.c2p(px,1e-3) for px,py in coords]
+        for point in points_zero:
             bar = Rectangle(
                 height = abs(point[1]-self.graph_origin_y),
                 width = width,
                 stroke_opacity = self.stroke_opacity,
                 fill_opacity = self.fill_opacity,
             )
-            if coord[1]>=0:
-                bar.next_to(np.array(point),DOWN,buff=0)
-            else:
-                bar.next_to(np.array(point),UP,buff=0)
+            bar.next_to(np.array(point),DOWN,buff=0)
             self.add(bar)
+        self.change_bar_values(coords)
             
     def change_bar_values(self, coords) -> None:
         points = [self.axes.c2p(px,py) for px,py in coords]
@@ -1584,7 +1582,7 @@ class BarChartRectangle(VGroup):
             bar_bottom = bar.get_bottom()
             bar_top = bar.get_top()
             bar_height = value[1]-self.graph_origin_y
-            if bar_top[1]>bar_bottom[1]:
+            if bar_top[1]>=bar_bottom[1]:
                 bar.stretch_to_fit_height(bar_height)
                 bar.move_to(bar_bottom, DOWN)
             else:
@@ -1666,9 +1664,9 @@ class PlotBarChart2(Scene):
         
         y0 = [1e-3] * len(x0)
         y1 = [-4, 2, -5, 10, 10, 2, 25]
-        y2 = [dy+6 for dy in y1]
-        y3 = [dy-10 for dy in y2]
-        y4 = [dy+6 for dy in y3]
+        y2 = [dy-6 for dy in y1]
+        y3 = [dy-2 for dy in y2]
+        y4 = [dy+8 for dy in y3]
 
         coords0 = [[px,py] for px,py in zip(x0,y0)]
         coords1 = [[px,py] for px,py in zip(x0,y1)]
@@ -1687,16 +1685,6 @@ class PlotBarChart2(Scene):
         self.play(bars.animate.change_bar_values(coords4))
         self.wait()
         
-class PlotBarChart3(Scene):
-    def construct(self):
-        y1 = [-1, 2, -5, 10, 10, 20, 25]
-        y2 = [3, 5, 5, 5, 5, 5 ,5] 
-        # 内置BarChart不适合负数
-        barsin = BarChart(y1,max_value=None)
-        self.add(barsin)
-        self.play(barsin.animate.change_bar_values(y2))
-        
-        self.wait(2)
         
 if __name__ == "__main__":
     from os import system

@@ -171,6 +171,17 @@ class CustomGraph(Scene):
         
         axes.add_coordinate_labels()
         self.add(axes.scale(0.8))
+
+class PlotBarChart3(Scene):
+    def construct(self):
+        y1 = [-1, 2, -5, 10, 10, 20, 25]
+        y2 = [3, 5, 5, 5, 5, 5 ,5] 
+        # 内置BarChart不适合负数
+        barsin = BarChart(y1,max_value=None)
+        self.add(barsin)
+        self.play(barsin.animate.change_bar_values(y2))
+        
+        self.wait(2)
         
 if __name__ == "__main__":
     from os import system
