@@ -182,7 +182,32 @@ class PlotBarChart3(Scene):
         self.play(barsin.animate.change_bar_values(y2))
         
         self.wait(2)
+
+class GraphExample(Scene):
+    def construct(self):
+        axes = Axes((1, 10), (-1, 8))
+        axes.add_coordinate_labels()
+        axes.scale(0.8)
+        p_shift = axes.c2p(2,0)[0]-axes.c2p(1,0)[0]
+        axes.y_axis.shift(np.array([p_shift,0,0]))
+        self.play(Write(axes, lag_ratio=0.01, run_time=1))
+
+        step_graph = axes.get_graph(
+            lambda x: 2.0 if x > 3 else 1.0,
+            discontinuities=[3],
+            color=GREEN,
+        )
+
+        step_label = axes.get_graph_label(step_graph, Text("Step"), x=4)
+        parabola = axes.get_graph(lambda x: 0.25 * x**2)
+        parabola.set_stroke(BLUE)
+        self.play(
+            FadeOut(step_graph),
+            FadeOut(step_label),
+            ShowCreation(parabola)
+        )
+        self.wait()
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} CustomGraph -os".format(__file__))
+    system("manimgl {} GraphExample -os".format(__file__))
