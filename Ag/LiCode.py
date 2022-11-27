@@ -501,7 +501,7 @@ class Curvature(Scene):
             )
         self.add(curve, tan_line_and_vector_and_circle)
         self.play(
-                vlu.set_value, 0.98,
+                vlu.animate.set_value(0.98),
                 run_time = 30,
                 rate_func = linear,
             )
@@ -1183,7 +1183,6 @@ class TexTextTransform4(Scene):
             )
         self.wait()
 
-# 把优化空间改进：百分比
 class CustomGraph5(Scene):
     def construct(self):
         axes = Axes(
@@ -1555,7 +1554,150 @@ class Property1(Scene):
         self.play(Write(P5_tex))
         
         self.wait(5)
+
+class BarChartRectangle(VGroup):
+    CONFIG = {
+        "stroke_opacity":0.8,
+        "fill_opacity":0.5,
+    }
+    def __init__(self, axes, coords, width, **kwargs):
+        VGroup.__init__(self, **kwargs)
+        self.graph_origin_y = axes.x_axis.number_to_point(0)[1]
+        self.axes = axes
+        points = [axes.c2p(px,py) for px,py in coords]
+        for coord,point in zip(coords, points):
+            bar = Rectangle(
+                height = abs(point[1]-self.graph_origin_y),
+                width = width,
+                stroke_opacity = self.stroke_opacity,
+                fill_opacity = self.fill_opacity,
+            )
+            if coord[1]>=0:
+                bar.next_to(np.array(point),DOWN,buff=0)
+            else:
+                bar.next_to(np.array(point),UP,buff=0)
+            self.add(bar)
+            
+    def change_bar_values(self, coords) -> None:
+        points = [self.axes.c2p(px,py) for px,py in coords]
+        for bar, value in zip(self, points):
+            bar_bottom = bar.get_bottom()
+            bar_top = bar.get_top()
+            bar_height = value[1]-self.graph_origin_y
+            if bar_top[1]>bar_bottom[1]:
+                bar.stretch_to_fit_height(bar_height)
+                bar.move_to(bar_bottom, DOWN)
+            else:
+                bar.stretch_to_fit_height(-bar_height)
+                bar.move_to(bar_bottom, DOWN)
+
+
+class PlotBarChart1(Scene):
+    def construct(self):
+        axes = Axes(
+            (0,8,1), 
+            (0,30,5,),
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 4,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                    },
+                "include_tip":True,
+                "numbers_to_exclude": None,
+                },
+            y_axis_config={ 
+                "decimal_number_config": {
+                    "num_decimal_places": 2,
+                },
+            },
+        )
+        
+        axes.add_coordinate_labels()
+        axes.scale(0.86)
+        x_label = Text("x",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
+        y_label = Text("y",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
+        
+        x = [1, 2, 3, 4,  5,  6, 7]
+        y = [2, 4, 6, 8, 10, 20, 25]
+
+        coords = [[px,py] for px,py in zip(x,y)]
+        points = [axes.c2p(px,py) for px,py in coords]
+        bars = BarChartRectangle(axes, points, 0.618)
+        bars.set_color_by_gradient(BLUE, YELLOW)
+        self.add(axes,x_label,y_label)
+        self.play(
+            LaggedStart(
+                *[FadeIn(bar) for bar in bars], 
+            lag_ratio = 0.1618,
+            run_time = 2
+        ))
+        self.wait()
+
+class PlotBarChart2(Scene):
+    def construct(self):
+        axes = Axes(
+            (0,8,1), 
+            (-10,30,5,),
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 4,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                    },
+                "include_tip":True,
+                "numbers_to_exclude": [0],
+                },
+            y_axis_config={ 
+                "decimal_number_config": {
+                    "num_decimal_places": 0,
+                },
+            },
+        )
+        
+        axes.add_coordinate_labels()
+        axes.scale(0.86)
+        x_label = Text("x",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
+        y_label = Text("y",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
+    
+        x0 = [1, 2, 3, 4,  5,  6, 7 ]
+        
+        y0 = [1e-3] * len(x0)
+        y1 = [-4, 2, -5, 10, 10, 2, 25]
+        y2 = [dy+6 for dy in y1]
+        y3 = [dy-10 for dy in y2]
+        y4 = [dy+6 for dy in y3]
+
+        coords0 = [[px,py] for px,py in zip(x0,y0)]
+        coords1 = [[px,py] for px,py in zip(x0,y1)]
+        coords2 = [[px,py] for px,py in zip(x0,y2)]
+        coords3 = [[px,py] for px,py in zip(x0,y3)]
+        coords4 = [[px,py] for px,py in zip(x0,y4)]
+        
+        bars = BarChartRectangle(axes, coords0, 0.618)
+        bars.set_color_by_gradient(YELLOW, RED)
+
+        self.add(bars)
+        self.add(axes, x_label, y_label, bars)
+        self.play(bars.animate.change_bar_values(coords1))
+        self.play(bars.animate.change_bar_values(coords2))
+        self.play(bars.animate.change_bar_values(coords3))
+        self.play(bars.animate.change_bar_values(coords4))
+        self.wait()
+        
+class PlotBarChart3(Scene):
+    def construct(self):
+        y1 = [-1, 2, -5, 10, 10, 20, 25]
+        y2 = [3, 5, 5, 5, 5, 5 ,5] 
+        # 内置BarChart不适合负数
+        barsin = BarChart(y1,max_value=None)
+        self.add(barsin)
+        self.play(barsin.animate.change_bar_values(y2))
+        
+        self.wait(2)
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} CustomGraph6 -o".format(__file__))
+    system("manimgl {} PlotBarChart2 -o".format(__file__))

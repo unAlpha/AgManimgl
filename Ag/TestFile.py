@@ -127,7 +127,7 @@ class demo(Scene):
         )
         self.add(square, brace)
 
-class AxesTxt(Axes):    
+class AxesLabelsTex(Axes):    
     def add_coordinate_labels(
         self,
         **kwargs
@@ -151,7 +151,7 @@ class AxesTxt(Axes):
 
 class CustomGraph(Scene):
     def construct(self):
-        axes = AxesTxt(
+        axes = AxesLabelsTex(
             (0,7,1), 
             (0,110,20,),
             axis_config={
