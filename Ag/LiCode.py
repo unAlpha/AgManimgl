@@ -1671,7 +1671,7 @@ class PlotBarChart(Scene):
 class PlotBarChart1(Scene):
     def construct(self):
         axes = Axes(
-            (10,18,1), 
+            (2000,2009,1), 
             (0,30,5,),
             axis_config={
                 "stroke_color": GREY_A,
@@ -1718,10 +1718,7 @@ class PlotBarChart1(Scene):
             return axes
         
         add_coordinate_labels(axes)
-        
-        x_label = Text("x",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
-        y_label = Text("y",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
-        
+       
          # 加入网络线
         axes.lines_x_axis=VGroup()
         axes.lines_y_axis=VGroup()
@@ -1736,6 +1733,9 @@ class PlotBarChart1(Scene):
             
         x = [x-axes.x_axis.x_min for x in axes.get_x_axis().get_tick_range()][1:]
         y = [2, 4, 6, 8, 10, 20, 25]
+
+        x_label = Text("x",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
+        y_label = Text("y",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
 
         coords = [[px,py] for px,py in zip(x,y)]
 
@@ -1805,4 +1805,4 @@ class PlotBarChart2(Scene):
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} PlotBarChart1 -o".format(__file__))
+    system("manimgl {} PlotBarChart2 -os".format(__file__))

@@ -1,9 +1,9 @@
 import os
 import fitz
 
-root_dir = r'E:\Dropbox\发票\12月份\12月份电子发票'
-repeat_dir = r'E:\Dropbox\发票\11月份\11月份电子发票'
- 
+root_dir = r'E:\Dropbox\发票\1月份\1月份电子发票'
+repeat_dir = r'E:\Dropbox\发票\12月份\12月份电子发票'
+
 def fapiao_read(text):
     money = 0
     dollar = ""

@@ -89,4 +89,4 @@ class InterBool1(Scene):
     
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} InterBool2 -om".format(__file__))
+    system("manimgl {} InterBool1 -om".format(__file__))

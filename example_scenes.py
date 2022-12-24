@@ -328,7 +328,7 @@ class UpdatersExample(Scene):
         now = self.time
         w0 = square.get_width()
         square.add_updater(
-            lambda m: m.set_width(w0 * math.sin(self.time - now) + w0)
+            lambda m: m.set_width(w0 * math.cos(self.time - now) + w0)
         )
         self.wait(4 * PI)
 
@@ -409,10 +409,6 @@ class CoordinateSystemExample(Scene):
 
         # Other coordinate systems you can play around with include
         # ThreeDAxes, NumberPlane, and ComplexPlane.
-
-if __name__ == "__main__":
-    from os import system
-    system("manimgl {} GraphExample -om".format(__file__))
 
 class GraphExample(Scene):
     def construct(self):
@@ -669,5 +665,8 @@ class ControlsExample(Scene):
         # self.wait(60)
         # self.embed()
 
-
+if __name__ == "__main__":
+    from os import system
+    system("manimgl {} UpdatersExample -os".format(__file__))
+    
 # See https://github.com/3b1b/videos for many, many more
