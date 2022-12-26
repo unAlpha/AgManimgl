@@ -174,8 +174,8 @@ def ffmpeg_video_clip():
                 os.system(order_clip)
                 
             if not os.path.exists(final_video_over):
-                order_overlay = f"ffmpeg -y -i {clip_file} -i {media_file} \
-                            -filter_complex \"[1:v]scale=1920:1080[over];[0:v][over]overlay=5:5\" \
+                order_overlay = f"ffmpeg -y -i {clip_file} -itsoffset 1 -i {media_file} \
+                            -filter_complex \"[1:v]scale=1920:1080[over];[0:v][over]overlay=0:0\" \
                             -c:v libx264 -b:v 10000k -c:a copy {final_video_over}"
                 os.system(order_overlay)
                  
