@@ -1,25 +1,22 @@
 from manimlib import *
 from moviepy.editor import *
-import subprocess
 
-def time_to_frames(time_str, fps):
-    # Split the time string into hours, minutes, seconds, and frames
-    hours, minutes, seconds, frames = time_str.split(":")
-    # Convert hours, minutes, seconds, and frames to integers
-    hours = int(hours)
-    minutes = int(minutes)
-    seconds = int(seconds)
-    frames = int(frames)
-    # Calculate the total number of frames
-    total_frames = fps * (hours * 3600 + minutes * 60 + seconds) + frames
-    return total_frames
-
+video_name = "惯性核聚变-ttB"
 Word = "可控核聚变重大突破：美国人用激光惯性约束实现点火！"
-txt = [[f"{i}/6",Word] for i in range(1,7)]
-
+clip_times=[
+        ["000000","034003"],
+        ["033718","065737"],
+        ["065740","095128"],
+        ["095134","155135"],
+        ["153727","202230"],
+        ["201219","215037"],
+    ]
 video_path = r"Z:\LiFiles\2022年\12月份\惯性核聚变\交付"
 media_path = r"E:\Dropbox\manim\AgManimgl\media\videos"  
-video_name = "惯性核聚变-ttB"
+clip_path = os.path.join(video_path,"抖音切割")
+image_path = os.path.join(clip_path,"images")
+video_file = os.path.join(video_path, video_name+".mp4")
+txt = [[f"{i}/{len(clip_times)}",Word] for i in range(1,len(clip_times))]
 
 class video_text0(Scene):
     i = 0 
@@ -67,6 +64,18 @@ class video_text4(video_text0):
     
 class video_text5(video_text0):
     i = 5
+
+def time_to_frames(time_str, fps):
+    # Split the time string into hours, minutes, seconds, and frames
+    hours, minutes, seconds, frames = time_str.split(":")
+    # Convert hours, minutes, seconds, and frames to integers
+    hours = int(hours)
+    minutes = int(minutes)
+    seconds = int(seconds)
+    frames = int(frames)
+    # Calculate the total number of frames
+    total_frames = fps * (hours * 3600 + minutes * 60 + seconds) + frames
+    return total_frames
 
 #方法一 太慢了   
 def moviepy_video_clip():
@@ -135,19 +144,7 @@ def convert_time(time_string, fps):
     # 使用字符串的 join 方法来连接分隔的字符
     return ":".join(pairs[0:2]) + "." + str(int(int(pairs[2])*(1/fps)*1000))
 
-def ffmpeg_video_clip():
-    clip_path = os.path.join(video_path,"抖音切割")
-    image_path = os.path.join(clip_path,"images")
-    video_file = os.path.join(video_path, video_name+".mp4")
-    
-    time_str =[
-        ["000000","034003"],
-        ["033718","065737"],
-        ["065740","095128"],
-        ["095134","155135"],
-        ["153727","202230"],
-        ["201219","215037"],
-    ]
+def ffmpeg_video_clip(time_str):
     print("Start generate")
     video = VideoFileClip(video_file)
     fps = video.fps
@@ -158,7 +155,7 @@ def ffmpeg_video_clip():
         image_name = f"({i+1}).jpg"
         image_file = os.path.join(image_path, image_name)
         image_file_video = os.path.join(clip_path, f"img_({i+1}).ts")
-        media_name = "video_text0.mov"
+        media_name = f"video_text{i}.mov"
         media_file = os.path.join(media_path, media_name)
         final_video_over = os.path.join(clip_path, video_name+f"_tmp_6-{i+1}.ts")
         final_video_file = os.path.join(clip_path, video_name+f"_6-{i+1}.mp4")
@@ -174,7 +171,7 @@ def ffmpeg_video_clip():
                 os.system(order_clip)
                 
             if not os.path.exists(final_video_over):
-                order_overlay = f"ffmpeg -y -i {clip_file} -itsoffset 1 -i {media_file} \
+                order_overlay = f"ffmpeg -y -i {clip_file} -itsoffset 0.5 -i {media_file} \
                             -filter_complex \"[1:v]scale=1920:1080[over];[0:v][over]overlay=0:0\" \
                             -c:v libx264 -b:v 10000k -c:a copy {final_video_over}"
                 os.system(order_overlay)
@@ -194,12 +191,11 @@ def ffmpeg_video_clip():
             if os.path.exists(rmf):
                 os.remove(rmf)
                 print(f"Delet {rmf} done!")
-            
-            
+           
 if __name__ == "__main__":
     from os import system
-    for i in range(6):
+    for i in range(len(clip_times)):
         if not os.path.exists(os.path.join(media_path, f"video_text{i}.mov")):
             system(f"manimgl {__file__} video_text{i} -ot --fps 50")
-    ffmpeg_video_clip()    
+    ffmpeg_video_clip(clip_times)    
         
