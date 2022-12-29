@@ -175,7 +175,7 @@ class CustomGraph(Scene):
 class PlotBarChart3(Scene):
     def construct(self):
         y1 = [-1, 2, -5, 10, 10, 20, 25]
-        y2 = [3, 5, 5, 5, 5, 5 ,5] 
+        y2 = [3, 5, 5, 5, 5, 6 ,5] 
         # 内置BarChart不适合负数
         barsin = BarChart(y1,max_value=None)
         self.add(barsin)
@@ -185,4 +185,4 @@ class PlotBarChart3(Scene):
   
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} UpdatersExample -o".format(__file__))
+    system("manimgl {} PlotBarChart3 -w".format(__file__)) 

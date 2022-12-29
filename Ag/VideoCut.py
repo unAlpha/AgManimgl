@@ -1,22 +1,23 @@
 from manimlib import *
 from moviepy.editor import *
+from os import system
 
-video_name = "惯性核聚变-ttB"
-Word = "可控核聚变重大突破：美国人用激光惯性约束实现点火！"
+video_name = "病毒_ytB-cutWuhan"
+Word = "“冠状病毒”是什么？新型肺炎病毒是如何使人生病的？"
 clip_times=[
-        ["000000","034003"],
-        ["033718","065737"],
-        ["065740","095128"],
-        ["095134","155135"],
-        ["153727","202230"],
-        ["201219","215037"],
+        ["01:00:00:00","01:05:09:05"],
+        ["01:05:09:24","01:07:49:07"],
+        ["01:07:49:07","01:14:26:15"],
+        ["01:14:26:35","01:18:20:29"],
+        ["01:18:20:29","01:22:14:27"],
+        ["01:22:14:27","01:25:08:34"],
     ]
-video_path = r"Z:\LiFiles\2022年\12月份\惯性核聚变\交付"
+video_path = r"Z:\LiFiles\2022年\12月份\新冠切割"
 media_path = r"E:\Dropbox\manim\AgManimgl\media\videos"  
 clip_path = os.path.join(video_path,"抖音切割")
 image_path = os.path.join(clip_path,"images")
 video_file = os.path.join(video_path, video_name+".mp4")
-txt = [[f"{i}/{len(clip_times)}",Word] for i in range(1,len(clip_times))]
+txt = [[f"{i+1}/{len(clip_times)}",Word] for i in range(0,len(clip_times))]
 
 class video_text0(Scene):
     i = 0 
@@ -77,7 +78,7 @@ def time_to_frames(time_str, fps):
     total_frames = fps * (hours * 3600 + minutes * 60 + seconds) + frames
     return total_frames
 
-#方法一 太慢了   
+# 方法一 太慢了   
 def moviepy_video_clip():
     video_file = os.path.join(video_path, video_name+".mp4")
     video_clip = VideoFileClip(video_file)
@@ -137,12 +138,14 @@ def convert_time(time_string, fps):
     chars = [c for c in time_string]
 
     # 使用一个循环来分隔每两个字符
-    pairs = []
-    for i in range(0, len(chars)-1, 2):
-        pairs.append(chars[i] + chars[i+1])
+    pairs = time_string.split(":")
 
+    ms = int(pairs[-1])*(1/fps)*1000
+    parts_ms = str(ms).split(".")[0]
+    while len(parts_ms) < 3:
+        parts_ms = "0"+ parts_ms
     # 使用字符串的 join 方法来连接分隔的字符
-    return ":".join(pairs[0:2]) + "." + str(int(int(pairs[2])*(1/fps)*1000))
+    return ":".join(pairs[1:3]) + "." + parts_ms
 
 def ffmpeg_video_clip(time_str):
     print("Start generate")
@@ -152,7 +155,7 @@ def ffmpeg_video_clip(time_str):
         print(f"Generate {i+1}")
         clip_name = f"clip_{i+1}.ts"
         clip_file = os.path.join(clip_path, clip_name)
-        image_name = f"({i+1}).jpg"
+        image_name = f"{i+1}.jpg"
         image_file = os.path.join(image_path, image_name)
         image_file_video = os.path.join(clip_path, f"img_({i+1}).ts")
         media_name = f"video_text{i}.mov"
@@ -183,7 +186,7 @@ def ffmpeg_video_clip(time_str):
                 os.system(order_img) 
             
             order_merge = f"ffmpeg -y -i \"concat:{image_file_video}|{final_video_over}\" \
-                        -c:v libx264 -b:v 10000k -c:a aac {final_video_file}" 
+                        -c:v libx264 -b:v 10000k -c:a copy {final_video_file}" 
             os.system(order_merge)        
             
         rm_list = [clip_file,final_video_over,image_file_video]
@@ -193,9 +196,8 @@ def ffmpeg_video_clip(time_str):
                 print(f"Delet {rmf} done!")
            
 if __name__ == "__main__":
-    from os import system
     for i in range(len(clip_times)):
         if not os.path.exists(os.path.join(media_path, f"video_text{i}.mov")):
-            system(f"manimgl {__file__} video_text{i} -ot --fps 50")
+            system(f"manimgl {__file__} video_text{i} -wt --fps 50")
     ffmpeg_video_clip(clip_times)    
         
