@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 import os
-file_path = "D:\迅雷下载"
+file_path = "Z:\Drive"
 files_names = os.listdir(file_path)
 for files_name in files_names:
     if ".ts" in files_name: 

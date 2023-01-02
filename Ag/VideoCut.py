@@ -2,17 +2,14 @@ from manimlib import *
 from moviepy.editor import *
 from os import system
 
-video_name = "病毒_ytB-cutWuhan"
-Word = "“冠状病毒”是什么？新型肺炎病毒是如何使人生病的？"
+video_name = "血氧仪-tt"
+Word = "脉搏血氧仪是什么原理？火腿肠也能测出血氧饱和度吗？"
 clip_times=[
-        ["01:00:00:00","01:05:09:05"],
-        ["01:05:09:24","01:07:49:07"],
-        ["01:07:49:07","01:14:26:15"],
-        ["01:14:26:35","01:18:20:29"],
-        ["01:18:20:29","01:22:14:27"],
-        ["01:22:14:27","01:25:08:34"],
+        ["01:00:00:00","01:05:31:48"],
+        ["01:05:31:49","01:11:52:12"],
+        ["01:11:52:14","01:20:57:07"],
     ]
-video_path = r"Z:\LiFiles\2022年\12月份\新冠切割"
+video_path = r"Z:\LiFiles\2023年\1月份\血氧仪\交付"
 media_path = r"E:\Dropbox\manim\AgManimgl\media\videos"  
 clip_path = os.path.join(video_path,"抖音切割")
 image_path = os.path.join(clip_path,"images")
@@ -158,7 +155,7 @@ def ffmpeg_video_clip(time_str):
         image_name = f"{i+1}.jpg"
         image_file = os.path.join(image_path, image_name)
         image_file_video = os.path.join(clip_path, f"img_({i+1}).ts")
-        media_name = f"video_text{i}.mov"
+        media_name = f"{video_name}_overlay_{i+1}.mov"
         media_file = os.path.join(media_path, media_name)
         final_video_over = os.path.join(clip_path, video_name+f"_tmp_6-{i+1}.ts")
         final_video_file = os.path.join(clip_path, video_name+f"_6-{i+1}.mp4")
@@ -197,7 +194,7 @@ def ffmpeg_video_clip(time_str):
            
 if __name__ == "__main__":
     for i in range(len(clip_times)):
-        if not os.path.exists(os.path.join(media_path, f"video_text{i}.mov")):
-            system(f"manimgl {__file__} video_text{i} -wt --fps 50")
+        if not os.path.exists(os.path.join(media_path, f"{video_name}_overlay_{i+1}.mov")):
+            system(f"manimgl {__file__} video_text{i} -wt --fps 50 --file_name {video_name}_overlay_{i+1}")
     ffmpeg_video_clip(clip_times)    
         
