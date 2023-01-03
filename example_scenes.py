@@ -70,7 +70,7 @@ class OpeningManimExample(Scene):
 
 class AnimatingMethods(Scene):
     def construct(self):
-        grid = Tex(r"\pi").get_grid(10, 10, height=4)
+        grid = Tex(R"\pi").get_grid(10, 10, height=4)
         self.add(grid)
 
         # You can animate the application of mobject methods with the
@@ -155,110 +155,103 @@ class TextExample(Scene):
 
 class TexTransformExample(Scene):
     def construct(self):
-        to_isolate = ["B", "C", "=", "(", ")"]
+        # Tex to color map
+        t2c = {
+            "A": BLUE,
+            "B": TEAL,
+            "C": GREEN,
+        }
+        # Configuration to pass along to each Tex mobject
+        kw = dict(font_size=72, t2c=t2c)
         lines = VGroup(
-            # Passing in muliple arguments to Tex will result
-            # in the same expression as if those arguments had
-            # been joined together, except that the submobject
-            # hierarchy of the resulting mobject ensure that the
-            # Tex mobject has a subject corresponding to
-            # each of these strings.  For example, the Tex mobject
-            # below will have 5 subjects, corresponding to the
-            # expressions [A^2, +, B^2, =, C^2]
-            Tex("A^2", "+", "B^2", "=", "C^2"),
-            # Likewise here
-            Tex("A^2", "=", "C^2", "-", "B^2"),
-            # Alternatively, you can pass in the keyword argument
-            # "isolate" with a list of strings that should be out as
-            # their own submobject.  So the line below is equivalent
-            # to the commented out line below it.
-            Tex("A^2 = (C + B)(C - B)", isolate=["A^2", *to_isolate]),
-            # Tex("A^2", "=", "(", "C", "+", "B", ")", "(", "C", "-", "B", ")"),
-            Tex("A = \\sqrt{(C + B)(C - B)}", isolate=["A", *to_isolate])
+            Tex("A^2 + B^2 = C^2", **kw),
+            Tex("A^2 = C^2 - B^2", **kw),
+            Tex("A^2 = (C + B)(C - B)", **kw),
+            Tex(R"A = \sqrt{(C + B)(C - B)}", **kw),
         )
         lines.arrange(DOWN, buff=LARGE_BUFF)
-        for line in lines:
-            line.set_color_by_tex_to_color_map({
-                "A": BLUE,
-                "B": TEAL,
-                "C": GREEN,
-            })
 
-        play_kw = {"run_time": 2}
         self.add(lines[0])
-        # The animation TransformMatchingTex will line up parts
-        # of the source and target which have matching tex strings.
+        # The animation TransformMatchingStrings will line up parts
+        # of the source and target which have matching substring strings.
         # Here, giving it a little path_arc makes each part sort of
         # rotate into their final positions, which feels appropriate
         # for the idea of rearranging an equation
         self.play(
-            TransformMatchingTex(
+            TransformMatchingStrings(
                 lines[0].copy(), lines[1],
+                # matched_keys specifies which substring should
+                # line up. If it's not specified, the animation
+                # will try its best, but may not quite give the
+                # intended effect
+                matched_keys=["A^2", "B^2", "C^2"],
+                # When you want a substring from the source
+                # to go to a non-equal substring from the target,
+                # use the key map.
+                key_map={"+": "-"},
                 path_arc=90 * DEGREES,
             ),
-            **play_kw
         )
         self.wait()
-
-        # Now, we could try this again on the next line...
-        self.play(
-            TransformMatchingTex(lines[1].copy(), lines[2]),
-            **play_kw
-        )
+        self.play(TransformMatchingStrings(
+            lines[1].copy(), lines[2],
+            matched_keys=["A^2"]
+        ))
         self.wait()
-        # ...and this looks nice enough, but since there's no tex
-        # in lines[2] which matches "C^2" or "B^2", those terms fade
-        # out to nothing while the C and B terms fade in from nothing.
-        # If, however, we want the C^2 to go to C, and B^2 to go to B,
-        # we can specify that with a key map.
-        self.play(FadeOut(lines[2]))
         self.play(
-            TransformMatchingTex(
-                lines[1].copy(), lines[2],
-                key_map={
-                    "C^2": "C",
-                    "B^2": "B",
-                }
+            TransformMatchingStrings(
+                lines[2].copy(), lines[3],
+                key_map={"2": R"\sqrt"},
+                path_arc=-30 * DEGREES,
             ),
-            **play_kw
         )
+        self.wait(2)
+
+        # You can also index into Tex mobject (or other StringMobjects)
+        # by substrings and regular expressions
+        top_equation = lines[0]
+        low_equation = lines[3]
+
+        self.play(LaggedStartMap(FlashAround, low_equation["C"], lag_ratio=0.5))
+        self.play(LaggedStartMap(FlashAround, low_equation["B"], lag_ratio=0.5))
+        self.play(LaggedStartMap(FlashAround, top_equation[re.compile(r"\w\^2")]))
+        self.play(Indicate(low_equation[R"\sqrt"]))
         self.wait()
+        self.play(LaggedStartMap(FadeOut, lines, shift=2 * RIGHT))
 
-        # And to finish off, a simple TransformMatchingShapes would work
-        # just fine.  But perhaps we want that exponent on A^2 to transform into
-        # the square root symbol.  At the moment, lines[2] treats the expression
-        # A^2 as a unit, so we might create a new version of the same line which
-        # separates out just the A.  This way, when TransformMatchingTex lines up
-        # all matching parts, the only mismatch will be between the "^2" from
-        # new_line2 and the "\sqrt" from the final line.  By passing in,
-        # transform_mismatches=True, it will transform this "^2" part into
-        # the "\sqrt" part.
-        new_line2 = Tex("A^2 = (C + B)(C - B)", isolate=["A", *to_isolate])
-        new_line2.replace(lines[2])
-        new_line2.match_style(lines[2])
+        # Indexing by substrings like this may not work when
+        # the order in which Latex draws symbols does not match
+        # the order in which they show up in the string.
+        # For example, here the infinity is drawn before the sigma
+        # so we don't get the desired behavior.
+        equation = Tex(R"\sum_{n = 1}^\infty \frac{1}{n^2} = \frac{\pi^2}{6}")
+        self.play(FadeIn(equation))
+        self.play(equation[R"\infty"].animate.set_color(RED))  # Doesn't hit the infinity
+        self.wait()
+        self.play(FadeOut(equation))
 
-        self.play(
-            TransformMatchingTex(
-                new_line2, lines[3],
-                transform_mismatches=True,
-            ),
-            **play_kw
+        # However you can always fix this by explicitly passing in
+        # a string you might want to isolate later. Also, using
+        # \over instead of \frac helps to avoid the issue for fractions
+        equation = Tex(
+            R"\sum_{n = 1}^\infty {1 \over n^2} = {\pi^2 \over 6}",
+            # Explicitly mark "\infty" as a substring you might want to access
+            isolate=[R"\infty"]
         )
-        self.wait(3)
-        self.play(FadeOut(lines, RIGHT))
+        self.play(FadeIn(equation))
+        self.play(equation[R"\infty"].animate.set_color(RED))  # Got it!
+        self.wait()
+        self.play(FadeOut(equation))
 
-        # Alternatively, if you don't want to think about breaking up
-        # the tex strings deliberately, you can TransformMatchingShapes,
-        # which will try to line up all pieces of a source mobject with
-        # those of a target, regardless of the submobject hierarchy in
-        # each one, according to whether those pieces have the same
-        # shape (as best it can).
+        # TransformMatchingShapes will try to line up all pieces of a
+        # source mobject with those of a target, regardless of the
+        # what Mobject type they are.
         source = Text("the morse code", height=1)
         target = Text("here come dots", height=1)
 
         self.play(Write(source))
         self.wait()
-        kw = {"run_time": 3, "path_arc": PI / 2}
+        kw = dict(run_time=3, path_arc=PI / 2)
         self.play(TransformMatchingShapes(source, target, **kw))
         self.wait()
         self.play(TransformMatchingShapes(target, source, **kw))
@@ -346,15 +339,16 @@ class CoordinateSystemExample(Scene):
             width=10,
             # Axes is made of two NumberLine mobjects.  You can specify
             # their configuration with axis_config
-            axis_config={
-                "stroke_color": GREY_A,
-                "stroke_width": 2,
-            },
+            axis_config=dict(
+                stroke_color=GREY_A,
+                stroke_width=2,
+                numbers_to_exclude=[0],
+            ),
             # Alternatively, you can specify configuration for just one
             # of them, like this.
-            y_axis_config={
-                "include_tip": False,
-            }
+            y_axis_config=dict(
+                numbers_with_elongated_ticks=[-2, 2],
+            )
         )
         # Keyword arguments of add_coordinate_labels can be used to
         # configure the DecimalNumber mobjects which it creates and
@@ -412,7 +406,7 @@ class CoordinateSystemExample(Scene):
 
 class GraphExample(Scene):
     def construct(self):
-        axes = Axes((-3, 10), (-1, 8))
+        axes = Axes((-3, 10), (-1, 8), height=6)
         axes.add_coordinate_labels()
 
         self.play(Write(axes, lag_ratio=0.01, run_time=1))
@@ -491,10 +485,76 @@ class GraphExample(Scene):
         self.wait()
 
 
+class TexAndNumbersExample(InteractiveScene):
+    def construct(self):
+        axes = Axes((-3, 3), (-3, 3), unit_size=1)
+        axes.to_edge(DOWN)
+        axes.add_coordinate_labels(font_size=16)
+        circle = Circle(radius=2)
+        circle.set_stroke(YELLOW, 3)
+        circle.move_to(axes.get_origin())
+        self.add(axes, circle)
+
+        # When numbers show up in tex, they can be readily
+        # replaced with DecimalMobjects so that methods like
+        # get_value and set_value can be called on them, and
+        # animations like ChangeDecimalToValue can be called
+        # on them.
+        tex = Tex("x^2 + y^2 = 4.00")
+        tex.next_to(axes, UP, buff=0.5)
+        value = tex.make_number_changable("4.00")
+
+
+        # This will tie the right hand side of our equation to
+        # the square of the radius of the circle
+        value.add_updater(lambda v: v.set_value(circle.get_radius()**2))
+        self.add(tex)
+
+        text = Text("""
+            You can manipulate numbers
+            in Tex mobjects
+        """, font_size=30)
+        text.next_to(tex, RIGHT, buff=1.5)
+        arrow = Arrow(text, tex)
+        self.add(text, arrow)
+
+        self.play(
+            circle.animate.set_height(2.0),
+            run_time=4,
+            rate_func=there_and_back,
+        )
+
+        # By default, tex.make_number_changable replaces the first occurance
+        # of the number,but by passing replace_all=True it replaces all and
+        # returns a group of the results
+        exponents = tex.make_number_changable("2", replace_all=True)
+        self.play(
+            LaggedStartMap(
+                FlashAround, exponents,
+                lag_ratio=0.2, buff=0.1, color=RED
+            ),
+            exponents.animate.set_color(RED)
+        )
+
+        def func(x, y):
+            # Switch from manim coords to axes coords
+            xa, ya = axes.point_to_coords(np.array([x, y, 0]))
+            return xa**4 + ya**4 - 4
+
+        new_curve = ImplicitFunction(func)
+        new_curve.match_style(circle)
+        circle.rotate(angle_of_vector(new_curve.get_start()))  # Align
+        value.clear_updaters()
+
+        self.play(
+            *(ChangeDecimalToValue(exp, 4) for exp in exponents),
+            ReplacementTransform(circle.copy(), new_curve),
+            circle.animate.set_stroke(width=1, opacity=0.5),
+        )
+
+
 class SurfaceExample(Scene):
-    CONFIG = {
-        "camera_class": ThreeDCamera,
-    }
+    default_camera_config = dict(samples=4)
 
     def construct(self):
         surface_text = Text("For 3d scenes, try using surfaces")

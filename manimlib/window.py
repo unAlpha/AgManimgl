@@ -7,7 +7,6 @@ from moderngl_window.context.pyglet.window import Window as PygletWindow
 from moderngl_window.timers.clock import Timer
 from screeninfo import get_monitors
 
-from manimlib.utils.config_ops import digest_config
 from manimlib.utils.customization import get_customization
 
 from typing import TYPE_CHECKING
@@ -17,20 +16,18 @@ if TYPE_CHECKING:
 
 
 class Window(PygletWindow):
-    fullscreen = False
-    resizable = True
-    gl_version = (3, 3)
-    vsync = True
-    cursor = True
+    fullscreen: bool = False
+    resizable: bool = True
+    gl_version: tuple[int, int] = (3, 3)
+    vsync: bool = True
+    cursor: bool = True
 
     def __init__(
         self,
         scene: Scene,
         size: tuple[int, int] = (1280, 720),
-        **kwargs
     ):
         super().__init__(size=size)
-        digest_config(self, kwargs)
 
         self.scene = scene
         self.pressed_keys = set()

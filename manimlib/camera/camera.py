@@ -18,7 +18,6 @@ from manimlib.constants import DOWN, LEFT, ORIGIN, OUT, RIGHT, UP
 from manimlib.mobject.mobject import Mobject
 from manimlib.mobject.mobject import Point
 from manimlib.utils.color import color_to_rgba
-from manimlib.utils.config_ops import digest_config
 from manimlib.utils.simple_functions import fdiv
 from manimlib.utils.space_ops import normalize
 
@@ -26,14 +25,21 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from manimlib.shader_wrapper import ShaderWrapper
-
+    from manimlib.typing import ManimColor, Vect3
+    from typing import Any, Iterable
 
 class CameraFrame(Mobject):
-    CONFIG = {
-        "frame_shape": (FRAME_WIDTH, FRAME_HEIGHT),
-        "center_point": ORIGIN,
-        "focal_dist_to_height": 2,
-    }
+    def __init__(
+        self,
+        frame_shape: tuple[float, float] = (FRAME_WIDTH, FRAME_HEIGHT),
+        center_point: Vect3 = ORIGIN,
+        focal_dist_to_height: float = 2.0,
+        **kwargs,
+    ):
+        self.frame_shape = frame_shape
+        self.center_point = center_point
+        self.focal_dist_to_height = focal_dist_to_height
+        super().__init__(**kwargs)
 
     def init_uniforms(self) -> None:
         super().init_uniforms()
@@ -165,38 +171,45 @@ class CameraFrame(Mobject):
 
 
 class Camera(object):
-    CONFIG = {
-        "background_image": None,
-        "frame_config": {},
-        "pixel_width": DEFAULT_PIXEL_WIDTH,
-        "pixel_height": DEFAULT_PIXEL_HEIGHT,
-        "fps": DEFAULT_FPS,
-        # Note: frame height and width will be resized to match
-        # the pixel aspect ratio
-        "background_color": BLACK,
-        "background_opacity": 1,
+    def __init__(
+        self,
+        ctx: moderngl.Context | None = None,
+        background_image: str | None = None,
+        frame_config: dict = dict(),
+        pixel_width: int = DEFAULT_PIXEL_WIDTH,
+        pixel_height: int = DEFAULT_PIXEL_HEIGHT,
+        fps: int = DEFAULT_FPS,
+        # Note: frame height and width will be resized to match the pixel aspect ratio
+        background_color: ManimColor = BLACK,
+        background_opacity: float = 1.0,
         # Points in vectorized mobjects with norm greater
         # than this value will be rescaled.
-        "max_allowable_norm": FRAME_WIDTH,
-        "image_mode": "RGBA",
-        "n_channels": 4,
-        "pixel_array_dtype": 'uint8',
-        "light_source_position": [-10, 10, 10],
-        # Measured in pixel widths, used for vector graphics
-        "anti_alias_width": 1.5,
+        max_allowable_norm: float = FRAME_WIDTH,
+        image_mode: str = "RGBA",
+        n_channels: int = 4,
+        pixel_array_dtype: type = np.uint8,
+        light_source_position: Vect3 = np.array([-10, 10, 10]),
         # Although vector graphics handle antialiasing fine
         # without multisampling, for 3d scenes one might want
         # to set samples to be greater than 0.
-        "samples": 0,
-    }
+        samples: int = 0,
+    ):
+        self.background_image = background_image
+        self.pixel_width = pixel_width
+        self.pixel_height = pixel_height
+        self.fps = fps
+        self.max_allowable_norm = max_allowable_norm
+        self.image_mode = image_mode
+        self.n_channels = n_channels
+        self.pixel_array_dtype = pixel_array_dtype
+        self.light_source_position = light_source_position
+        self.samples = samples
 
-    def __init__(self, ctx: moderngl.Context | None = None, **kwargs):
-        digest_config(self, kwargs, locals())
         self.rgb_max_val: float = np.iinfo(self.pixel_array_dtype).max
         self.background_rgba: list[float] = list(color_to_rgba(
-            self.background_color, self.background_opacity
+            background_color, background_opacity
         ))
-        self.init_frame()
+        self.init_frame(**frame_config)
         self.init_context(ctx)
         self.init_shaders()
         self.init_textures()
@@ -207,8 +220,8 @@ class Camera(object):
         # mobjects
         self.mob_to_render_groups = {}
 
-    def init_frame(self) -> None:
-        self.frame = CameraFrame(**self.frame_config)
+    def init_frame(self, **config) -> None:
+        self.frame = CameraFrame(**config)
 
     def init_context(self, ctx: moderngl.Context | None = None) -> None:
         if ctx is None:
@@ -292,7 +305,8 @@ class Camera(object):
     def get_pixel_array(self) -> np.ndarray:
         raw = self.get_raw_fbo_data(dtype='f4')
         flat_arr = np.frombuffer(raw, dtype='f4')
-        arr = flat_arr.reshape([*self.fbo.size, self.n_channels])
+        arr = flat_arr.reshape([*reversed(self.fbo.size), self.n_channels])
+        arr = arr[::-1]
         # Convert from float
         return (self.rgb_max_val * arr).astype(self.pixel_array_dtype)
 
@@ -352,13 +366,13 @@ class Camera(object):
         self.frame.set_width(frame_width)
 
     # Rendering
-    def capture(self, *mobjects: Mobject, **kwargs) -> None:
+    def capture(self, *mobjects: Mobject) -> None:
         self.refresh_perspective_uniforms()
         for mobject in mobjects:
             for render_group in self.get_render_group_list(mobject):
                 self.render(render_group)
 
-    def render(self, render_group: dict[str]) -> None:
+    def render(self, render_group: dict[str, Any]) -> None:
         shader_wrapper = render_group["shader_wrapper"]
         shader_program = render_group["prog"]
         self.set_shader_uniforms(shader_program, shader_wrapper)
@@ -367,7 +381,7 @@ class Camera(object):
         if render_group["single_use"]:
             self.release_render_group(render_group)
 
-    def get_render_group_list(self, mobject: Mobject) -> Iterable[dict[str]]:
+    def get_render_group_list(self, mobject: Mobject) -> Iterable[dict[str, Any]]:
         if mobject.is_changing():
             return self.generate_render_group_list(mobject)
 
@@ -377,7 +391,7 @@ class Camera(object):
             self.mob_to_render_groups[key] = list(self.generate_render_group_list(mobject))
         return self.mob_to_render_groups[key]
 
-    def generate_render_group_list(self, mobject: Mobject) -> Iterable[dict[str]]:
+    def generate_render_group_list(self, mobject: Mobject) -> Iterable[dict[str, Any]]:
         return (
             self.get_render_group(sw, single_use=mobject.is_changing())
             for sw in mobject.get_shader_wrapper_list()
@@ -387,7 +401,7 @@ class Camera(object):
         self,
         shader_wrapper: ShaderWrapper,
         single_use: bool = True
-    ) -> dict[str]:
+    ) -> dict[str, Any]:
         # Data buffers
         vbo = self.ctx.buffer(shader_wrapper.vert_data.tobytes())
         if shader_wrapper.vert_indices is None:
@@ -415,7 +429,7 @@ class Camera(object):
             "single_use": single_use,
         }
 
-    def release_render_group(self, render_group: dict[str]) -> None:
+    def release_render_group(self, render_group: dict[str, Any]) -> None:
         for key in ["vbo", "ibo", "vao"]:
             if render_group[key] is not None:
                 render_group[key].release()
@@ -428,14 +442,12 @@ class Camera(object):
     # Shaders
     def init_shaders(self) -> None:
         # Initialize with the null id going to None
-        self.id_to_shader_program: dict[
-            int | str, tuple[moderngl.Program, str] | None
-        ] = {"": None}
+        self.id_to_shader_program: dict[int, tuple[moderngl.Program, str] | None] = {hash(""): None}
 
     def get_shader_program(
         self,
         shader_wrapper: ShaderWrapper
-    ) -> tuple[moderngl.Program, str]:
+    ) -> tuple[moderngl.Program, str] | None:
         sid = shader_wrapper.get_program_id()
         if sid not in self.id_to_shader_program:
             # Create shader program for the first time, then cache
@@ -454,20 +466,13 @@ class Camera(object):
             tid = self.get_texture_id(path)
             shader[name].value = tid
         for name, value in it.chain(self.perspective_uniforms.items(), shader_wrapper.uniforms.items()):
-            try:
+            if name in shader:
                 if isinstance(value, np.ndarray) and value.ndim > 0:
                     value = tuple(value)
                 shader[name].value = value
-            except KeyError:
-                pass
 
     def refresh_perspective_uniforms(self) -> None:
         frame = self.frame
-        pw, ph = self.get_pixel_shape()
-        fw, fh = frame.get_shape()
-        # TODO, this should probably be a mobject uniform, with
-        # the camera taking care of the conversion factor
-        anti_alias_width = self.anti_alias_width / (ph / fh)
         # Orient light
         rotation = frame.get_inverse_camera_rotation_matrix()
         offset = frame.get_center()
@@ -478,7 +483,7 @@ class Camera(object):
 
         self.perspective_uniforms = {
             "frame_shape": frame.get_shape(),
-            "anti_alias_width": anti_alias_width,
+            "pixel_shape": self.get_pixel_shape(),
             "camera_offset": tuple(offset),
             "camera_rotation": tuple(np.array(rotation).T.flatten()),
             "camera_position": tuple(cam_pos),
@@ -517,7 +522,5 @@ class Camera(object):
 
 # Mostly just defined so old scenes don't break
 class ThreeDCamera(Camera):
-    CONFIG = {
-        "samples": 4,
-        "anti_alias_width": 0,
-    }
+    def __init__(self, samples: int = 4, **kwargs):
+        super().__init__(samples=samples, **kwargs)

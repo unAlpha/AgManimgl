@@ -9,34 +9,22 @@ from scipy.spatial.distance import cdist
 from manimlib.constants import WHITE
 from manimlib.logger import log
 from manimlib.mobject.svg.svg_mobject import SVGMobject
+from manimlib.mobject.types.vectorized_mobject import VMobject
 from manimlib.mobject.types.vectorized_mobject import VGroup
-from manimlib.utils.color import color_to_rgb
-from manimlib.utils.color import rgb_to_hex
-from manimlib.utils.config_ops import digest_config
+from manimlib.utils.color import color_to_hex
+from manimlib.utils.color import hex_to_int
+from manimlib.utils.color import int_to_hex
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from colour import Color
-    from typing import Callable, Iterable, Union
-
-    ManimColor = Union[str, Color]
-    Span = tuple[int, int]
-    Selector = Union[
-        str,
-        re.Pattern,
-        tuple[Union[int, None], Union[int, None]],
-        Iterable[Union[
-            str,
-            re.Pattern,
-            tuple[Union[int, None], Union[int, None]]
-        ]]
-    ]
+    from typing import Callable
+    from manimlib.typing import ManimColor, Span, Selector
 
 
 class StringMobject(SVGMobject, ABC):
     """
-    An abstract base class for `MTex` and `MarkupText`
+    An abstract base class for `Tex` and `MarkupText`
 
     This class aims to optimize the logic of "slicing submobjects
     via substrings". This could be much clearer and more user-friendly
@@ -48,109 +36,139 @@ class StringMobject(SVGMobject, ABC):
     or a 2-tuple containing integers or None, or a collection of the above.
     Note, substrings specified cannot *partly* overlap with each other.
 
-    Each instance of `StringMobject` generates 2 svg files.
+    Each instance of `StringMobject` may generate 2 svg files.
     The additional one is generated with some color commands inserted,
     so that each submobject of the original `SVGMobject` will be labelled
     by the color of its paired submobject from the additional `SVGMobject`.
     """
-    CONFIG = {
-        "height": None,
-        "stroke_width": 0,
-        "stroke_color": WHITE,
-        "path_string_config": {
-            "should_subdivide_sharp_curves": True,
-            "should_remove_null_curves": True,
-        },
-        "base_color": WHITE,
-        "isolate": (),
-        "protect": (),
-    }
+    height = None
 
-    def __init__(self, string: str, **kwargs):
+    def __init__(
+        self,
+        string: str,
+        fill_color: ManimColor = WHITE,
+        stroke_color: ManimColor = WHITE,
+        stroke_width: float = 0,
+        path_string_config: dict = dict(
+            should_subdivide_sharp_curves=True,
+            should_remove_null_curves=True,
+        ),
+        base_color: ManimColor = WHITE,
+        isolate: Selector = (),
+        protect: Selector = (),
+        # When set to true, only the labelled svg is
+        # rendered, and its contents are used directly
+        # for the body of this String Mobject
+        use_labelled_svg: bool = False,
+        **kwargs
+    ):
         self.string = string
-        digest_config(self, kwargs)
-        if self.base_color is None:
-            self.base_color = WHITE
+        self.base_color = base_color or WHITE
+        self.isolate = isolate
+        self.protect = protect
+        self.use_labelled_svg = use_labelled_svg
 
         self.parse()
-        super().__init__(**kwargs)
+        super().__init__(
+            stroke_color=stroke_color,
+            fill_color=fill_color,
+            stroke_width=stroke_width,
+            path_string_config=path_string_config,
+            **kwargs
+        )
         self.labels = [submob.label for submob in self.submobjects]
 
-    def get_file_path(self) -> str:
-        original_content = self.get_content(is_labelled=False)
-        return self.get_file_path_by_content(original_content)
+    def get_file_path(self, is_labelled: bool = False) -> str:
+        is_labelled = is_labelled or self.use_labelled_svg
+        return self.get_file_path_by_content(self.get_content(is_labelled))
 
     @abstractmethod
     def get_file_path_by_content(self, content: str) -> str:
         return ""
 
-    def generate_mobject(self) -> None:
-        super().generate_mobject()
-
+    def assign_labels_by_color(self, mobjects: list[VMobject]) -> None:
+        """
+        Assuming each mobject in the list `mobjects` has a fill color
+        meant to represent a numerical label, this assigns those
+        those numerical labels to each mobject as an attribute
+        """
         labels_count = len(self.labelled_spans)
         if labels_count == 1:
-            for submob in self.submobjects:
-                submob.label = 0
+            for mob in mobjects:
+                mob.label = 0
             return
 
-        labelled_content = self.get_content(is_labelled=True)
-        file_path = self.get_file_path_by_content(labelled_content)
-        labelled_svg = SVGMobject(file_path)
-        if len(self.submobjects) != len(labelled_svg.submobjects):
-            log.warning(
-                "Cannot align submobjects of the labelled svg "
-                "to the original svg. Skip the labelling process."
-            )
-            for submob in self.submobjects:
-                submob.label = 0
-            return
-
-        self.rearrange_submobjects_by_positions(labelled_svg)
         unrecognizable_colors = []
-        for submob, labelled_svg_submob in zip(
-            self.submobjects, labelled_svg.submobjects
-        ):
-            label = self.hex_to_int(self.color_to_hex(
-                labelled_svg_submob.get_fill_color()
-            ))
+        for mob in mobjects:
+            label = hex_to_int(color_to_hex(mob.get_fill_color()))
             if label >= labels_count:
                 unrecognizable_colors.append(label)
                 label = 0
-            submob.label = label
+            mob.label = label
+
         if unrecognizable_colors:
             log.warning(
-                "Unrecognizable color labels detected (%s). "
+                "Unrecognizable color labels detected (%s). " + \
                 "The result could be unexpected.",
                 ", ".join(
-                    self.int_to_hex(color)
+                    int_to_hex(color)
                     for color in unrecognizable_colors
                 )
             )
 
+    def mobjects_from_file(self, file_path: str) -> list[VMobject]:
+        submobs = super().mobjects_from_file(file_path)
+
+        if self.use_labelled_svg:
+            # This means submobjects are colored according to spans
+            self.assign_labels_by_color(submobs)
+            return submobs
+
+        # Otherwise, submobs are not colored, so generate a new list
+        # of submobject which are and use those for labels
+        unlabelled_submobs = submobs
+        labelled_content = self.get_content(is_labelled=True)
+        labelled_file = self.get_file_path_by_content(labelled_content)
+        labelled_submobs = super().mobjects_from_file(labelled_file)
+        self.labelled_submobs = labelled_submobs
+        self.unlabelled_submobs = unlabelled_submobs
+
+        self.assign_labels_by_color(labelled_submobs)
+        self.rearrange_submobjects_by_positions(labelled_submobs, unlabelled_submobs)
+        for usm, lsm in zip(unlabelled_submobs, labelled_submobs):
+            usm.label = lsm.label
+
+        if len(unlabelled_submobs) != len(labelled_submobs):
+            log.warning(
+                "Cannot align submobjects of the labelled svg " + \
+                "to the original svg. Skip the labelling process."
+            )
+            for usm in unlabelled_submobs:
+                usm.label = 0
+            return unlabelled_submobs
+
+        return unlabelled_submobs
+
     def rearrange_submobjects_by_positions(
-        self, labelled_svg: SVGMobject
+        self, labelled_submobs: list[VMobject], unlabelled_submobs: list[VMobject],
     ) -> None:
-        # Rearrange submobjects of `labelled_svg` so that
-        # each submobject is labelled by the nearest one of `labelled_svg`.
-        # The correctness cannot be ensured, since the svg may
-        # change significantly after inserting color commands.
-        if not labelled_svg.submobjects:
+        """
+        Rearrange `labeleled_submobjects` so that each submobject
+        is labelled by the nearest one of `unlabelled_submobs`.
+        The correctness cannot be ensured, since the svg may
+        change significantly after inserting color commands.
+        """
+        if len(labelled_submobs) == 0:
             return
 
-        bb_0 = self.get_bounding_box()
-        bb_1 = labelled_svg.get_bounding_box()
-        scale_factor = abs((bb_0[2] - bb_0[0]) / (bb_1[2] - bb_1[0]))
-        labelled_svg.move_to(self).scale(scale_factor)
-
+        labelled_svg = VGroup(*labelled_submobs)
+        labelled_svg.replace(VGroup(*unlabelled_submobs))
         distance_matrix = cdist(
-            [submob.get_center() for submob in self.submobjects],
-            [submob.get_center() for submob in labelled_svg.submobjects]
+            [submob.get_center() for submob in unlabelled_submobs],
+            [submob.get_center() for submob in labelled_submobs]
         )
         _, indices = linear_sum_assignment(distance_matrix)
-        labelled_svg.set_submobjects([
-            labelled_svg.submobjects[index]
-            for index in indices
-        ])
+        labelled_submobs[:] = [labelled_submobs[index] for index in indices]
 
     # Toolkits
 
@@ -192,18 +210,6 @@ class StringMobject(SVGMobject, ABC):
     @staticmethod
     def span_contains(span_0: Span, span_1: Span) -> bool:
         return span_0[0] <= span_1[0] and span_0[1] >= span_1[1]
-
-    @staticmethod
-    def color_to_hex(color: ManimColor) -> str:
-        return rgb_to_hex(color_to_rgb(color))
-
-    @staticmethod
-    def hex_to_int(rgb_hex: str) -> int:
-        return int(rgb_hex[1:], 16)
-
-    @staticmethod
-    def int_to_hex(rgb_int: int) -> str:
-        return f"#{rgb_int:06x}".upper()
 
     # Parsing
 
@@ -377,7 +383,7 @@ class StringMobject(SVGMobject, ABC):
             lambda label, flag, attr_dict: self.get_command_string(
                 attr_dict,
                 is_end=flag < 0,
-                label_hex=self.int_to_hex(label) if is_labelled else None
+                label_hex=int_to_hex(label) if is_labelled else None
             )
         )
         prefix, suffix = self.get_content_prefix_and_suffix(
@@ -448,6 +454,14 @@ class StringMobject(SVGMobject, ABC):
             )
             for span in self.labelled_spans[1:]
         ]
+
+    def get_specified_substrings(self) -> list[str]:
+        substrs = [
+            self.string[slice(*span)]
+            for span in self.labelled_spans[1:]
+        ]
+        # Use dict.fromkeys to remove duplicates while retaining order
+        return list(dict.fromkeys(substrs).keys())
 
     def get_group_part_items(self) -> list[tuple[str, list[int]]]:
         if not self.labels:
@@ -532,12 +546,37 @@ class StringMobject(SVGMobject, ABC):
         ])
 
     def select_parts(self, selector: Selector) -> VGroup:
-        return self.build_parts_from_indices_lists(
-            self.get_submob_indices_lists_by_selector(selector)
-        )
+        specified_substrings = self.get_specified_substrings()
+        if isinstance(selector, (str, re.Pattern)) and selector not in specified_substrings:
+            return self.select_unisolated_substring(selector)
+        indices_list = self.get_submob_indices_lists_by_selector(selector)
+        return self.build_parts_from_indices_lists(indices_list)
 
-    def select_part(self, selector: Selector, index: int = 0) -> VGroup:
+    def __getitem__(self, value: int | slice | Selector) -> VMobject:
+        if isinstance(value, (int, slice)):
+            return super().__getitem__(value)
+        return self.select_parts(value)
+
+    def select_part(self, selector: Selector, index: int = 0) -> VMobject:
         return self.select_parts(selector)[index]
+
+    def substr_to_path_count(self, substr: str) -> int:
+        return len(re.sub(r"\s", "", substr))
+
+    def get_symbol_substrings(self):
+        return list(re.sub(r"\s", "", self.string))
+
+    def select_unisolated_substring(self, pattern: str | re.Pattern) -> VGroup:
+        if isinstance(pattern, str):
+            pattern = re.compile(re.escape(pattern))
+        result = []
+        for match in re.finditer(pattern, self.string):
+            index = match.start()
+            start = self.substr_to_path_count(self.string[:index])
+            substr = match.group()
+            end = start + self.substr_to_path_count(substr)
+            result.append(self[start:end])
+        return VGroup(*result)
 
     def set_parts_color(self, selector: Selector, color: ManimColor):
         self.select_parts(selector).set_color(color)

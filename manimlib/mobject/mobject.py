@@ -29,7 +29,6 @@ from manimlib.utils.color import color_gradient
 from manimlib.utils.color import color_to_rgb
 from manimlib.utils.color import get_colormap_list
 from manimlib.utils.color import rgb_to_hex
-from manimlib.utils.config_ops import digest_config
 from manimlib.utils.iterables import batch_by_property
 from manimlib.utils.iterables import list_update
 from manimlib.utils.iterables import listify
@@ -47,48 +46,53 @@ from manimlib.utils.space_ops import rotation_matrix_transpose
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from colour import Color
-    from typing import Callable, Iterable, Sequence, Union
-
+    from typing import Callable, Iterable, Sequence, Union, Tuple
     import numpy.typing as npt
+    from manimlib.typing import ManimColor, Vect3, Vect4, Vect3Array
 
-    TimeBasedUpdater = Callable[["Mobject", float], None]
-    NonTimeUpdater = Callable[["Mobject"], None]
+    TimeBasedUpdater = Callable[["Mobject", float], "Mobject" | None]
+    NonTimeUpdater = Callable[["Mobject"], "Mobject" | None]
     Updater = Union[TimeBasedUpdater, NonTimeUpdater]
-    ManimColor = Union[str, Color]
 
 
 class Mobject(object):
     """
     Mathematical Object
     """
-    CONFIG = {
-        "color": WHITE,
-        "opacity": 1,
-        "dim": 3,  # TODO, get rid of this
-        # Lighting parameters
-        # ...
-        # Larger reflectiveness makes things brighter when facing the light
-        "reflectiveness": 0.0,
-        # Larger shadow makes faces opposite the light darker
-        "shadow": 0.0,
-        # Makes parts bright where light gets reflected toward the camera
-        "gloss": 0.0,
-        # For shaders
-        "shader_folder": "",
-        "render_primitive": moderngl.TRIANGLE_STRIP,
-        "texture_paths": None,
-        "depth_test": False,
-        # If true, the mobject will not get rotated according to camera position
-        "is_fixed_in_frame": False,
-        # Must match in attributes of vert shader
-        "shader_dtype": [
-            ('point', np.float32, (3,)),
-        ],
-    }
+    dim: int = 3
+    shader_folder: str = ""
+    render_primitive: int = moderngl.TRIANGLE_STRIP
+    # Must match in attributes of vert shader
+    shader_dtype: Sequence[Tuple[str, type, Tuple[int]]] = [
+        ('point', np.float32, (3,)),
+    ]
 
-    def __init__(self, **kwargs):
-        digest_config(self, kwargs)
+    def __init__(
+        self,
+        color: ManimColor = WHITE,
+        opacity: float = 1.0,
+        # Larger reflectiveness makes things brighter when facing the light
+        reflectiveness: float = 0.0,
+        # Larger shadow makes faces opposite the light darker
+        shadow: float = 0.0,
+        # Makes parts bright where light gets reflected toward the camera
+        gloss: float = 0.0,
+        # For shaders
+        texture_paths: dict[str, str] | None = None,
+        # If true, the mobject will not get rotated according to camera position
+        is_fixed_in_frame: bool = False,
+        depth_test: bool = False,
+    ):
+        self.color = color
+        self.opacity = opacity
+        self.reflectiveness = reflectiveness
+        self.shadow = shadow
+        self.gloss = gloss
+        self.texture_paths = texture_paths
+        self.is_fixed_in_frame = is_fixed_in_frame
+        self.depth_test = depth_test
+
+        # Internal state
         self.submobjects: list[Mobject] = []
         self.parents: list[Mobject] = []
         self.family: list[Mobject] = [self]
@@ -171,18 +175,15 @@ class Mobject(object):
         self.refresh_bounding_box()
         return self
 
-    def set_points(self, points: npt.ArrayLike):
-        if len(points) == len(self.data["points"]):
-            self.data["points"][:] = points
-        elif isinstance(points, np.ndarray):
-            self.data["points"] = points.copy()
-        else:
-            self.data["points"] = np.array(points)
-        self.refresh_bounding_box()
+    def set_points(self, points: Vect3Array):
+        self.resize_points(len(points))
+        self.data["points"][:] = points
         return self
 
-    def append_points(self, new_points: npt.ArrayLike):
-        self.data["points"] = np.vstack([self.data["points"], new_points])
+    def append_points(self, new_points: Vect3Array):
+        n = self.get_num_points()
+        self.resize_points(n + len(new_points))
+        self.data["points"][n:] = new_points
         self.refresh_bounding_box()
         return self
 
@@ -195,8 +196,8 @@ class Mobject(object):
     def apply_points_function(
         self,
         func: Callable[[np.ndarray], np.ndarray],
-        about_point: np.ndarray = None,
-        about_edge: np.ndarray = ORIGIN,
+        about_point: Vect3 = None,
+        about_edge: Vect3 = ORIGIN,
         works_on_bounding_box: bool = False
     ):
         if about_point is None and about_edge is not None:
@@ -228,7 +229,7 @@ class Mobject(object):
         self.set_points(mobject.get_points())
         return self
 
-    def get_points(self) -> np.ndarray:
+    def get_points(self) -> Vect3Array:
         return self.data["points"]
 
     def clear_points(self) -> None:
@@ -237,22 +238,22 @@ class Mobject(object):
     def get_num_points(self) -> int:
         return len(self.data["points"])
 
-    def get_all_points(self) -> np.ndarray:
+    def get_all_points(self) -> Vect3Array:
         if self.submobjects:
             return np.vstack([sm.get_points() for sm in self.get_family()])
         else:
             return self.get_points()
 
     def has_points(self) -> bool:
-        return self.get_num_points() > 0
+        return self.data["points"].size > 0
 
-    def get_bounding_box(self) -> np.ndarray:
+    def get_bounding_box(self) -> Vect3Array:
         if self.needs_new_bounding_box:
             self.data["bounding_box"] = self.compute_bounding_box()
             self.needs_new_bounding_box = False
         return self.data["bounding_box"]
 
-    def compute_bounding_box(self) -> np.ndarray:
+    def compute_bounding_box(self) -> Vect3Array:
         all_points = np.vstack([
             self.get_points(),
             *(
@@ -284,9 +285,9 @@ class Mobject(object):
 
     def are_points_touching(
         self,
-        points: np.ndarray,
+        points: Vect3Array,
         buff: float = 0
-    ) -> bool:
+    ) -> np.ndarray:
         bb = self.get_bounding_box()
         mins = (bb[0] - buff)
         maxs = (bb[2] + buff)
@@ -294,7 +295,7 @@ class Mobject(object):
 
     def is_point_touching(
         self,
-        point: np.ndarray,
+        point: Vect3,
         buff: float = 0
     ) -> bool:
         return self.are_points_touching(np.array(point, ndmin=2), buff)[0]
@@ -309,7 +310,7 @@ class Mobject(object):
 
     # Family matters
 
-    def __getitem__(self, value):
+    def __getitem__(self, value: int | slice) -> Mobject:
         if isinstance(value, slice):
             GroupClass = self.get_group_class()
             return GroupClass(*self.split().__getitem__(value))
@@ -321,7 +322,7 @@ class Mobject(object):
     def __len__(self):
         return len(self.split())
 
-    def split(self):
+    def split(self) -> list[Mobject]:
         return self.submobjects
 
     def assemble_family(self):
@@ -333,7 +334,7 @@ class Mobject(object):
             parent.assemble_family()
         return self
 
-    def get_family(self, recurse: bool = True):
+    def get_family(self, recurse: bool = True) -> list[Mobject]:
         if recurse:
             return self.family
         else:
@@ -393,6 +394,7 @@ class Mobject(object):
         if self in old_submob.parents:
             old_submob.parents.remove(self)
         self.submobjects[index] = new_submob
+        new_submob.parents.append(self)
         self.assemble_family()
         return self
 
@@ -419,7 +421,7 @@ class Mobject(object):
 
     def arrange(
         self,
-        direction: np.ndarray = RIGHT,
+        direction: Vect3 = RIGHT,
         center: bool = True,
         **kwargs
     ):
@@ -439,7 +441,7 @@ class Mobject(object):
         buff_ratio: float | None = None,
         h_buff_ratio: float = 0.5,
         v_buff_ratio: float = 0.5,
-        aligned_edge: np.ndarray = ORIGIN,
+        aligned_edge: Vect3 = ORIGIN,
         fill_rows_first: bool = True
     ):
         submobs = self.submobjects
@@ -520,9 +522,14 @@ class Mobject(object):
         self.assemble_family()
         return self
 
+    def reverse_submobjects(self):
+        self.submobjects.reverse()
+        self.assemble_family()
+        return self
+
     # Copying and serialization
 
-    def stash_mobject_pointers(func):
+    def stash_mobject_pointers(func: Callable):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             uncopied_attrs = ["parents", "target", "saved_state"]
@@ -651,7 +658,7 @@ class Mobject(object):
             self.match_updaters(mobject)
         return self
 
-    def looks_identical(self, mobject: Mobject):
+    def looks_identical(self, mobject: Mobject) -> bool:
         fam1 = self.family_members_with_points()
         fam2 = mobject.family_members_with_points()
         if len(fam1) != len(fam2):
@@ -661,14 +668,22 @@ class Mobject(object):
                 if set(d1).difference(d2):
                     return False
                 for key in d1:
-                    eq = (d1[key] == d2[key])
-                    if isinstance(eq, bool):
-                        if not eq:
+                    if isinstance(d1[key], np.ndarray) and isinstance(d2[key], np.ndarray):
+                        if not d1[key].size == d2[key].size:
                             return False
-                    else:
-                        if not eq.all():
-                            return False
+                    if not np.isclose(d1[key], d2[key]).all():
+                        return False
         return True
+
+    def has_same_shape_as(self, mobject: Mobject) -> bool:
+        # Normalize both point sets by centering and making height 1
+        points1, points2 = (
+            (m.get_all_points() - m.get_center()) / m.get_height()
+            for m in (self, mobject)
+        )
+        if len(points1) != len(points2):
+            return False
+        return bool(np.isclose(points1, points2).all())
 
     # Creating new Mobjects from this one
 
@@ -676,16 +691,35 @@ class Mobject(object):
         group_class = self.get_group_class()
         return group_class(*(self.copy() for _ in range(n)))
 
-    def get_grid(self, n_rows: int, n_cols: int, height: float | None = None, **kwargs) -> Group:
+    def get_grid(self,
+                 n_rows: int,
+                 n_cols: int,
+                 height: float | None = None,
+                 width: float | None = None,
+                 group_by_rows: bool = False,
+                 group_by_cols: bool = False,
+                 **kwargs) -> Group:
         """
         Returns a new mobject containing multiple copies of this one
         arranged in a grid
         """
-        grid = self.replicate(n_rows * n_cols)
+        total = n_rows * n_cols
+        grid = self.replicate(total)
+        if group_by_cols:
+            kwargs["fill_rows_first"] = False
         grid.arrange_in_grid(n_rows, n_cols, **kwargs)
         if height is not None:
             grid.set_height(height)
-        return grid
+        if width is not None:
+            grid.set_height(width)
+
+        group_class = self.get_group_class()
+        if group_by_rows:
+            return group_class(*(grid[n:n + n_cols] for n in range(0, total, n_cols)))
+        elif group_by_cols:
+            return group_class(*(grid[n:n + n_rows] for n in range(0, total, n_rows)))
+        else:
+            return grid
 
     # Updating
 
@@ -791,14 +825,14 @@ class Mobject(object):
     def is_changing(self) -> bool:
         return self._is_animating or self.has_updaters
 
-    def set_animating_status(self, is_animating: bool, recurse: bool = True) -> None:
-        for mob in self.get_family(recurse):
+    def set_animating_status(self, is_animating: bool, recurse: bool = True):
+        for mob in (*self.get_family(recurse), *self.get_ancestors(extended=True)):
             mob._is_animating = is_animating
         return self
 
     # Transforming operations
 
-    def shift(self, vector: np.ndarray):
+    def shift(self, vector: Vect3):
         self.apply_points_function(
             lambda points: points + vector,
             about_edge=None,
@@ -810,8 +844,8 @@ class Mobject(object):
         self,
         scale_factor: float | npt.ArrayLike,
         min_scale_factor: float = 1e-8,
-        about_point: np.ndarray | None = None,
-        about_edge: np.ndarray = ORIGIN
+        about_point: Vect3 | None = None,
+        about_edge: Vect3 = ORIGIN
     ):
         """
         Default behavior is to scale about the center of the mobject.
@@ -848,14 +882,14 @@ class Mobject(object):
         self.apply_points_function(func, works_on_bounding_box=True, **kwargs)
         return self
 
-    def rotate_about_origin(self, angle: float, axis: np.ndarray = OUT):
+    def rotate_about_origin(self, angle: float, axis: Vect3 = OUT):
         return self.rotate(angle, axis, about_point=ORIGIN)
 
     def rotate(
         self,
         angle: float,
-        axis: np.ndarray = OUT,
-        about_point: np.ndarray | None = None,
+        axis: Vect3 = OUT,
+        about_point: Vect3 | None = None,
         **kwargs
     ):
         rot_matrix_T = rotation_matrix_transpose(angle, axis)
@@ -866,7 +900,7 @@ class Mobject(object):
         )
         return self
 
-    def flip(self, axis: np.ndarray = UP, **kwargs):
+    def flip(self, axis: Vect3 = UP, **kwargs):
         return self.rotate(TAU / 2, axis, **kwargs)
 
     def apply_function(self, function: Callable[[np.ndarray], np.ndarray], **kwargs):
@@ -917,8 +951,8 @@ class Mobject(object):
 
     def wag(
         self,
-        direction: np.ndarray = RIGHT,
-        axis: np.ndarray = DOWN,
+        direction: Vect3 = RIGHT,
+        axis: Vect3 = DOWN,
         wag_factor: float = 1.0
     ):
         for mob in self.family_members_with_points():
@@ -940,7 +974,7 @@ class Mobject(object):
 
     def align_on_border(
         self,
-        direction: np.ndarray,
+        direction: Vect3,
         buff: float = DEFAULT_MOBJECT_TO_EDGE_BUFFER
     ):
         """
@@ -956,27 +990,27 @@ class Mobject(object):
 
     def to_corner(
         self,
-        corner: np.ndarray = LEFT + DOWN,
+        corner: Vect3 = LEFT + DOWN,
         buff: float = DEFAULT_MOBJECT_TO_EDGE_BUFFER
     ):
         return self.align_on_border(corner, buff)
 
     def to_edge(
         self,
-        edge: np.ndarray = LEFT,
+        edge: Vect3 = LEFT,
         buff: float = DEFAULT_MOBJECT_TO_EDGE_BUFFER
     ):
         return self.align_on_border(edge, buff)
 
     def next_to(
         self,
-        mobject_or_point: Mobject | np.ndarray,
-        direction: np.ndarray = RIGHT,
+        mobject_or_point: Mobject | Vect3,
+        direction: Vect3 = RIGHT,
         buff: float = DEFAULT_MOBJECT_TO_MOBJECT_BUFFER,
-        aligned_edge: np.ndarray = ORIGIN,
+        aligned_edge: Vect3 = ORIGIN,
         submobject_to_align: Mobject | None = None,
         index_of_submobject_to_align: int | slice | None = None,
-        coor_mask: np.ndarray = np.array([1, 1, 1]),
+        coor_mask: Vect3 = np.array([1, 1, 1]),
     ):
         if isinstance(mobject_or_point, Mobject):
             mob = mobject_or_point
@@ -1021,7 +1055,7 @@ class Mobject(object):
             return True
         return False
 
-    def stretch_about_point(self, factor: float, dim: int, point: np.ndarray):
+    def stretch_about_point(self, factor: float, dim: int, point: Vect3):
         return self.stretch(factor, dim, about_point=point)
 
     def stretch_in_place(self, factor: float, dim: int):
@@ -1086,20 +1120,20 @@ class Mobject(object):
             self.set_depth(min_depth, **kwargs)
         return self
 
-    def set_coord(self, value: float, dim: int, direction: np.ndarray = ORIGIN):
+    def set_coord(self, value: float, dim: int, direction: Vect3 = ORIGIN):
         curr = self.get_coord(dim, direction)
         shift_vect = np.zeros(self.dim)
         shift_vect[dim] = value - curr
         self.shift(shift_vect)
         return self
 
-    def set_x(self, x: float, direction: np.ndarray = ORIGIN):
+    def set_x(self, x: float, direction: Vect3 = ORIGIN):
         return self.set_coord(x, 0, direction)
 
-    def set_y(self, y: float, direction: np.ndarray = ORIGIN):
+    def set_y(self, y: float, direction: Vect3 = ORIGIN):
         return self.set_coord(y, 1, direction)
 
-    def set_z(self, z: float, direction: np.ndarray = ORIGIN):
+    def set_z(self, z: float, direction: Vect3 = ORIGIN):
         return self.set_coord(z, 2, direction)
 
     def space_out_submobjects(self, factor: float = 1.5, **kwargs):
@@ -1110,9 +1144,9 @@ class Mobject(object):
 
     def move_to(
         self,
-        point_or_mobject: Mobject | np.ndarray,
-        aligned_edge: np.ndarray = ORIGIN,
-        coor_mask: np.ndarray = np.array([1, 1, 1])
+        point_or_mobject: Mobject | Vect3,
+        aligned_edge: Vect3 = ORIGIN,
+        coor_mask: Vect3 = np.array([1, 1, 1])
     ):
         if isinstance(point_or_mobject, Mobject):
             target = point_or_mobject.get_bounding_box_point(aligned_edge)
@@ -1150,7 +1184,7 @@ class Mobject(object):
         self.scale((length + buff) / length)
         return self
 
-    def put_start_and_end_on(self, start: np.ndarray, end: np.ndarray):
+    def put_start_and_end_on(self, start: Vect3, end: Vect3):
         curr_start, curr_end = self.get_start_and_end()
         curr_vect = curr_end - curr_start
         if np.all(curr_vect == 0):
@@ -1184,7 +1218,7 @@ class Mobject(object):
 
     def set_color_by_rgba_func(
         self,
-        func: Callable[[np.ndarray], Sequence[float]],
+        func: Callable[[Vect3], Vect4],
         recurse: bool = True
     ):
         """
@@ -1197,7 +1231,7 @@ class Mobject(object):
 
     def set_color_by_rgb_func(
         self,
-        func: Callable[[np.ndarray], Sequence[float]],
+        func: Callable[[Vect3], Vect3],
         opacity: float = 1,
         recurse: bool = True
     ):
@@ -1344,7 +1378,7 @@ class Mobject(object):
 
     # Getters
 
-    def get_bounding_box_point(self, direction: np.ndarray) -> np.ndarray:
+    def get_bounding_box_point(self, direction: Vect3) -> Vect3:
         bb = self.get_bounding_box()
         indices = (np.sign(direction) + 1).astype(int)
         return np.array([
@@ -1352,10 +1386,10 @@ class Mobject(object):
             for i in range(3)
         ])
 
-    def get_edge_center(self, direction: np.ndarray) -> np.ndarray:
+    def get_edge_center(self, direction: Vect3) -> Vect3:
         return self.get_bounding_box_point(direction)
 
-    def get_corner(self, direction: np.ndarray) -> np.ndarray:
+    def get_corner(self, direction: Vect3) -> Vect3:
         return self.get_bounding_box_point(direction)
 
     def get_all_corners(self):
@@ -1365,13 +1399,13 @@ class Mobject(object):
             for indices in it.product([0, 2], repeat=3)
         ])
 
-    def get_center(self) -> np.ndarray:
+    def get_center(self) -> Vect3:
         return self.get_bounding_box()[1]
 
-    def get_center_of_mass(self) -> np.ndarray:
+    def get_center_of_mass(self) -> Vect3:
         return self.get_all_points().mean(0)
 
-    def get_boundary_point(self, direction: np.ndarray) -> np.ndarray:
+    def get_boundary_point(self, direction: Vect3) -> Vect3:
         all_points = self.get_all_points()
         boundary_directions = all_points - self.get_center()
         norms = np.linalg.norm(boundary_directions, axis=1)
@@ -1379,7 +1413,7 @@ class Mobject(object):
         index = np.argmax(np.dot(boundary_directions, np.array(direction).T))
         return all_points[index]
 
-    def get_continuous_bounding_box_point(self, direction: np.ndarray) -> np.ndarray:
+    def get_continuous_bounding_box_point(self, direction: Vect3) -> Vect3:
         dl, center, ur = self.get_bounding_box()
         corner_vect = (ur - center)
         return center + direction / np.max(np.abs(np.true_divide(
@@ -1388,22 +1422,22 @@ class Mobject(object):
             where=((corner_vect) != 0)
         )))
 
-    def get_top(self) -> np.ndarray:
+    def get_top(self) -> Vect3:
         return self.get_edge_center(UP)
 
-    def get_bottom(self) -> np.ndarray:
+    def get_bottom(self) -> Vect3:
         return self.get_edge_center(DOWN)
 
-    def get_right(self) -> np.ndarray:
+    def get_right(self) -> Vect3:
         return self.get_edge_center(RIGHT)
 
-    def get_left(self) -> np.ndarray:
+    def get_left(self) -> Vect3:
         return self.get_edge_center(LEFT)
 
-    def get_zenith(self) -> np.ndarray:
+    def get_zenith(self) -> Vect3:
         return self.get_edge_center(OUT)
 
-    def get_nadir(self) -> np.ndarray:
+    def get_nadir(self) -> Vect3:
         return self.get_edge_center(IN)
 
     def length_over_dim(self, dim: int) -> float:
@@ -1419,7 +1453,7 @@ class Mobject(object):
     def get_depth(self) -> float:
         return self.length_over_dim(2)
 
-    def get_coord(self, dim: int, direction: np.ndarray = ORIGIN) -> float:
+    def get_coord(self, dim: int, direction: Vect3 = ORIGIN) -> float:
         """
         Meant to generalize get_x, get_y, get_z
         """
@@ -1434,20 +1468,20 @@ class Mobject(object):
     def get_z(self, direction=ORIGIN) -> float:
         return self.get_coord(2, direction)
 
-    def get_start(self) -> np.ndarray:
+    def get_start(self) -> Vect3:
         self.throw_error_if_no_points()
         return self.get_points()[0].copy()
 
-    def get_end(self) -> np.ndarray:
+    def get_end(self) -> Vect3:
         self.throw_error_if_no_points()
         return self.get_points()[-1].copy()
 
-    def get_start_and_end(self) -> tuple(np.ndarray, np.ndarray):
+    def get_start_and_end(self) -> tuple[Vect3, Vect3]:
         self.throw_error_if_no_points()
         points = self.get_points()
         return (points[0].copy(), points[-1].copy())
 
-    def point_from_proportion(self, alpha: float) -> np.ndarray:
+    def point_from_proportion(self, alpha: float) -> Vect3:
         points = self.get_points()
         i, subalpha = integer_interpolate(0, len(points) - 1, alpha)
         return interpolate(points[i], points[i + 1], subalpha)
@@ -1494,9 +1528,9 @@ class Mobject(object):
 
     def match_coord(
         self,
-        mobject_or_point: Mobject | np.ndarray,
+        mobject_or_point: Mobject | Vect3,
         dim: int,
-        direction: np.ndarray = ORIGIN
+        direction: Vect3 = ORIGIN
     ):
         if isinstance(mobject_or_point, Mobject):
             coord = mobject_or_point.get_coord(dim, direction)
@@ -1506,29 +1540,29 @@ class Mobject(object):
 
     def match_x(
         self,
-        mobject_or_point: Mobject | np.ndarray,
-        direction: np.ndarray = ORIGIN
+        mobject_or_point: Mobject | Vect3,
+        direction: Vect3 = ORIGIN
     ):
         return self.match_coord(mobject_or_point, 0, direction)
 
     def match_y(
         self,
-        mobject_or_point: Mobject | np.ndarray,
-        direction: np.ndarray = ORIGIN
+        mobject_or_point: Mobject | Vect3,
+        direction: Vect3 = ORIGIN
     ):
         return self.match_coord(mobject_or_point, 1, direction)
 
     def match_z(
         self,
-        mobject_or_point: Mobject | np.ndarray,
-        direction: np.ndarray = ORIGIN
+        mobject_or_point: Mobject | Vect3,
+        direction: Vect3 = ORIGIN
     ):
         return self.match_coord(mobject_or_point, 2, direction)
 
     def align_to(
         self,
-        mobject_or_point: Mobject | np.ndarray,
-        direction: np.ndarray = ORIGIN
+        mobject_or_point: Mobject | Vect3,
+        direction: Vect3 = ORIGIN
     ):
         """
         Examples:
@@ -1698,7 +1732,7 @@ class Mobject(object):
         for sm, sm1, sm2 in zip(self.get_family(), mobject1.get_family(), mobject2.get_family()):
             keys = sm.data.keys() & sm1.data.keys() & sm2.data.keys()
             sm.lock_data(list(filter(
-                lambda key: np.all(sm1.data[key] == sm2.data[key]),
+                lambda key: (sm1.data[key] == sm2.data[key]).all(),
                 keys,
             )))
         return self
@@ -1709,7 +1743,7 @@ class Mobject(object):
 
     # Operations touching shader uniforms
 
-    def affects_shader_info_id(func):
+    def affects_shader_info_id(func: Callable):
         @wraps(func)
         def wrapper(self):
             for mob in self.get_family():
@@ -1807,7 +1841,7 @@ class Mobject(object):
         self.shader_wrapper.refresh_id()
         return self
 
-    def get_shader_wrapper(self):
+    def get_shader_wrapper(self) -> ShaderWrapper:
         self.shader_wrapper.vert_data = self.get_shader_data()
         self.shader_wrapper.vert_indices = self.get_shader_vert_indices()
         self.shader_wrapper.uniforms = self.get_shader_uniforms()
@@ -1993,13 +2027,16 @@ class Group(Mobject):
 
 
 class Point(Mobject):
-    CONFIG = {
-        "artificial_width": 1e-6,
-        "artificial_height": 1e-6,
-    }
-
-    def __init__(self, location: npt.ArrayLike = ORIGIN, **kwargs):
-        Mobject.__init__(self, **kwargs)
+    def __init__(
+        self,
+        location: Vect3 = ORIGIN,
+        artificial_width: float = 1e-6,
+        artificial_height: float = 1e-6,
+        **kwargs
+    ):
+        self.artificial_width = artificial_width
+        self.artificial_height = artificial_height
+        super().__init__(**kwargs)
         self.set_location(location)
 
     def get_width(self) -> float:
@@ -2008,10 +2045,10 @@ class Point(Mobject):
     def get_height(self) -> float:
         return self.artificial_height
 
-    def get_location(self) -> np.ndarray:
+    def get_location(self) -> Vect3:
         return self.get_points()[0].copy()
 
-    def get_bounding_box_point(self, *args, **kwargs) -> np.ndarray:
+    def get_bounding_box_point(self, *args, **kwargs) -> Vect3:
         return self.get_location()
 
     def set_location(self, new_loc: npt.ArrayLike):
