@@ -1805,4 +1805,4 @@ class PlotBarChart2(Scene):
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} PlotBarChart2 -os".format(__file__))
+    system("manimgl {} TexTextTransform4 -os".format(__file__))

@@ -1,5 +1,4 @@
 from manimlib import *
-import scipy.stats as ss
 def get_coords_from_csvdata(file_name):
     import csv
     coords = []
