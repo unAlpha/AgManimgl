@@ -1773,7 +1773,7 @@ class PlotBarChart2(Scene):
         )
         
         axes.add_coordinate_labels()
-        axes.scale(0.86)
+        # axes.scale(0.86)
         x_label = Text("x",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
         y_label = Text("y",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
     
@@ -1801,8 +1801,8 @@ class PlotBarChart2(Scene):
         self.play(bars.animate.change_bar_values(coords3))
         self.play(bars.animate.change_bar_values(coords4))
         self.wait()
-        
+
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} TexTextTransform4 -os".format(__file__))
+    system("manimgl {} ConvolutionPic -o".format(__file__))

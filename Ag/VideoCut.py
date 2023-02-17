@@ -2,19 +2,24 @@ from manimlib import *
 from moviepy.editor import *
 from os import system
 
-video_name = "血氧仪-tt"
-Word = "脉搏血氧仪是什么原理？火腿肠也能测出血氧饱和度吗？"
-clip_times=[
-        ["01:00:00:00","01:05:31:48"],
-        ["01:05:31:49","01:11:52:12"],
-        ["01:11:52:14","01:20:57:07"],
-    ]
-video_path = r"Z:\LiFiles\2023年\1月份\血氧仪\交付"
+video_path = r"Z:\LiFiles\2023年\2月份\地震\交付"
 media_path = r"E:\Dropbox\manim\AgManimgl\media\videos"  
+video_name = "地震异常-tt2"
+Word = "土耳其大地震前的蓝光是怎么回事？地震还有哪些前兆？"
+GeneratorFalse = False
+num_clip = 3
+clip_times=[
+        # ["01:00:00:00","01:00:00:00"],
+        # ["01:00:00:00","01:00:00:00"],
+        # ["01:00:00:00","01:00:00:00"],
+        # ["01:00:00:00","01:00:00:00"],
+        # ["01:00:00:00","01:00:00:00"],
+        # ["01:00:00:00","01:00:00:00"],
+    ]
 clip_path = os.path.join(video_path,"抖音切割")
 image_path = os.path.join(clip_path,"images")
 video_file = os.path.join(video_path, video_name+".mp4")
-txt = [[f"{i+1}/{len(clip_times)}",Word] for i in range(0,len(clip_times))]
+txt = [[f"{i+1}/{num_clip}",Word] for i in range(0,num_clip)]
 
 class video_text0(Scene):
     i = 0 
@@ -23,13 +28,17 @@ class video_text0(Scene):
                 txt[self.i][0],
                 font_size=40,
                 color=RED,
-                font ='Alibaba PuHuiTi 2.0 115 Black',
+                # font ='Alibaba PuHuiTi 2.0 115 Black',
+                font = '阿里巴巴普惠体 2.0',
+                weight = 'Bold'
             )
         text2 = Text(
                 txt[self.i][1],
                 font_size=40,
                 color=WHITE,
-                font ='Alibaba PuHuiTi 2.0 75 SemiBold',
+                # font ='Alibaba PuHuiTi 2.0 75 SemiBold',
+                font = '阿里巴巴普惠体 2.0',
+                weight = 'Medium'
             )
         text = VGroup(text1,text2).arrange(RIGHT,buff=0.38)
         text.to_corner(DL).shift(UP)
@@ -47,6 +56,7 @@ class video_text0(Scene):
             Uncreate(text),
             FadeOut(bg_text),  
         )
+        self.wait(0.1)
 
 class video_text1(video_text0):
     i = 1 
@@ -144,57 +154,75 @@ def convert_time(time_string, fps):
     # 使用字符串的 join 方法来连接分隔的字符
     return ":".join(pairs[1:3]) + "." + parts_ms
 
-def ffmpeg_video_clip(time_str):
+def ffmpeg_video_clip():
     print("Start generate")
     video = VideoFileClip(video_file)
     fps = video.fps
-    for i,times in enumerate(time_str):
+    for i in range(num_clip):
         print(f"Generate {i+1}")
         clip_name = f"clip_{i+1}.ts"
         clip_file = os.path.join(clip_path, clip_name)
         image_name = f"{i+1}.jpg"
         image_file = os.path.join(image_path, image_name)
-        image_file_video = os.path.join(clip_path, f"img_({i+1}).ts")
+        image_file_video = os.path.join(clip_path, f"img_{i+1}.mp4")
         media_name = f"{video_name}_overlay_{i+1}.mov"
         media_file = os.path.join(media_path, media_name)
         final_video_over = os.path.join(clip_path, video_name+f"_tmp_6-{i+1}.ts")
         final_video_file = os.path.join(clip_path, video_name+f"_6-{i+1}.mp4")
-        start_time = convert_time(times[0],fps)
-        print(start_time)
-        end_time = convert_time(times[1],fps)
-        print(end_time)
         
         if os.path.exists(video_file):
-            if not os.path.exists(clip_file):
-                order_clip = f"ffmpeg -y -ss {start_time} -to {end_time} -accurate_seek -i {video_file} \
-                        -c:v libx264 -b:v 10000k -c:a aac -b:a 195k -vbsf h264_mp4toannexb {clip_file}"
-                os.system(order_clip)
-                
-            if not os.path.exists(final_video_over):
-                order_overlay = f"ffmpeg -y -i {clip_file} -itsoffset 0.5 -i {media_file} \
-                            -filter_complex \"[1:v]scale=1920:1080[over];[0:v][over]overlay=0:0\" \
-                            -c:v libx264 -b:v 10000k -c:a copy {final_video_over}"
-                os.system(order_overlay)
-                 
             if not os.path.exists(image_file_video):
-                order_img = f"ffmpeg -y -loop 1 -i {image_file} -t 0.1 \
-                            -vf \"fps=50,format=yuv420p,scale=1920:1080:force_original_aspect_ratio=decrease,pad = 1920:1080:(ow-iw)/ 2:(oh-ih)/ 2\" \
-                            -c:v libx264 -b:v 10000k -vbsf h264_mp4toannexb {image_file_video}"
+                print(f"order_img {i+1} 生成中……")
+                order_img = f"ffmpeg -y -loop 1 \
+                            -i {image_file} \
+                            -t 0.1 \
+                            -vf \"fps=50,format=yuv420p,\
+                            scale=1920:1080:force_original_aspect_ratio=decrease,\
+                            pad = 1920:1080:(ow-iw)/2:(oh-ih)/2\" \
+                            -c:v libx264 -b:v 10000k -vbsf h264_mp4toannexb \
+                            {image_file_video}"
                 os.system(order_img) 
-            
-            order_merge = f"ffmpeg -y -i \"concat:{image_file_video}|{final_video_over}\" \
-                        -c:v libx264 -b:v 10000k -c:a copy {final_video_file}" 
-            os.system(order_merge)        
-            
-        rm_list = [clip_file,final_video_over,image_file_video]
-        for rmf in rm_list:
-            if os.path.exists(rmf):
-                os.remove(rmf)
-                print(f"Delet {rmf} done!")
+                print(f"order_img {i+1} 生成成功")
+                
+            if GeneratorFalse:
+                start_time = convert_time(clip_times[i][0],fps)
+                print(start_time)
+                end_time = convert_time(clip_times[i][1],fps)
+                print(end_time)
+                if not os.path.exists(clip_file):
+                    print(f"order_clip {i+1} 生成中……")
+                    order_clip = f"ffmpeg -y -ss {start_time} -to {end_time} \
+                                -accurate_seek -i {video_file} \
+                                -c:v libx264 -b:v 10000k -c:a aac -b:a 195k -vbsf h264_mp4toannexb {clip_file}"
+                    os.system(order_clip)
+                    print(f"order_clip {i+1} 生成成功")
+                    
+                if not os.path.exists(final_video_over):
+                    print(f"order_overlay {i+1} 生成中……")
+                    order_overlay = f"ffmpeg -y -i {clip_file} \
+                                    -itsoffset 0.5 -i {media_file} -filter_complex \
+                                    \"[1:v]scale=1920:1080[over];[0:v][over]overlay=0:0\" \
+                                    -c:v libx264 -b:v 10000k -c:a copy {final_video_over}"
+                    os.system(order_overlay)
+                    print(f"order_overlay {i+1} 生成成功")
+                
+                print(f"order_merge {i+1} 合并中")
+                order_merge = f"ffmpeg -y -i \
+                            \"concat:{image_file_video}|{final_video_over}\" \
+                            -c:v libx264 -b:v 10000k -c:a copy {final_video_file}" 
+                os.system(order_merge)
+                print(f"order_merge {i+1} 合并成功") 
+                    
+                if os.path.exists(final_video_file):
+                    rm_list = [clip_file,final_video_over,image_file_video]
+                    for rmf in rm_list:
+                        if os.path.exists(rmf):
+                            os.remove(rmf)
+                            print(f"Delet {rmf} done!")
            
 if __name__ == "__main__":
-    for i in range(len(clip_times)):
+    for i in range(num_clip):
         if not os.path.exists(os.path.join(media_path, f"{video_name}_overlay_{i+1}.mov")):
             system(f"manimgl {__file__} video_text{i} -wt --fps 50 --file_name {video_name}_overlay_{i+1}")
-    ffmpeg_video_clip(clip_times)    
+    ffmpeg_video_clip()    
         

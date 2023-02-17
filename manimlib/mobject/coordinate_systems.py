@@ -397,6 +397,7 @@ class CoordinateSystem(ABC):
         # TODO
         pass
 
+
 class Axes(VGroup, CoordinateSystem):
     default_axis_config: dict = dict()
     default_x_axis_config: dict = dict()

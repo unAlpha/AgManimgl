@@ -39,20 +39,10 @@ def prompt_user_for_choice(scene_classes):
             "which ones would you like to render?" + \
             "\nScene Name or Number: "
         )
-        # return [
-        #     name_to_class[split_str] if not split_str.isnumeric() else scene_classes[int(split_str) - 1]
-        #     for split_str in user_input.replace(" ", "").split(",")
-        # ]
-        class_num = [num_str for num_str in user_input.split(",")]
-        for cn in class_num:
-            if str.__contains__(str(cn), '-'):
-                num1=cn[:cn.rfind('-', 1)]
-                num2=cn[cn.rfind('-', 1)+1:]
-                class_num.remove(cn)
-                for tmp in range(int(num1),int(num2)+1):
-                    class_num.append(tmp)
-        return [scene_classes[int(num_str)-1] for num_str in class_num]
-    
+        return [
+            name_to_class[split_str] if not split_str.isnumeric() else scene_classes[int(split_str) - 1]
+            for split_str in user_input.replace(" ", "").split(",")
+        ]
     except IndexError:
         log.error("Invalid scene number")
         sys.exit(2)
@@ -81,7 +71,7 @@ def compute_total_frames(scene_class, scene_config):
     """
     pre_config = copy.deepcopy(scene_config)
     pre_config["file_writer_config"]["write_to_movie"] = False
-    pre_config["file_writer_config"]["save_last_frame"] = False
+    pre_config["file_writer_config"]["save_last_frame"] = True
     pre_config["file_writer_config"]["quiet"] = True
     pre_config["skip_animations"] = True
     pre_scene = scene_class(**pre_config)

@@ -725,8 +725,6 @@ class ControlsExample(Scene):
         self.textbox.set_value("Manim")
         # self.wait(60)
         # self.embed()
-if __name__ == "__main__":
-    from os import system
-    system("manimgl {} UpdatersExample -os".format(__file__))
-    
+
+
 # See https://github.com/3b1b/videos for many, many more

@@ -1,24 +1,34 @@
-# 1. 请写出求巴塞尔问题近似解的python代码
-# （注：巴塞尔问题不了解是什么可以百度，但是请不要试图抄网上的答案）
+# import os
+# import manimpango
+# print(manimpango.list_fonts())
+# os.system("ffmpeg -y -loop 1 \
+#         -i \"/Users/pengyinzhong/Downloads/X/交付/抖音切割/images/1.jpg\" \
+#         -t 0.1 \
+#         -vf \"fps=50,format=yuv420p,scale=1920:1080:force_original_aspect_ratio=decrease,\
+#         pad = 1920:1080:(ow-iw)/2:(oh-ih)/2\" \
+#         -c:v libx264 -b:v 10000k -vbsf h264_mp4toannexb \
+#         \"/Users/pengyinzhong/Downloads/X/交付/抖音切割/img_1.ts\""
+#         )
 
-import math
+import numpy as np
+import matplotlib.pyplot as plt
 
-def TheBaselProblem(N):
-    BP_num = 0
-    for i in range(1,N+1):
-        BP_num+=1/(i*i)
-    return BP_num
+# Generate a set of random data with normal distribution
+data = np.random.normal(100, 10, 1000)
 
-if __name__ == '__main__':
-    N = int(1e6)
-    BP_value = TheBaselProblem(N)
-    print(
-        "巴塞尔问题近似解:%s\n近似解与实值误差:%s"
-        %(BP_value,math.pi*math.pi/6-BP_value)
-        )
+# Plot a histogram of the data
+plt.hist(data, bins=30, edgecolor='black', density=True)
 
+# Plot the normal distribution curve over the histogram
+mean, std = np.mean(data), np.std(data)
+x = np.linspace(mean - 3*std, mean + 3*std, 100)
+y = 1 / (std * np.sqrt(2 * np.pi)) * np.exp(-(x - mean)**2 / (2 * std**2))
+plt.plot(x, y, 'r')
 
+# Add labels and title to the plot
+plt.xlabel('Data')
+plt.ylabel('Probability Density')
+plt.title('Normal Distribution Plot')
 
-# 2. sqrt(1+2*sqrt(1+3*sqrt(1+4*sqrt(1+...))))的值等于? 
-# （提示：第二题可以使用python，也可以手算，给出结果即可）
-# 答案为：3
+# Show the plot
+plt.show()

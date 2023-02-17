@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 import os
-file_path = "Z:\Drive"
+file_path = r"Z:\LiFiles\2023年\2月份\地震\素材"
 files_names = os.listdir(file_path)
 for files_name in files_names:
     if ".ts" in files_name: 

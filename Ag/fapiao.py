@@ -1,8 +1,8 @@
 import os
 import fitz
 
-root_dir = r'E:\Dropbox\发票\1月份\1月份电子发票'
-repeat_dir = r'E:\Dropbox\发票\12月份\12月份电子发票'
+root_dir = r'E:\Dropbox\发票\2月份\2月份电子发票'
+repeat_dir = r'E:\Dropbox\发票\1月份\1月份电子发票'
 
 def fapiao_read(text):
     money = 0
@@ -48,9 +48,10 @@ for file in os.listdir(root_dir):
                 print(f"有重复命名：{out_file_name}")
         for rpfile in os.listdir(repeat_dir):
             if rpfile == out_file_name+".pdf":
-                print(rpfile,"重复")
+                print(rpfile,"重复……！")
         dst = os.path.join(root_dir, out_file_name+".pdf")
         doc.close()
-        os.rename(src, dst)
+        if not os.path.exists(dst):
+            os.rename(src, dst)
         
 print(round(Money_sum,2))
