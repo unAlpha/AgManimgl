@@ -54,17 +54,23 @@ def show(_score_map, _players):   # 开局
 
 def start_game(_score_map, _players, freq=1, count_f=1):   # 游戏和统计
     type_lst = []
+    players = len(_players)
     if count_f==1:
+        print(f"当{players}玩游戏时：")
         for i in range(freq):
             grp = show(_score_map, _players)
             type_lst = type_lst + [t["type"] for t in grp]
         c = Counter(type_lst)
         print(c)
         total = sum(c.values())
-        for item in c.items():
-            print(f"{item[0]}频率：{item[1]/total:.2%}")
+        for key, value in c.items():
+            # 将当前值除以计算得到的数，然后更新字典中的值
+            c[key] = round(value/total, 4)
+        print(c)
+        print("------------------------------------")
             
     if count_f==2 :
+        print(f"当{players}玩游戏时：")
         c = {'单张': 0, '对子': 0, '金花': 0, '顺子': 0, '同花顺': 0, '豹子': 0}
         for i in range(freq):
             grp = show(_score_map, _players)
@@ -73,9 +79,13 @@ def start_game(_score_map, _players, freq=1, count_f=1):   # 游戏和统计
                 if key in type_lst:
                     c[key]+=1
         print(c)
-        total = len(_players)*freq
-        for item in c.items():
-            print(f"{item[0]}频率：{item[1]/total:.2%}")
+        total = freq
+        for key, value in c.items():
+            # 将当前值除以计算得到的数，然后更新字典中的值
+            c[key] = round(value/total, 4)
+        print(c)
+        print("------------------------------------")
+        
 
 if __name__ == '__main__':
     # 准备扑克牌
@@ -87,7 +97,10 @@ if __name__ == '__main__':
         for n in num:
             score_map[f"{s}{n}"] = count
             count += 1
-    # 6个玩家入场
-    players = [f"p{i}" for i in range(1, 5)]
-    # 开始游戏
-    start_game(score_map, players, freq=10000, count_f=2)
+    # 从一人到多少人玩
+    players = 6
+    for i in range(6,players+2):
+        # 玩家入场
+        players = [f"p{i}" for i in range(1, i)]
+        # 开始游戏
+        start_game(score_map, players, freq=1000000, count_f=2)

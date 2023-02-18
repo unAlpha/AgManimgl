@@ -1374,7 +1374,8 @@ class CustomGraph6(Scene):
             if i==1:
                 texm.shift(UP*0.22)
             pm.add(texm)
-        
+            
+        # 加上部分的线（没有最后一根）
         axes.lines_x_axis=VGroup()
         axes.lines_y_axis=VGroup()
         x_p=[x for x in np.arange(*axes.x_range)]
@@ -1802,7 +1803,96 @@ class PlotBarChart2(Scene):
         self.play(bars.animate.change_bar_values(coords4))
         self.wait()
 
+class AxesLabelsTex(Axes):    
+    def add_coordinate_labels(
+        self,
+        **kwargs
+    ):
+        x_numbers = self.get_x_axis().get_tick_range()
+        y_numbers = self.get_y_axis().get_tick_range()
+        self.coordinate_labels = VGroup()
+        for number in x_numbers:
+            axis = self.get_x_axis()
+            value = number
+            number_mob = axis.get_number_mobject(value, **kwargs)
+            self.coordinate_labels.add(number_mob)
+        for number in y_numbers:
+            axis = self.get_y_axis()
+            value = number
+            kwargs["unit"] = 0.01
+            kwargs["unit_tex"] = "\\%"
+            number_mob = axis.get_number_mobject(value, **kwargs)
+            self.coordinate_labels.add(number_mob)
+        self.add(self.coordinate_labels)
+        return self
+
+class CustomGraph10(Scene):
+    def construct(self):
+        axes = AxesLabelsTex(
+            (0,18,1), 
+            (0,0.04,0.01,),
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 2,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                    },
+                "include_tip":True,
+                },
+            )
+        axes.add_coordinate_labels()
+        axes.scale(0.9618)
+        x_label = Text("人数",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
+        y_label = Text("概率",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
         
+        # 加上全部的线
+        axes.lines_x_axis=VGroup()
+        axes.lines_y_axis=VGroup()
+        x_p=[x for x in np.arange(*axes.x_range)]
+        x_p.append(axes.x_axis.x_max)
+        y_p=[x for x in np.arange(*axes.y_range)]
+        y_p.append(axes.y_axis.x_max)
+        for x_point in list(zip(x_p, [axes.y_axis.x_max]*len(x_p), [0]*len(x_p))):
+            axes.lines_x_axis.add(axes.get_v_line(axes.c2p(*x_point),color=GREY_D))
+        for y_point in list(zip([axes.x_axis.x_max]*len(y_p), y_p, [0]*len(y_p))):
+            axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point),color=GREY_D))
+            
+        coords = get_coords_from_csvdata(r"Ag\data_files\金花方法2")
+        transposed_coords = [list(x) for x in zip(*coords)]
+        # print(coords)   
+        # print(transposed_coords[5][1:])
+        denominator = 1000000
+        points1 = [axes.c2p(float(px),round(float(py)/denominator,4)) for px,py in zip(transposed_coords[0][1:],transposed_coords[5][1:])]
+        points2 = [axes.c2p(float(px),round(float(py)/denominator,4)) for px,py in zip(transposed_coords[0][1:],transposed_coords[6][1:])]
+        # Set graph
+        graph1 = DiscreteGraphFromSetPoints(points1,color=YELLOW_A,stroke_width=10)
+        graph2 = DiscreteGraphFromSetPoints(points2,color=RED,stroke_width=10,stroke_opacity=0.68)
+        
+        text1 = Text("同花顺",font="思源黑体",font_size=36)
+        text2 = Text("豹子",font="思源黑体",font_size=36,color=RED)
+
+        # Set dots
+        dots1 = VGroup(*[
+            Dot(radius=0.06,color=YELLOW_E).move_to([px,py,pz])
+            for px,py,pz in points1])
+        dots2 = VGroup(*[
+            Dot(radius=0.06,color=RED).move_to([px,py,pz])
+            for px,py,pz in points2])
+        
+        text1.next_to(dots1[13],DOWN*1.4)
+        text2.next_to(dots1[12],UP*2)
+        
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        self.add(axes.lines_x_axis,axes.lines_y_axis,axes,x_label,y_label)
+        self.add(text1,text2)
+        self.play(ShowCreation(dots1,run_time=2))
+        self.play(ShowCreation(graph1,run_time=1))
+        self.play(ShowCreation(dots2,run_time=1))
+        self.play(ShowCreation(graph2,run_time=4))
+        self.wait(3)
+       
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} ConvolutionPic -o".format(__file__))
+    system("manimgl {} CustomGraph10 -os".format(__file__))

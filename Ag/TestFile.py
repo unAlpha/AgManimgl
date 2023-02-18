@@ -203,4 +203,4 @@ class MySceneR(Scene):
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} PlotBarChart3".format(__file__)) 
+    system("manimgl {} CustomGraph -os".format(__file__)) 
