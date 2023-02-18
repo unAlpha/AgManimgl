@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 ASPECT_RATIO: float = 16.0 / 9.0
 FRAME_HEIGHT: float = 8.0
 FRAME_WIDTH: float = FRAME_HEIGHT * ASPECT_RATIO
+FRAME_SHAPE: tuple[float, float] = (FRAME_WIDTH, FRAME_HEIGHT)
 FRAME_Y_RADIUS: float = FRAME_HEIGHT / 2
 FRAME_X_RADIUS: float = FRAME_WIDTH / 2
 
@@ -65,8 +66,8 @@ RADIANS: float = 1
 FFMPEG_BIN: str = "ffmpeg"
 
 JOINT_TYPE_MAP: dict = {
-    "auto": 0,
-    "round": 1,
+    "no_joint": 0,
+    "auto": 1,
     "bevel": 2,
     "miter": 3,
 }

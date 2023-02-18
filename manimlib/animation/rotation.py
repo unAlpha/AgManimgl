@@ -40,8 +40,13 @@ class Rotating(Animation):
         )
 
     def interpolate_mobject(self, alpha: float) -> None:
-        for sm1, sm2 in self.get_all_families_zipped():
-            sm1.set_points(sm2.get_points())
+        pairs = zip(
+            self.mobject.family_members_with_points(),
+            self.starting_mobject.family_members_with_points(),
+        )
+        for sm1, sm2 in pairs:
+            for key in sm1.pointlike_data_keys:
+                sm1.data[key][:] = sm2.data[key]
         self.mobject.rotate(
             self.rate_func(alpha) * self.angle,
             axis=self.axis,

@@ -27,16 +27,19 @@ from manimlib.constants import OUT
 from manimlib.constants import PI
 from manimlib.constants import RED
 from manimlib.constants import RIGHT
-from manimlib.constants import RIGHT
 from manimlib.constants import SMALL_BUFF
 from manimlib.constants import SMALL_BUFF
 from manimlib.constants import UP
-from manimlib.constants import UP
+from manimlib.constants import UL
+from manimlib.constants import UR
+from manimlib.constants import DL
+from manimlib.constants import DR
 from manimlib.constants import WHITE
 from manimlib.constants import YELLOW
 from manimlib.mobject.boolean_ops import Difference
 from manimlib.mobject.geometry import Arc
 from manimlib.mobject.geometry import Circle
+from manimlib.mobject.geometry import Dot
 from manimlib.mobject.geometry import Line
 from manimlib.mobject.geometry import Polygon
 from manimlib.mobject.geometry import Rectangle
@@ -248,8 +251,6 @@ class Laptop(VGroup):
         self.axis = axis
 
         self.add(body, screen_plate, axis)
-        self.rotate(5 * np.pi / 12, LEFT, about_point=ORIGIN)
-        self.rotate(np.pi / 6, DOWN, about_point=ORIGIN)
 
 
 class VideoIcon(SVGMobject):
@@ -380,7 +381,6 @@ class Bubble(SVGMobject):
             self.flip()
 
         self.content = Mobject()
-        self.refresh_triangulation()
 
     def get_tip(self):
         # TODO, find a better way
@@ -486,17 +486,29 @@ class VectorizedEarth(SVGMobject):
 
 
 class Piano(VGroup):
-    n_white_keys = 52
-    black_pattern = [0, 2, 3, 5, 6]
-    white_keys_per_octave = 7
-    white_key_dims = (0.15, 1.0)
-    black_key_dims = (0.1, 0.66)
-    key_buff = 0.02
-    white_key_color = WHITE
-    black_key_color = GREY_E
-    total_width = 13
+    def __init__(
+        self,
+        n_white_keys = 52,
+        black_pattern = [0, 2, 3, 5, 6],
+        white_keys_per_octave = 7,
+        white_key_dims = (0.15, 1.0),
+        black_key_dims = (0.1, 0.66),
+        key_buff = 0.02,
+        white_key_color = WHITE,
+        black_key_color = GREY_E,
+        total_width = 13,
+        **kwargs
+    ):
+        self.n_white_keys = n_white_keys
+        self.black_pattern = black_pattern
+        self.white_keys_per_octave = white_keys_per_octave
+        self.white_key_dims = white_key_dims
+        self.black_key_dims = black_key_dims
+        self.key_buff = key_buff
+        self.white_key_color = white_key_color
+        self.black_key_color = black_key_color
+        self.total_width = total_width
 
-    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.add_white_keys()
         self.add_black_keys()
@@ -540,7 +552,7 @@ class Piano(VGroup):
 class Piano3D(VGroup):
     def __init__(
         self,
-        reflectiveness: float = 1.0,
+        shading: Tuple[float, float, float] = (1.0, 0.2, 0.2),
         stroke_width: float = 0.25,
         stroke_color: ManimColor = BLACK,
         key_depth: float = 0.1,
@@ -557,9 +569,58 @@ class Piano3D(VGroup):
             for key in piano_2d
         ))
         self.set_stroke(stroke_color, stroke_width)
+        self.set_shading(*shading)
         self.apply_depth_test()
 
         # Elevate black keys
         for i, key in enumerate(self):
             if piano_2d[i] in piano_2d.black_keys:
                 key.shift(black_key_shift * OUT)
+                key.set_color(BLACK)
+
+
+
+class DieFace(VGroup):
+    def __init__(
+        self,
+        value: int,
+        side_length: float = 1.0,
+        corner_radius: float = 0.15,
+        stroke_color: ManimColor = WHITE,
+        stroke_width: float = 2.0,
+        fill_color: ManimColor = GREY_E,
+        dot_radius: float = 0.08,
+        dot_color: ManimColor = BLUE_B,
+        dot_coalesce_factor: float = 0.5
+    ):
+        dot = Dot(radius=dot_radius, fill_color=dot_color)
+        square = Square(
+            side_length=side_length,
+            stroke_color=stroke_color,
+            stroke_width=stroke_width,
+            fill_color=fill_color,
+            fill_opacity=1.0,
+        )
+        square.round_corners(corner_radius)
+
+        if not (1 <= value <= 6):
+            raise Exception("DieFace only accepts integer inputs between 1 and 6")
+
+        edge_group = [
+            (ORIGIN,),
+            (UL, DR),
+            (UL, ORIGIN, DR),
+            (UL, UR, DL, DR),
+            (UL, UR, ORIGIN, DL, DR),
+            (UL, UR, LEFT, RIGHT, DL, DR),
+        ][value - 1]
+
+        arrangement = VGroup(*(
+            dot.copy().move_to(square.get_bounding_box_point(vect))
+            for vect in edge_group
+        ))
+        arrangement.space_out_submobjects(dot_coalesce_factor)
+
+        super().__init__(square, arrangement)
+        self.value = value
+        self.index = value

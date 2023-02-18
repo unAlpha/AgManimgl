@@ -5,6 +5,11 @@ if TYPE_CHECKING:
     from colour import Color
     import numpy as np
     import re
+    
+    try:
+        from typing import Self
+    except ImportError:
+        from typing_extensions import Self
 
     # Abbreviations for a common types
     ManimColor = Union[str, Color, None]
@@ -18,6 +23,8 @@ if TYPE_CHECKING:
         tuple[Union[int, None], Union[int, None]],
     ]
     Selector = Union[SingleSelector, Iterable[SingleSelector]]
+
+    UniformDict = Dict[str, float | bool | np.ndarray | tuple]
 
     # These are various alternate names for np.ndarray meant to specify
     # certain shapes.
@@ -36,3 +43,4 @@ if TYPE_CHECKING:
     Vect2Array = Annotated[FloatArray, Literal["N", 2]]
     Vect3Array = Annotated[FloatArray, Literal["N", 3]]
     Vect4Array = Annotated[FloatArray, Literal["N", 4]]
+    VectNArray = Annotated[FloatArray, Literal["N", "M"]]

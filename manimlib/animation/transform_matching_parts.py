@@ -1,19 +1,15 @@
 from __future__ import annotations
 
 import itertools as it
-
-import numpy as np
+from difflib import SequenceMatcher
 
 from manimlib.animation.composition import AnimationGroup
 from manimlib.animation.fading import FadeInFromPoint
 from manimlib.animation.fading import FadeOutToPoint
-from manimlib.animation.fading import FadeTransformPieces
 from manimlib.animation.transform import Transform
 from manimlib.mobject.mobject import Mobject
-from manimlib.mobject.mobject import Group
-from manimlib.mobject.svg.string_mobject import StringMobject
-from manimlib.mobject.types.vectorized_mobject import VGroup
 from manimlib.mobject.types.vectorized_mobject import VMobject
+from manimlib.mobject.svg.string_mobject import StringMobject
 
 from typing import TYPE_CHECKING
 
@@ -32,7 +28,6 @@ class TransformMatchingParts(AnimationGroup):
         mismatch_animation: type = Transform,
         run_time: float = 2,
         lag_ratio: float = 0,
-        group_type: type = Group,
         **kwargs,
     ):
         self.source = source
@@ -42,8 +37,8 @@ class TransformMatchingParts(AnimationGroup):
         self.anim_config = dict(**kwargs)
 
         # We will progressively build up a list of transforms
-        # from characters in source to those in target. These
-        # two lists keep track of which characters are accounted
+        # from pieces in source to those in target. These
+        # two lists keep track of which pieces are accounted
         # for so far
         self.source_pieces = source.family_members_with_points()
         self.target_pieces = target.family_members_with_points()
@@ -57,14 +52,18 @@ class TransformMatchingParts(AnimationGroup):
             self.add_transform(*pair)
 
         # Finally, account for mismatches
-        for source_char in self.source_pieces:
+        for source_piece in self.source_pieces:
+            if any([source_piece in anim.mobject.get_family() for anim in self.anims]):
+                continue
             self.anims.append(FadeOutToPoint(
-                source_char, target.get_center(),
+                source_piece, target.get_center(),
                 **self.anim_config
             ))
-        for target_char in self.target_pieces:
+        for target_piece in self.target_pieces:
+            if any([target_piece in anim.mobject.get_family() for anim in self.anims]):
+                continue
             self.anims.append(FadeInFromPoint(
-                target_char, source.get_center(),
+                target_piece, source.get_center(),
                 **self.anim_config
             ))
 
@@ -72,7 +71,6 @@ class TransformMatchingParts(AnimationGroup):
             *self.anims,
             run_time=run_time,
             lag_ratio=lag_ratio,
-            group_type=group_type,
         )
 
     def add_transform(
@@ -129,27 +127,63 @@ class TransformMatchingStrings(TransformMatchingParts):
         target: StringMobject,
         matched_keys: Iterable[str] = [],
         key_map: dict[str, str] = dict(),
+        matched_pairs: Iterable[tuple[VMobject, VMobject]] = [],
         **kwargs,
     ):
         matched_pairs = [
-            *[(source[key], target[key]) for key in matched_keys],
-            *[(source[key1], target[key2]) for key1, key2 in key_map.items()],
-            *[
-                (source[substr], target[substr])
-                for substr in [
-                    *source.get_specified_substrings(),
-                    *target.get_specified_substrings(),
-                    *source.get_symbol_substrings(),
-                    *target.get_symbol_substrings(),
-                ]
-            ]
+            *matched_pairs,
+            *self.matching_blocks(source, target, matched_keys, key_map),
         ]
+
         super().__init__(
             source, target,
             matched_pairs=matched_pairs,
-            group_type=VGroup,
             **kwargs,
         )
+
+    def matching_blocks(
+        self,
+        source: StringMobject,
+        target: StringMobject,
+        matched_keys: Iterable[str],
+        key_map: dict[str, str]
+    ) -> list[tuple[VMobject, VMobject]]:
+        syms1 = source.get_symbol_substrings()
+        syms2 = target.get_symbol_substrings()
+        counts1 = list(map(source.substr_to_path_count, syms1))
+        counts2 = list(map(target.substr_to_path_count, syms2))
+
+        # Start with user specified matches
+        blocks = [(source[key], target[key]) for key in matched_keys]
+        blocks += [(source[key1], target[key2]) for key1, key2 in key_map.items()]
+
+        # Nullify any intersections with those matches in the two symbol lists
+        for sub_source, sub_target in blocks:
+            for i in range(len(syms1)):
+                if source[i] in sub_source.family_members_with_points():
+                    syms1[i] = "Null1"
+            for j in range(len(syms2)):
+                if target[j] in sub_target.family_members_with_points():
+                    syms2[j] = "Null2"
+
+        # Group together longest matching substrings
+        while True:
+            matcher = SequenceMatcher(None, syms1, syms2)
+            match = matcher.find_longest_match(0, len(syms1), 0, len(syms2))
+            if match.size == 0:
+                break
+
+            i1 = sum(counts1[:match.a])
+            i2 = sum(counts2[:match.b])
+            size = sum(counts1[match.a:match.a + match.size])
+
+            blocks.append((source[i1:i1 + size], target[i2:i2 + size]))
+
+            for i in range(match.size):
+                syms1[match.a + i] = "Null1"
+                syms2[match.b + i] = "Null2"
+
+        return blocks
 
 
 class TransformMatchingTex(TransformMatchingStrings):

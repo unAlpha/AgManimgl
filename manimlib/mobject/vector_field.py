@@ -13,6 +13,7 @@ from manimlib.mobject.types.vectorized_mobject import VMobject
 from manimlib.utils.bezier import interpolate
 from manimlib.utils.bezier import inverse_interpolate
 from manimlib.utils.color import get_colormap_list
+from manimlib.utils.color import rgb_to_color
 from manimlib.utils.dict_ops import merge_dicts_recursively
 from manimlib.utils.rate_functions import linear
 from manimlib.utils.simple_functions import sigmoid
@@ -22,7 +23,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Callable, Iterable, Sequence, TypeVar, Tuple
-    import numpy.typing as npt
     from manimlib.typing import ManimColor, Vect3, VectN, Vect3Array
 
     from manimlib.mobject.coordinate_systems import CoordinateSystem
@@ -174,7 +174,10 @@ class VectorField(VGroup):
             **vector_config
         )
         vect.shift(_input - origin)
-        vect.set_rgba_array([[*self.value_to_rgb(norm), self.opacity]])
+        vect.set_color(
+            rgb_to_color(self.value_to_rgb(norm)),
+            opacity=self.opacity,
+        )
         return vect
 
 
@@ -250,7 +253,7 @@ class StreamLines(VGroup):
             line.virtual_time = time
             step = max(1, int(len(points) / self.n_samples_per_line))
             line.set_points_as_corners(points[::step])
-            line.make_approximately_smooth()
+            line.make_smooth(approx=True)
             lines.append(line)
         self.set_submobjects(lines)
 

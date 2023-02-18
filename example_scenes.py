@@ -31,7 +31,7 @@ class OpeningManimExample(Scene):
         )
         linear_transform_words.arrange(RIGHT)
         linear_transform_words.to_edge(UP)
-        linear_transform_words.set_stroke(BLACK, 10, background=True)
+        linear_transform_words.set_backstroke(width=5)
 
         self.play(
             ShowCreation(grid),
@@ -52,7 +52,7 @@ class OpeningManimExample(Scene):
             this is the map $z \\rightarrow z^2$
         """)
         complex_map_words.to_corner(UR)
-        complex_map_words.set_stroke(BLACK, 5, background=True)
+        complex_map_words.set_backstroke(width=5)
 
         self.play(
             FadeOut(grid),
@@ -174,16 +174,17 @@ class TexTransformExample(Scene):
         self.add(lines[0])
         # The animation TransformMatchingStrings will line up parts
         # of the source and target which have matching substring strings.
-        # Here, giving it a little path_arc makes each part sort of
-        # rotate into their final positions, which feels appropriate
-        # for the idea of rearranging an equation
+        # Here, giving it a little path_arc makes each part rotate into
+        # their final positions, which feels appropriate for the idea of
+        # rearranging an equation
         self.play(
             TransformMatchingStrings(
                 lines[0].copy(), lines[1],
                 # matched_keys specifies which substring should
                 # line up. If it's not specified, the animation
-                # will try its best, but may not quite give the
-                # intended effect
+                # will align the longest matching substrings.
+                # In this case, the substring "^2 = C^2" would
+                # trip it up
                 matched_keys=["A^2", "B^2", "C^2"],
                 # When you want a substring from the source
                 # to go to a non-equal substring from the target,
@@ -206,25 +207,57 @@ class TexTransformExample(Scene):
             ),
         )
         self.wait(2)
-
-        # You can also index into Tex mobject (or other StringMobjects)
-        # by substrings and regular expressions
-        top_equation = lines[0]
-        low_equation = lines[3]
-
-        self.play(LaggedStartMap(FlashAround, low_equation["C"], lag_ratio=0.5))
-        self.play(LaggedStartMap(FlashAround, low_equation["B"], lag_ratio=0.5))
-        self.play(LaggedStartMap(FlashAround, top_equation[re.compile(r"\w\^2")]))
-        self.play(Indicate(low_equation[R"\sqrt"]))
-        self.wait()
         self.play(LaggedStartMap(FadeOut, lines, shift=2 * RIGHT))
+
+        # TransformMatchingShapes will try to line up all pieces of a
+        # source mobject with those of a target, regardless of the
+        # what Mobject type they are.
+        source = Text("the morse code", height=1)
+        target = Text("here come dots", height=1)
+        saved_source = source.copy()
+
+        self.play(Write(source))
+        self.wait()
+        kw = dict(run_time=3, path_arc=PI / 2)
+        self.play(TransformMatchingShapes(source, target, **kw))
+        self.wait()
+        self.play(TransformMatchingShapes(target, saved_source, **kw))
+        self.wait()
+
+
+class TexIndexing(Scene):
+    def construct(self):
+        # You can index into Tex mobject (or other StringMobjects) by substrings
+        equation = Tex(R"e^{\pi i} = -1", font_size=144)
+
+        self.add(equation)
+        self.play(FlashAround(equation["e"]))
+        self.wait()
+        self.play(Indicate(equation[R"\pi"]))
+        self.wait()
+        self.play(TransformFromCopy(
+            equation[R"e^{\pi i}"].copy().set_opacity(0.5),
+            equation["-1"],
+            path_arc=-PI / 2,
+            run_time=3
+        ))
+        self.play(FadeOut(equation))
+
+        # Or regular expressions
+        equation = Tex("A^2 + B^2 = C^2", font_size=144)
+
+        self.play(Write(equation))
+        for part in equation[re.compile(r"\w\^2")]:
+            self.play(FlashAround(part))
+        self.wait()
+        self.play(FadeOut(equation))
 
         # Indexing by substrings like this may not work when
         # the order in which Latex draws symbols does not match
         # the order in which they show up in the string.
         # For example, here the infinity is drawn before the sigma
         # so we don't get the desired behavior.
-        equation = Tex(R"\sum_{n = 1}^\infty \frac{1}{n^2} = \frac{\pi^2}{6}")
+        equation = Tex(R"\sum_{n = 1}^\infty \frac{1}{n^2} = \frac{\pi^2}{6}", font_size=72)
         self.play(FadeIn(equation))
         self.play(equation[R"\infty"].animate.set_color(RED))  # Doesn't hit the infinity
         self.wait()
@@ -236,26 +269,13 @@ class TexTransformExample(Scene):
         equation = Tex(
             R"\sum_{n = 1}^\infty {1 \over n^2} = {\pi^2 \over 6}",
             # Explicitly mark "\infty" as a substring you might want to access
-            isolate=[R"\infty"]
+            isolate=[R"\infty"],
+            font_size=72
         )
         self.play(FadeIn(equation))
         self.play(equation[R"\infty"].animate.set_color(RED))  # Got it!
         self.wait()
         self.play(FadeOut(equation))
-
-        # TransformMatchingShapes will try to line up all pieces of a
-        # source mobject with those of a target, regardless of the
-        # what Mobject type they are.
-        source = Text("the morse code", height=1)
-        target = Text("here come dots", height=1)
-
-        self.play(Write(source))
-        self.wait()
-        kw = dict(run_time=3, path_arc=PI / 2)
-        self.play(TransformMatchingShapes(source, target, **kw))
-        self.wait()
-        self.play(TransformMatchingShapes(target, source, **kw))
-        self.wait()
 
 
 class UpdatersExample(Scene):
@@ -268,16 +288,8 @@ class UpdatersExample(Scene):
         # that of the newly constructed object
         brace = always_redraw(Brace, square, UP)
 
-        text, number = label = VGroup(
-            Text("Width = "),
-            DecimalNumber(
-                0,
-                show_ellipsis=True,
-                num_decimal_places=2,
-                include_sign=True,
-            )
-        )
-        label.arrange(RIGHT)
+        label = TexText("Width = 0.00")
+        number = label.make_number_changable("0.00")
 
         # This ensures that the method deicmal.next_to(square)
         # is called on every frame
@@ -486,7 +498,7 @@ class GraphExample(Scene):
         self.wait()
 
 
-class TexAndNumbersExample(InteractiveScene):
+class TexAndNumbersExample(Scene):
     def construct(self):
         axes = Axes((-3, 3), (-3, 3), unit_size=1)
         axes.to_edge(DOWN)
@@ -554,9 +566,7 @@ class TexAndNumbersExample(InteractiveScene):
         )
 
 
-class SurfaceExample(Scene):
-    default_camera_config = dict(samples=4)
-
+class SurfaceExample(ThreeDScene):
     def construct(self):
         surface_text = Text("For 3d scenes, try using surfaces")
         surface_text.fix_in_frame()
@@ -588,13 +598,6 @@ class SurfaceExample(Scene):
             mob.mesh = SurfaceMesh(mob)
             mob.mesh.set_stroke(BLUE, 1, opacity=0.5)
 
-        # Set perspective
-        frame = self.camera.frame
-        frame.set_euler_angles(
-            theta=-30 * DEGREES,
-            phi=70 * DEGREES,
-        )
-
         surface = surfaces[0]
 
         self.play(
@@ -616,12 +619,12 @@ class SurfaceExample(Scene):
         self.play(
             Transform(surface, surfaces[2]),
             # Move camera frame during the transition
-            frame.animate.increment_phi(-10 * DEGREES),
-            frame.animate.increment_theta(-20 * DEGREES),
+            self.frame.animate.increment_phi(-10 * DEGREES),
+            self.frame.animate.increment_theta(-20 * DEGREES),
             run_time=3
         )
         # Add ambient rotation
-        frame.add_updater(lambda m, dt: m.increment_theta(-0.1 * dt))
+        self.frame.add_updater(lambda m, dt: m.increment_theta(-0.1 * dt))
 
         # Play around with where the light is
         light_text = Text("You can move around the light source")
@@ -690,6 +693,8 @@ class InteractiveDevelopment(Scene):
 
 
 class ControlsExample(Scene):
+    drag_to_pan = False
+
     def setup(self):
         self.textbox = Textbox()
         self.checkbox = Checkbox()

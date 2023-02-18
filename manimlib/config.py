@@ -94,6 +94,14 @@ def parse_cli():
             help="Render to a movie file with an alpha channel",
         )
         parser.add_argument(
+            "--vcodec",
+            help="Video codec to use with ffmpeg",
+        )
+        parser.add_argument(
+            "--pix_fmt",
+            help="Pixel format to use for the output of ffmpeg, defaults to `yuv420p`",
+        )
+        parser.add_argument(
             "-q", "--quiet",
             action="store_true",
             help="",
@@ -159,6 +167,12 @@ def parse_cli():
             "--show_animation_progress",
             action="store_true",
             help="Show progress bar for each animation",
+        )
+        parser.add_argument(
+            "--prerun",
+            action="store_true",
+            help="Calculate total framecount, to display in a progress bar, by doing " + \
+                 "an initial run of the scene which skips animations."
         )
         parser.add_argument(
             "--video_dir",
@@ -386,7 +400,7 @@ def get_output_directory(args: Namespace, custom_config: dict) -> str:
 
 
 def get_file_writer_config(args: Namespace, custom_config: dict) -> dict:
-    return {
+    result = {
         "write_to_movie": not args.skip_animations and args.write_file,
         "break_into_partial_movies": custom_config["break_into_partial_movies"],
         "save_last_frame": args.skip_animations and args.write_file,
@@ -402,6 +416,19 @@ def get_file_writer_config(args: Namespace, custom_config: dict) -> dict:
         "quiet": args.quiet,
     }
 
+    if args.vcodec:
+        result["video_codec"] = args.vcodec
+    elif args.transparent:
+        result["video_codec"] = 'prores_ks'
+        result["pixel_format"] = ''
+    elif args.gif:
+        result["video_codec"] = ''
+
+    if args.pix_fmt:
+        result["pixel_format"] = args.pix_fmt
+
+    return result
+
 
 def get_window_config(args: Namespace, custom_config: dict, camera_config: dict) -> dict:
     # Default to making window half the screen size
@@ -414,9 +441,7 @@ def get_window_config(args: Namespace, custom_config: dict, camera_config: dict)
     if not (args.full_screen or custom_config["full_screen"]):
         window_width //= 2
     window_height = int(window_width / aspect_ratio)
-    return {
-        "size": (window_width, window_height),
-    }
+    return dict(size=(window_width, window_height))
 
 
 def get_camera_config(args: Namespace, custom_config: dict) -> dict:
@@ -491,6 +516,7 @@ def get_configuration(args: Namespace) -> dict:
         "presenter_mode": args.presenter_mode,
         "leave_progress_bars": args.leave_progress_bars,
         "show_animation_progress": args.show_animation_progress,
+        "prerun": args.prerun,
         "embed_exception_mode": custom_config["embed_exception_mode"],
         "embed_error_sound": custom_config["embed_error_sound"],
     }

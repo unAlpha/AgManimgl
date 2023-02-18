@@ -1,31 +1,29 @@
 #version 330
 
-#INSERT camera_uniform_declarations.glsl
+uniform float frame_scale;
+uniform float is_fixed_in_frame;
 
 in vec3 point;
-in vec3 prev_point;
-in vec3 next_point;
-
+in vec4 stroke_rgba;
 in float stroke_width;
-in vec4 color;
+in vec3 joint_normal;
+in vec4 joint_product;
 
 // Bezier control point
-out vec3 bp;
-out vec3 prev_bp;
-out vec3 next_bp;
+out vec3 verts;
 
+out vec4 v_joint_product;
 out float v_stroke_width;
 out vec4 v_color;
 
 const float STROKE_WIDTH_CONVERSION = 0.01;
 
-#INSERT position_point_into_frame.glsl
-
 void main(){
-    bp = position_point_into_frame(point);
-    prev_bp = position_point_into_frame(prev_point);
-    next_bp = position_point_into_frame(next_point);
-
-    v_stroke_width = STROKE_WIDTH_CONVERSION * stroke_width * frame_shape[1] / 8.0;
-    v_color = color;
+    verts = point;
+    v_stroke_width = STROKE_WIDTH_CONVERSION * stroke_width;
+    if(!bool(is_fixed_in_frame)){
+        v_stroke_width *= frame_scale;
+    }
+    v_joint_product = joint_product;
+    v_color = stroke_rgba;
 }

@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import numpy as np
-
 from manimlib.mobject.mobject import Mobject
 from manimlib.utils.iterables import listify
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from manimlib.typing import Self
 
 
 class ValueTracker(Mobject):
@@ -23,22 +27,21 @@ class ValueTracker(Mobject):
         self.value = value
         super().__init__(**kwargs)
 
-    def init_data(self) -> None:
-        super().init_data()
-        self.data["value"] = np.array(
+    def init_uniforms(self) -> None:
+        super().init_uniforms()
+        self.uniforms["value"] = np.array(
             listify(self.value),
-            ndmin=2,
             dtype=self.value_type,
         )
 
-    def get_value(self) -> float | complex:
-        result = self.data["value"][0, :]
+    def get_value(self) -> float | complex | np.ndarray:
+        result = self.uniforms["value"]
         if len(result) == 1:
             return result[0]
         return result
 
-    def set_value(self, value: float | complex):
-        self.data["value"][0, :] = value
+    def set_value(self, value: float | complex | np.ndarray) -> Self:
+        self.uniforms["value"][:] = value
         return self
 
     def increment_value(self, d_value: float | complex) -> None:

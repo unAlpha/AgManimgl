@@ -9,7 +9,6 @@ import itertools as it
 from manimlib.constants import BLACK, BLUE, BLUE_D, BLUE_E, GREEN, GREY_A, WHITE, RED
 from manimlib.constants import DEGREES, PI
 from manimlib.constants import DL, UL, DOWN, DR, LEFT, ORIGIN, OUT, RIGHT, UP
-from manimlib.constants import FRAME_HEIGHT, FRAME_WIDTH
 from manimlib.constants import FRAME_X_RADIUS, FRAME_Y_RADIUS
 from manimlib.constants import MED_SMALL_BUFF, SMALL_BUFF
 from manimlib.mobject.functions import ParametricCurve
@@ -22,6 +21,7 @@ from manimlib.mobject.svg.tex_mobject import Tex
 from manimlib.mobject.types.dot_cloud import DotCloud
 from manimlib.mobject.types.surface import ParametricSurface
 from manimlib.mobject.types.vectorized_mobject import VGroup
+from manimlib.mobject.types.vectorized_mobject import VMobject
 from manimlib.utils.dict_ops import merge_dicts_recursively
 from manimlib.utils.simple_functions import binary_search
 from manimlib.utils.space_ops import angle_of_vector
@@ -32,9 +32,9 @@ from manimlib.utils.space_ops import normalize
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Callable, Iterable, Sequence, Type, TypeVar
+    from typing import Callable, Iterable, Sequence, Type, TypeVar, Optional
     from manimlib.mobject.mobject import Mobject
-    from manimlib.typing import ManimColor, Vect3, Vect3Array, VectN, RangeSpecifier
+    from manimlib.typing import ManimColor, Vect3, Vect3Array, VectN, RangeSpecifier, Self
 
     T = TypeVar("T", bound=Mobject)
 
@@ -54,7 +54,7 @@ class CoordinateSystem(ABC):
         self,
         x_range: RangeSpecifier = DEFAULT_X_RANGE,
         y_range: RangeSpecifier = DEFAULT_Y_RANGE,
-        num_sampled_graph_points_per_tick: int = 20,
+        num_sampled_graph_points_per_tick: int = 5,
     ):
         self.x_range = x_range
         self.y_range = y_range
@@ -236,28 +236,33 @@ class CoordinateSystem(ABC):
         """
         return self.input_to_graph_point(x, graph)
 
-    def bind_graph_to_func(self, graph, func, jagged=False, get_discontinuities=None):
+    def bind_graph_to_func(
+        self,
+        graph: VMobject,
+        func: Callable[[Vect3], Vect3],
+        jagged: bool = False,
+        get_discontinuities: Optional[Callable[[], Vect3]] = None
+    ) -> VMobject:
         """
         Use for graphing functions which might change over time, or change with
         conditions
         """
-        x_values = [self.x_axis.p2n(p) for p in graph.get_points()]
+        x_values = np.array([self.x_axis.p2n(p) for p in graph.get_points()])
 
-        def get_x_values():
+        def get_graph_points():
+            xs = x_values
             if get_discontinuities:
                 ds = get_discontinuities()
                 ep = 1e-6
                 added_xs = it.chain(*((d - ep, d + ep) for d in ds))
-                return sorted([*x_values, *added_xs])[:len(x_values)]
-            else:
-                return x_values
+                xs[:] = sorted([*x_values, *added_xs])[:len(x_values)]
+            return self.c2p(xs, func(xs))
 
-        graph.add_updater(lambda g: g.set_points_as_corners([
-            self.c2p(x, func(x))
-            for x in get_x_values()
-        ]))
+        graph.add_updater(
+            lambda g: g.set_points_as_corners(get_graph_points())
+        )
         if not jagged:
-            graph.add_updater(lambda g: g.make_approximately_smooth())
+            graph.add_updater(lambda g: g.make_smooth(approx=True))
         return graph
 
     def get_graph_label(
@@ -503,8 +508,7 @@ class ThreeDAxes(Axes):
         z_axis_config: dict = dict(),
         z_normal: Vect3 = DOWN,
         depth: float = 6.0,
-        num_axis_pieces: int = 20,
-        gloss: float = 0.5,
+        flat_stroke: bool = False,
         **kwargs
     ):
         Axes.__init__(self, x_range, y_range, **kwargs)
@@ -529,8 +533,7 @@ class ThreeDAxes(Axes):
         self.axes.add(self.z_axis)
         self.add(self.z_axis)
 
-        for axis in self.axes:
-            axis.insert_n_curves(num_axis_pieces - 1)
+        self.set_flat_stroke(flat_stroke)
 
     def get_all_ranges(self) -> list[Sequence[float]]:
         return [self.x_range, self.y_range, self.z_range]
@@ -639,6 +642,8 @@ class NumberPlane(Axes):
         lines2 = VGroup()
         inputs = np.arange(axis2.x_min, axis2.x_max + step, step)
         for i, x in enumerate(inputs):
+            if abs(x) < 1e-8:
+                continue
             new_line = line.copy()
             new_line.shift(axis2.n2p(x) - axis2.n2p(0))
             if i % (1 + ratio) == 0:
@@ -660,7 +665,7 @@ class NumberPlane(Axes):
         kwargs["buff"] = 0
         return Arrow(self.c2p(0, 0), self.c2p(*coords), **kwargs)
 
-    def prepare_for_nonlinear_transform(self, num_inserted_curves: int = 50):
+    def prepare_for_nonlinear_transform(self, num_inserted_curves: int = 50) -> Self:
         for mob in self.family_members_with_points():
             num_curves = mob.get_num_curves()
             if num_inserted_curves > num_curves:
@@ -699,7 +704,7 @@ class ComplexPlane(NumberPlane):
         skip_first: bool = True,
         font_size: int = 36,
         **kwargs
-    ):
+    ) -> Self:
         if numbers is None:
             numbers = self.get_default_coordinate_values(skip_first)
 

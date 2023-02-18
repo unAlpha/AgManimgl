@@ -1,93 +1,66 @@
 #version 330
 
-#INSERT camera_uniform_declarations.glsl
-
 in vec2 uv_coords;
-in vec2 uv_b2;
 
 in float uv_stroke_width;
-in vec4 color;
 in float uv_anti_alias_width;
+in vec4 color;
 
-in float has_prev;
-in float has_next;
-in float bevel_start;
-in float bevel_end;
-in float angle_from_prev;
-in float angle_to_next;
-
-in float bezier_degree;
+in float is_linear;
 
 out vec4 frag_color;
 
+const float QUICK_DIST_WIDTH = 0.2;
 
-float cross2d(vec2 v, vec2 w){
-    return v.x * w.y - w.x * v.y;
+float dist_to_curve(){
+    // In the linear case, the curve will have
+    // been set to equal the x axis
+    if(bool(is_linear)) return abs(uv_coords.y);
+
+    // Otherwise, find the distance from uv_coords to the curve y = x^2
+    float x0 = uv_coords.x;
+    float y0 = uv_coords.y;
+
+    // This is a quick approximation for computing
+    // the distance to the curve.
+    // Evaluate F(x, y) = y - x^2
+    // divide by its gradient's magnitude
+    float Fxy = y0 - x0 * x0;
+    float approx_dist = abs(Fxy) * inversesqrt(1.0 + 4 * x0 * x0);
+    if(approx_dist < QUICK_DIST_WIDTH) return approx_dist;
+
+    // Otherwise, solve for the minimal distance.
+    // The distance squared between (x0, y0) and a point (x, x^2) looks like
+    //
+    // (x0 - x)^2 + (y0 - x^2)^2 = x^4 + (1 - 2y0)x^2 - 2x0 * x + (x0^2 + y0^2)
+    //
+    // Setting the derivative equal to zero (and rescaling) looks like
+    // 
+    // x^3 + (0.5 - y0) * x - 0.5 * x0 = 0
+    //
+    // Adapted from https://www.shadertoy.com/view/ws3GD7
+    x0 = abs(x0);
+    float p = (0.5 - y0) / 3.0;  // p / 3 in usual Cardano's formula notation
+    float q = 0.25 * x0;         // -q / 2 in usual Cardano's formula notation
+    float disc = q*q + p*p*p;
+    float r = sqrt(abs(disc));
+
+    float x = (disc > 0.0) ? 
+        // 1 root
+        pow(q + r, 1.0 / 3.0) + pow(abs(q - r), 1.0 / 3.0) * sign(-p) :
+        // 3 roots
+        2.0 * cos(atan(r, q) / 3.0) * sqrt(-p);
+
+    return length(vec2(x0 - x, y0 - x * x));
 }
-
-
-float modify_distance_for_endpoints(vec2 p, float dist, float t){
-    float buff = 0.5 * uv_stroke_width - uv_anti_alias_width;
-    // Check the beginning of the curve
-    if(t == 0){
-        // Clip the start
-        if(has_prev == 0) return max(dist, -p.x + buff);
-        // Bevel start
-        if(bevel_start == 1){
-            float a = angle_from_prev;
-            mat2 rot = mat2(
-                cos(a), sin(a),
-                -sin(a), cos(a)
-            );
-            // Dist for intersection of two lines
-            float bevel_d = max(abs(p.y), abs((rot * p).y));
-            // Dist for union of this intersection with the real curve
-            // intersected with radius 2 away from curve to smooth out
-            // really sharp corners
-            return max(min(dist, bevel_d), dist / 2);
-        }
-        // Otherwise, start will be rounded off
-    }else if(t == 1){
-        // Check the end of the curve
-        // TODO, too much code repetition
-        vec2 v21 = (bezier_degree == 2) ? vec2(1, 0) - uv_b2 : vec2(-1, 0);
-        float len_v21 = length(v21);
-        if(len_v21 == 0){
-            v21 = -uv_b2;
-            len_v21 = length(v21);
-        }
-
-        float perp_dist = dot(p - uv_b2, v21) / len_v21;
-        if(has_next == 0) return max(dist, -perp_dist + buff);
-        // Bevel end
-        if(bevel_end == 1){
-            float a = -angle_to_next;
-            mat2 rot = mat2(
-                cos(a), sin(a),
-                -sin(a), cos(a)
-            );
-            vec2 v21_unit = v21 / length(v21);
-            float bevel_d = max(
-                abs(cross2d(p - uv_b2, v21_unit)),
-                abs(cross2d((rot * (p - uv_b2)), v21_unit))
-            );
-            return max(min(dist, bevel_d), dist / 2);
-        }
-        // Otherwise, end will be rounded off
-    }
-    return dist;
-}
-
-
-#INSERT quadratic_bezier_distance.glsl
 
 
 void main() {
     if (uv_stroke_width == 0) discard;
-    float dist_to_curve = min_dist_to_curve(uv_coords, uv_b2, bezier_degree);
-    // An sdf for the region around the curve we wish to color.
-    float signed_dist = abs(dist_to_curve) - 0.5 * uv_stroke_width;
-
     frag_color = color;
+
+    // sdf for the region around the curve we wish to color.
+    float signed_dist = dist_to_curve() - 0.5 * uv_stroke_width;
+
     frag_color.a *= smoothstep(0.5, -0.5, signed_dist / uv_anti_alias_width);
 }

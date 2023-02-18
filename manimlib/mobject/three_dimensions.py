@@ -23,7 +23,7 @@ from manimlib.utils.space_ops import z_to_vector
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Tuple, TypeVar
-    from manimlib.typing import ManimColor, Vect3
+    from manimlib.typing import ManimColor, Vect3, Sequence
 
     T = TypeVar("T", bound=Mobject)
 
@@ -36,21 +36,23 @@ class SurfaceMesh(VGroup):
         stroke_width: float = 1,
         stroke_color: ManimColor = GREY_A,
         normal_nudge: float = 1e-2,
-        flat_stroke: bool = False,
         depth_test: bool = True,
+        joint_type: str = 'no_joint',
+        flat_stroke: bool = False,
         **kwargs
     ):
         self.uv_surface = uv_surface
         self.resolution = resolution
         self.normal_nudge = normal_nudge
-        self.flat_stroke = flat_stroke
 
         super().__init__(
             stroke_color=stroke_color,
             stroke_width=stroke_width,
             depth_test=depth_test,
+            joint_type=joint_type,
             **kwargs
         )
+        self.set_flat_stroke(flat_stroke)
 
     def init_points(self) -> None:
         uv_surface = self.uv_surface
@@ -63,7 +65,7 @@ class SurfaceMesh(VGroup):
         u_indices = np.linspace(0, full_nu - 1, part_nu)
         v_indices = np.linspace(0, full_nv - 1, part_nv)
 
-        points, du_points, dv_points = uv_surface.get_surface_points_and_nudged_points()
+        points = uv_surface.get_points()
         normals = uv_surface.get_unit_normals()
         nudge = self.normal_nudge
         nudged_points = points + nudge * normals
@@ -94,7 +96,7 @@ class Sphere(Surface):
     def __init__(
         self,
         u_range: Tuple[float, float] = (0, TAU),
-        v_range: Tuple[float, float] = (0, PI),
+        v_range: Tuple[float, float] = (1e-5, PI - 1e-5),
         resolution: Tuple[int, int] = (101, 51),
         radius: float = 1.0,
         **kwargs,
@@ -164,7 +166,6 @@ class Cylinder(Surface):
         self.scale(self.radius)
         self.set_depth(self.height, stretch=True)
         self.apply_matrix(z_to_vector(self.axis))
-        return self
 
     def uv_func(self, u: float, v: float) -> np.ndarray:
         return np.array([np.cos(u), np.sin(u), v])
@@ -184,6 +185,7 @@ class Line3D(Cylinder):
             height=get_norm(axis),
             radius=width / 2,
             axis=axis,
+            resolution=resolution,
             **kwargs
         )
         self.shift((start + end) / 2)
@@ -252,7 +254,7 @@ class Cube(SGroup):
         self,
         color: ManimColor = BLUE,
         opacity: float = 1,
-        gloss: float = 0.5,
+        shading: Tuple[float, float, float] = (0.1, 0.5, 0.1),
         square_resolution: Tuple[int, int] = (2, 2),
         side_length: float = 2,
         **kwargs,
@@ -262,12 +264,9 @@ class Cube(SGroup):
             side_length=side_length,
             color=color,
             opacity=opacity,
+            shading=shading,
         )
-        super().__init__(
-            *square_to_cube_faces(face),
-            gloss=gloss,
-            **kwargs
-        )
+        super().__init__(*square_to_cube_faces(face), **kwargs)
 
 
 class Prism(Cube):
@@ -288,16 +287,12 @@ class VGroup3D(VGroup):
         self,
         *vmobjects: VMobject,
         depth_test: bool = True,
-        gloss: float = 0.2,
-        shadow: float = 0.2,
-        reflectiveness: float = 0.2,
-        joint_type: str = "round",
+        shading: Tuple[float, float, float] = (0.2, 0.2, 0.2),
+        joint_type: str = "no_joint",
         **kwargs
     ):
         super().__init__(*vmobjects, **kwargs)
-        self.set_gloss(gloss)
-        self.set_shadow(shadow)
-        self.set_reflectiveness(reflectiveness)
+        self.set_shading(*shading)
         self.set_joint_type(joint_type)
         if depth_test:
             self.apply_depth_test()
@@ -342,7 +337,7 @@ class Dodecahedron(VGroup3D):
         fill_opacity: float = 1,
         stroke_color: ManimColor = BLUE_E,
         stroke_width: float = 1,
-        reflectiveness: float = 0.2,
+        shading: Tuple[float, float, float] = (0.2, 0.2, 0.2),
         **kwargs,
     ):
         style = dict(
@@ -350,7 +345,7 @@ class Dodecahedron(VGroup3D):
             fill_opacity=fill_opacity,
             stroke_color=stroke_color,
             stroke_width=stroke_width,
-            reflectiveness=reflectiveness,
+            shading=shading,
             **kwargs
         )
 
@@ -381,27 +376,20 @@ class Dodecahedron(VGroup3D):
 
         super().__init__(*pentagons, **style)
 
-        # # Rotate those two pentagons by all the axis permuations to fill
-        # # out the dodecahedron
-        # Id = np.identity(3)
-        # for i in range(3):
-        #     perm = [j % 3 for j in range(i, i + 3)]
-        #     for b in [1, -1]:
-        #         matrix = b * np.array([Id[0][perm], Id[1][perm], Id[2][perm]])
-        #         self.add(pentagon1.copy().apply_matrix(matrix, about_point=ORIGIN))
-        #         self.add(pentagon2.copy().apply_matrix(matrix, about_point=ORIGIN))
-
 
 class Prismify(VGroup3D):
     def __init__(self, vmobject, depth=1.0, direction=IN, **kwargs):
         # At the moment, this assume stright edges
         vect = depth * direction
         pieces = [vmobject.copy()]
-        points = vmobject.get_points()[::vmobject.n_points_per_curve]
+        points = vmobject.get_anchors()
         for p1, p2 in adjacent_pairs(points):
             wall = VMobject()
             wall.match_style(vmobject)
             wall.set_points_as_corners([p1, p2, p2 + vect, p1 + vect])
             pieces.append(wall)
-        pieces.append(vmobject.copy().shift(vect).reverse_points())
+        top = vmobject.copy()
+        top.shift(vect)
+        top.reverse_points()
+        pieces.append(top)
         super().__init__(*pieces, **kwargs)

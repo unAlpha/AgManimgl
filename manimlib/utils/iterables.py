@@ -91,7 +91,7 @@ def resize_array(nparray: np.ndarray, length: int) -> np.ndarray:
 
 def resize_preserving_order(nparray: np.ndarray, length: int) -> np.ndarray:
     if len(nparray) == 0:
-        return np.zeros((length, *nparray.shape[1:]))
+        return np.resize(nparray, length)
     if len(nparray) == length:
         return nparray
     indices = np.arange(length) * len(nparray) // length
@@ -101,6 +101,8 @@ def resize_preserving_order(nparray: np.ndarray, length: int) -> np.ndarray:
 def resize_with_interpolation(nparray: np.ndarray, length: int) -> np.ndarray:
     if len(nparray) == length:
         return nparray
+    if len(nparray) == 1 or array_is_constant(nparray):
+        return nparray[:1].repeat(length, axis=0)
     if length == 0:
         return np.zeros((0, *nparray.shape[1:]))
     cont_indices = np.linspace(0, len(nparray) - 1, length)
@@ -124,6 +126,14 @@ def make_even(
         [iterable_1[(n * len1) // new_len] for n in range(new_len)],
         [iterable_2[(n * len2) // new_len] for n in range(new_len)]
     )
+
+
+def arrays_match(arr1: np.ndarray, arr2: np.ndarray) -> bool:
+    return arr1.shape == arr2.shape and (arr1 == arr2).all()
+
+
+def array_is_constant(arr: np.ndarray) -> bool:
+    return len(arr) > 0 and (arr == arr[0]).all()
 
 
 def hash_obj(obj: object) -> int:

@@ -36,7 +36,7 @@ class Fade(Transform):
 
 class FadeIn(Fade):
     def create_target(self) -> Mobject:
-        return self.mobject
+        return self.mobject.copy()
 
     def create_starting_mobject(self) -> Mobject:
         start = super().create_starting_mobject()
@@ -103,12 +103,8 @@ class FadeTransform(Transform):
         self.stretch = stretch
         self.dim_to_match = dim_to_match
 
-        group_type = Group
-        if isinstance(mobject, VMobject) and isinstance(target_mobject, VMobject):
-            group_type = VGroup
-
         mobject.save_state()
-        super().__init__(group_type(mobject, target_mobject.copy()), **kwargs)
+        super().__init__(Group(mobject, target_mobject.copy()), **kwargs)
 
     def begin(self) -> None:
         self.ending_mobject = self.mobject.copy()

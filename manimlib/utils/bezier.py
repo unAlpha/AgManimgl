@@ -2,18 +2,22 @@ from __future__ import annotations
 
 import numpy as np
 from scipy import linalg
+from fontTools.cu2qu.cu2qu import curve_to_quadratic
 
 from manimlib.logger import log
 from manimlib.utils.simple_functions import choose
 from manimlib.utils.space_ops import cross2d
+from manimlib.utils.space_ops import cross
 from manimlib.utils.space_ops import find_intersection
 from manimlib.utils.space_ops import midpoint
+from manimlib.utils.space_ops import get_norm
+from manimlib.utils.space_ops import z_to_vector
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Callable, Sequence, TypeVar
-    from manimlib.typing import VectN, FloatArray
+    from typing import Callable, Sequence, TypeVar, Tuple
+    from manimlib.typing import VectN, FloatArray, VectNArray, Vect3Array
 
     Scalable = TypeVar("Scalable", float, FloatArray)
 
@@ -22,14 +26,14 @@ CLOSED_THRESHOLD = 0.001
 
 
 def bezier(
-    points: Sequence[Scalable]
-) -> Callable[[float], Scalable]:
+    points: Sequence[float | FloatArray] | VectNArray
+) -> Callable[[float], float | FloatArray]:
     if len(points) == 0:
         raise Exception("bezier cannot be calld on an empty list")
 
     n = len(points) - 1
 
-    def result(t: float) -> Scalable:
+    def result(t: float) -> float | FloatArray:
         return sum(
             ((1 - t)**(n - k)) * (t**k) * choose(n, k) * point
             for k, point in enumerate(points)
@@ -69,10 +73,10 @@ def partial_bezier_points(
 # Shortened version of partial_bezier_points just for quadratics,
 # since this is called a fair amount
 def partial_quadratic_bezier_points(
-    points: Sequence[Scalable],
+    points: Sequence[VectN] | VectNArray,
     a: float,
     b: float
-) -> list[Scalable]:
+) -> list[VectN]:
     if a == 1:
         return 3 * [points[-1]]
 
@@ -167,7 +171,7 @@ def match_interpolate(
     )
 
 
-def get_smooth_quadratic_bezier_handle_points(
+def approx_smooth_quadratic_bezier_handles(
     points: FloatArray
 ) -> FloatArray:
     """
@@ -201,8 +205,45 @@ def get_smooth_quadratic_bezier_handle_points(
     return handles
 
 
+def smooth_quadratic_path(anchors: Vect3Array) -> Vect3Array:
+    """
+    Returns a path defining a smooth quadratic bezier spline
+    through anchors.
+    """
+    if len(anchors) < 2:
+        return anchors
+    elif len(anchors) == 2:
+        return np.array([anchors[0], anchors.mean(1), anchors[2]])
+
+    is_flat = (anchors[:, 2] == 0).all()
+    if not is_flat:
+        normal = cross(anchors[2] - anchors[1], anchors[1] - anchors[0])
+        rot = z_to_vector(normal)
+        anchors = np.dot(anchors, rot)
+        shift = anchors[0, 2]
+        anchors[:, 2] -= shift
+    h1s, h2s = get_smooth_cubic_bezier_handle_points(anchors)
+    quads = [anchors[0, :2]]
+    for cub_bs in zip(anchors[:-1], h1s, h2s, anchors[1:]):
+        # Try to use fontTools curve_to_quadratic
+        new_quads = curve_to_quadratic(
+            [b[:2] for b in cub_bs],
+            max_err=0.1 * get_norm(cub_bs[3] - cub_bs[0])
+        )
+        # Otherwise fall back on home baked solution
+        if new_quads is None or len(new_quads) % 2 == 0:
+            new_quads = get_quadratic_approximation_of_cubic(*cub_bs)[:, :2]
+        quads.extend(new_quads[1:])
+    new_path = np.zeros((len(quads), 3))
+    new_path[:, :2] = quads
+    if not is_flat:
+        new_path[:, 2] += shift
+        new_path = np.dot(new_path, rot.T)
+    return new_path
+
+
 def get_smooth_cubic_bezier_handle_points(
-    points: Sequence[VectN]
+    points: Sequence[VectN] | VectNArray
 ) -> tuple[FloatArray, FloatArray]:
     points = np.array(points)
     num_handles = len(points) - 1
@@ -292,7 +333,7 @@ def get_quadratic_approximation_of_cubic(
     h0: FloatArray,
     h1: FloatArray,
     a1: FloatArray
-) -> np.ndarray:
+) -> FloatArray:
     a0 = np.array(a0, ndmin=2)
     h0 = np.array(h0, ndmin=2)
     h1 = np.array(h1, ndmin=2)
@@ -350,13 +391,12 @@ def get_quadratic_approximation_of_cubic(
     i1 = find_intersection(a1, T1, mid, Tm)
 
     m, n = np.shape(a0)
-    result = np.zeros((6 * m, n))
-    result[0::6] = a0
-    result[1::6] = i0
-    result[2::6] = mid
-    result[3::6] = mid
-    result[4::6] = i1
-    result[5::6] = a1
+    result = np.zeros((5 * m, n))
+    result[0::5] = a0
+    result[1::5] = i0
+    result[2::5] = mid
+    result[3::5] = i1
+    result[4::5] = a1
     return result
 
 

@@ -1,59 +1,45 @@
 #version 330
 
-#INSERT camera_uniform_declarations.glsl
+uniform bool winding;
 
 in vec4 color;
-in float fill_all;  // Either 0 or 1
-in float uv_anti_alias_width;
-
-in vec3 xyz_coords;
+in float fill_all;
 in float orientation;
 in vec2 uv_coords;
-in vec2 uv_b2;
-in float bezier_degree;
 
 out vec4 frag_color;
-
-// Needed for quadratic_bezier_distance insertion below
-float modify_distance_for_endpoints(vec2 p, float dist, float t){
-    return dist;
-}
-
-#INSERT quadratic_bezier_distance.glsl
-
-
-float sdf(){
-    if(bezier_degree < 2){
-        return abs(uv_coords[1]);
-    }
-    float u2 = uv_b2.x;
-    float v2 = uv_b2.y;
-    // For really flat curves, just take the distance to x-axis
-    if(abs(v2 / u2) < 0.1 * uv_anti_alias_width){
-        return abs(uv_coords[1]);
-    }
-    // This converts uv_coords to yet another space where the bezier points sit on
-    // (0, 0), (1/2, 0) and (1, 1), so that the curve can be expressed implicityly
-    // as y = x^2.
-    mat2 to_simple_space = mat2(
-        v2, 0,
-        2 - u2, 4 * v2
-    );
-    vec2 p = to_simple_space * uv_coords;
-    // Sign takes care of whether we should be filling the inside or outside of curve.
-    float sgn = orientation * sign(v2);
-    float Fp = (p.x * p.x - p.y);
-    if(sgn * Fp <= 0){
-        return 0.0;
-    }else{
-        return min_dist_to_curve(uv_coords, uv_b2, bezier_degree);
-    }
-}
-
 
 void main() {
     if (color.a == 0) discard;
     frag_color = color;
-    if (fill_all == 1.0) return;
-    frag_color.a *= smoothstep(1, 0, sdf() / uv_anti_alias_width);
+    /*
+    We want negatively oriented triangles to be canceled with positively
+    oriented ones. The easiest way to do this is to give them negative alpha,
+    and change the blend function to just add them. However, this messes with
+    usual blending, so instead the following line is meant to let this canceling
+    work even for the normal blending equation:
+
+    (1 - alpha) * dst + alpha * src
+
+    We want the effect of blending with a positively oriented triangle followed
+    by a negatively oriented one to return to whatever the original frag value
+    was. You can work out this will work if the alpha for negative orientations
+    is changed to -alpha / (1 - alpha). This has a singularity at alpha = 1,
+    so we cap it at a value very close to 1. Effectively, the purpose of this
+    cap is to make sure the original fragment color can be recovered even after
+    blending with an (alpha = 1) color.
+    */
+    if(winding){
+        float a = 0.95 * frag_color.a;
+        if(orientation < 0) a = -a / (1 - a);
+        frag_color.a = a;
+    }
+
+    if (bool(fill_all)) return;
+
+    float x = uv_coords.x;
+    float y = uv_coords.y;
+    float Fxy = (y - x * x);
+    if(!winding && orientation < 0) Fxy *= -1;
+    if(Fxy < 0) discard;
 }

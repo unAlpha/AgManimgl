@@ -48,7 +48,7 @@ class ParametricCurve(VMobject):
             self.start_new_path(points[0])
             self.add_points_as_corners(points[1:])
         if self.use_smoothing:
-            self.make_approximately_smooth()
+            self.make_smooth(approx=True)
         if not self.has_points():
             self.set_points(np.array([self.t_func(t_min)]))
         return self
@@ -92,10 +92,11 @@ class ImplicitFunction(VMobject):
         y_range: Tuple[float, float] = (-FRAME_Y_RADIUS, FRAME_Y_RADIUS),
         min_depth: int = 5,
         max_quads: int = 1500,
-        use_smoothing: bool = True,
+        use_smoothing: bool = False,
+        joint_type: str = 'no_joint',
         **kwargs
     ):
-        super().__init__(**kwargs)
+        super().__init__(joint_type=joint_type, **kwargs)
 
         p_min, p_max = (
             np.array([x_range[0], y_range[0]]),
@@ -109,7 +110,9 @@ class ImplicitFunction(VMobject):
             max_quads=max_quads,
         )  # returns a list of lists of 2D points
         curves = [
-            np.pad(curve, [(0, 0), (0, 1)]) for curve in curves if curve != []
+            np.pad(curve, [(0, 0), (0, 1)])
+            for curve in curves
+            if curve != []
         ]  # add z coord as 0
         for curve in curves:
             self.start_new_path(curve[0])

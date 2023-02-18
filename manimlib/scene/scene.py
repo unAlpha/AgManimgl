@@ -7,6 +7,7 @@ import platform
 import pyperclip
 import random
 import time
+from functools import wraps
 
 from IPython.terminal import pt_inputhooks
 from IPython.terminal.embed import InteractiveShellEmbed
@@ -18,6 +19,7 @@ from tqdm.auto import tqdm as ProgressDisplay
 from manimlib.animation.animation import prepare_animation
 from manimlib.animation.fading import VFadeInThenOut
 from manimlib.camera.camera import Camera
+from manimlib.camera.camera_frame import CameraFrame
 from manimlib.config import get_module
 from manimlib.constants import ARROW_SYMBOLS
 from manimlib.constants import DEFAULT_WAIT_TIME
@@ -37,11 +39,13 @@ from manimlib.mobject.types.vectorized_mobject import VMobject
 from manimlib.scene.scene_file_writer import SceneFileWriter
 from manimlib.utils.family_ops import extract_mobject_family_members
 from manimlib.utils.family_ops import recursive_mobject_remove
+from manimlib.utils.iterables import batch_by_property
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Callable, Iterable
+    from manimlib.typing import Vect3
 
     from PIL.Image import Image
 
@@ -50,18 +54,22 @@ if TYPE_CHECKING:
 
 PAN_3D_KEY = 'd'
 FRAME_SHIFT_KEY = 'f'
-ZOOM_KEY = 'z'
 RESET_FRAME_KEY = 'r'
 QUIT_KEY = 'q'
 
 
 class Scene(object):
     random_seed: int = 0
-    pan_sensitivity: float = 3.0
+    pan_sensitivity: float = 0.5
+    scroll_sensitivity: float = 20
+    drag_to_pan: bool = True
     max_num_saved_states: int = 50
     default_camera_config: dict = dict()
     default_window_config: dict = dict()
     default_file_writer_config: dict = dict()
+    samples = 0
+    # Euler angles, in degrees
+    default_frame_orientation = (0, 0)
 
     def __init__(
         self,
@@ -92,21 +100,28 @@ class Scene(object):
 
         self.camera_config = {**self.default_camera_config, **camera_config}
         self.window_config = {**self.default_window_config, **window_config}
+        for config in self.camera_config, self.window_config:
+            config["samples"] = self.samples
         self.file_writer_config = {**self.default_file_writer_config, **file_writer_config}
 
         # Initialize window, if applicable
         if self.preview:
             from manimlib.window import Window
             self.window = Window(scene=self, **self.window_config)
-            self.camera_config["ctx"] = self.window.ctx
+            self.camera_config["window"] = self.window
             self.camera_config["fps"] = 30  # Where's that 30 from?
         else:
             self.window = None
 
         # Core state of the scene
         self.camera: Camera = Camera(**self.camera_config)
+        self.frame: CameraFrame = self.camera.frame
+        self.frame.reorient(*self.default_frame_orientation)
+        self.frame.make_orientation_default()
+
         self.file_writer = SceneFileWriter(self, **self.file_writer_config)
         self.mobjects: list[Mobject] = [self.camera.frame]
+        self.render_groups: list[Mobject] = []
         self.id_to_mobject_map: dict[int, Mobject] = dict()
         self.num_plays: int = 0
         self.time: float = 0
@@ -186,14 +201,13 @@ class Scene(object):
             "Press `command + q` or `esc` to quit"
         )
         self.skip_animations = False
-        self.refresh_static_mobjects()
         while not self.is_window_closing():
             self.update_frame(1 / self.camera.fps)
 
     def embed(
         self,
         close_scene_on_exit: bool = True,
-        show_animation_progress: bool = True,
+        show_animation_progress: bool = False,
     ) -> None:
         if not self.preview:
             return  # Embed is only relevant with a preview
@@ -248,7 +262,6 @@ class Scene(object):
 
         # Operation to run after each ipython command
         def post_cell_func():
-            self.refresh_static_mobjects()
             if not self.is_window_closing():
                 self.update_frame(dt=0, ignore_skipping=True)
             self.save_state()
@@ -286,7 +299,13 @@ class Scene(object):
     # Only these methods should touch the camera
 
     def get_image(self) -> Image:
-        return self.camera.get_image()
+        if self.window is not None:
+            self.camera.use_window_fbo(False)
+            self.camera.capture(*self.render_groups)
+        image = self.camera.get_image()
+        if self.window is not None:
+            self.camera.use_window_fbo(True)
+        return image
 
     def show(self) -> None:
         self.update_frame(ignore_skipping=True)
@@ -303,8 +322,7 @@ class Scene(object):
 
         if self.window:
             self.window.clear()
-        self.camera.clear()
-        self.camera.capture(*self.mobjects)
+        self.camera.capture(*self.render_groups)
 
         if self.window:
             self.window.swap_buffers()
@@ -363,6 +381,33 @@ class Scene(object):
     def get_mobject_family_members(self) -> list[Mobject]:
         return extract_mobject_family_members(self.mobjects)
 
+    def assemble_render_groups(self):
+        """
+        Rendering can be more efficient when mobjects of the
+        same type are grouped together, so this function creates
+        Groups of all clusters of adjacent Mobjects in the scene
+        """
+        batches = batch_by_property(
+            self.mobjects,
+            lambda m: str(type(m)) + str(m.get_uniforms())
+        )
+
+        for group in self.render_groups:
+            group.clear()
+        self.render_groups = [
+            batch[0].get_group_class()(*batch)
+            for batch, key in batches
+        ]
+
+    def affects_mobject_list(func: Callable):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            func(self, *args, **kwargs)
+            self.assemble_render_groups()
+            return self
+        return wrapper
+
+    @affects_mobject_list
     def add(self, *new_mobjects: Mobject):
         """
         Mobjects will be displayed, from background to
@@ -389,6 +434,7 @@ class Scene(object):
         ))
         return self
 
+    @affects_mobject_list
     def replace(self, mobject: Mobject, *replacements: Mobject):
         if mobject in self.mobjects:
             index = self.mobjects.index(mobject)
@@ -399,6 +445,7 @@ class Scene(object):
             ]
         return self
 
+    @affects_mobject_list
     def remove(self, *mobjects_to_remove: Mobject):
         """
         Removes anything in mobjects from scenes mobject list, but in the event that one
@@ -416,11 +463,13 @@ class Scene(object):
         self.add(*mobjects)
         return self
 
+    @affects_mobject_list
     def bring_to_back(self, *mobjects: Mobject):
         self.remove(*mobjects)
         self.mobjects = list(mobjects) + self.mobjects
         return self
 
+    @affects_mobject_list
     def clear(self):
         self.mobjects = []
         return self
@@ -508,6 +557,7 @@ class Scene(object):
                 leave=self.leave_progress_bars,
                 ascii=True if platform.system() == 'Windows' else None,
                 desc=desc,
+                bar_format="{l_bar} {n_fmt:3}/{total_fmt:3} {rate_fmt}{postfix}",
             )
         else:
             return times
@@ -551,8 +601,6 @@ class Scene(object):
             self.real_animation_start_time = time.time()
             self.virtual_animation_start_time = self.time
 
-        self.refresh_static_mobjects()
-
     def post_play(self):
         if not self.skip_animations:
             self.file_writer.end_animation()
@@ -562,9 +610,6 @@ class Scene(object):
             self.update_frame(dt=0, ignore_skipping=True)
 
         self.num_plays += 1
-
-    def refresh_static_mobjects(self) -> None:
-        self.camera.refresh_static_mobjects()
 
     def begin_animations(self, animations: Iterable[Animation]) -> None:
         for animation in animations:
@@ -598,6 +643,7 @@ class Scene(object):
         else:
             self.update_mobjects(0)
 
+    @affects_mobject_list
     def play(
         self,
         *proto_animations: Animation | _AnimationBuilder,
@@ -640,7 +686,6 @@ class Scene(object):
                 self.emit_frame()
                 if stop_condition is not None and stop_condition():
                     break
-        self.refresh_static_mobjects()
         self.post_play()
 
     def hold_loop(self):
@@ -682,6 +727,7 @@ class Scene(object):
     def get_state(self) -> SceneState:
         return SceneState(self)
 
+    @affects_mobject_list
     def restore_state(self, scene_state: SceneState):
         scene_state.restore_scene(self)
 
@@ -700,15 +746,18 @@ class Scene(object):
         if self.undo_stack:
             self.redo_stack.append(self.get_state())
             self.restore_state(self.undo_stack.pop())
-        self.refresh_static_mobjects()
 
     def redo(self):
         if self.redo_stack:
             self.undo_stack.append(self.get_state())
             self.restore_state(self.redo_stack.pop())
-        self.refresh_static_mobjects()
 
-    def checkpoint_paste(self, skip: bool = False):
+    def checkpoint_paste(
+        self,
+        skip: bool = False,
+        record: bool = False,
+        progress_bar: bool = True
+    ):
         """
         Used during interactive development to run (or re-run)
         a block of scene code.
@@ -718,7 +767,7 @@ class Scene(object):
         was called on a block of code starting with that comment.
         """
         shell = get_ipython()
-        if shell is None:
+        if shell is None or self.window is None:
             raise Exception(
                 "Scene.checkpoint_paste cannot be called outside of " +
                 "an ipython shell"
@@ -735,9 +784,21 @@ class Scene(object):
         prev_skipping = self.skip_animations
         self.skip_animations = skip
 
+        prev_progress = self.show_animation_progress
+        self.show_animation_progress = progress_bar
+
+        if record:
+            self.camera.use_window_fbo(False)
+            self.file_writer.begin_insert()
+
         shell.run_cell(pasted)
 
+        if record:
+            self.file_writer.end_insert()
+            self.camera.use_window_fbo(True)
+
         self.skip_animations = prev_skipping
+        self.show_animation_progress = prev_progress
 
     def checkpoint(self, key: str):
         self.checkpoint_states[key] = self.get_state()
@@ -778,9 +839,10 @@ class Scene(object):
 
     def on_mouse_motion(
         self,
-        point: np.ndarray,
-        d_point: np.ndarray
+        point: Vect3,
+        d_point: Vect3
     ) -> None:
+        assert(self.window is not None)
         self.mouse_point.move_to(point)
 
         event_data = {"point": point, "d_point": d_point}
@@ -791,25 +853,24 @@ class Scene(object):
         frame = self.camera.frame
         # Handle perspective changes
         if self.window.is_key_pressed(ord(PAN_3D_KEY)):
-            frame.increment_theta(-self.pan_sensitivity * d_point[0])
-            frame.increment_phi(self.pan_sensitivity * d_point[1])
+            ff_d_point = frame.to_fixed_frame_point(d_point, relative=True)
+            ff_d_point *= self.pan_sensitivity
+            frame.increment_theta(-ff_d_point[0])
+            frame.increment_phi(ff_d_point[1])
         # Handle frame movements
         elif self.window.is_key_pressed(ord(FRAME_SHIFT_KEY)):
-            shift = -d_point
-            shift[0] *= frame.get_width() / 2
-            shift[1] *= frame.get_height() / 2
-            transform = frame.get_inverse_camera_rotation_matrix()
-            shift = np.dot(np.transpose(transform), shift)
-            frame.shift(shift)
+            frame.shift(-d_point)
 
     def on_mouse_drag(
         self,
-        point: np.ndarray,
-        d_point: np.ndarray,
+        point: Vect3,
+        d_point: Vect3,
         buttons: int,
         modifiers: int
     ) -> None:
         self.mouse_drag_point.move_to(point)
+        if self.drag_to_pan:
+            self.frame.shift(-d_point)
 
         event_data = {"point": point, "d_point": d_point, "buttons": buttons, "modifiers": modifiers}
         propagate_event = EVENT_DISPATCHER.dispatch(EventType.MouseDragEvent, **event_data)
@@ -818,7 +879,7 @@ class Scene(object):
 
     def on_mouse_press(
         self,
-        point: np.ndarray,
+        point: Vect3,
         button: int,
         mods: int
     ) -> None:
@@ -830,7 +891,7 @@ class Scene(object):
 
     def on_mouse_release(
         self,
-        point: np.ndarray,
+        point: Vect3,
         button: int,
         mods: int
     ) -> None:
@@ -841,22 +902,21 @@ class Scene(object):
 
     def on_mouse_scroll(
         self,
-        point: np.ndarray,
-        offset: np.ndarray
+        point: Vect3,
+        offset: Vect3,
+        x_pixel_offset: float,
+        y_pixel_offset: float
     ) -> None:
         event_data = {"point": point, "offset": offset}
         propagate_event = EVENT_DISPATCHER.dispatch(EventType.MouseScrollEvent, **event_data)
         if propagate_event is not None and propagate_event is False:
             return
 
-        frame = self.camera.frame
-        if self.window.is_key_pressed(ord(ZOOM_KEY)):
-            factor = 1 + np.arctan(10 * offset[1])
-            frame.scale(1 / factor, about_point=point)
-        else:
-            transform = frame.get_inverse_camera_rotation_matrix()
-            shift = np.dot(np.transpose(transform), offset)
-            frame.shift(-20.0 * shift)
+        rel_offset = y_pixel_offset / self.camera.get_pixel_height()
+        self.frame.scale(
+            1 - self.scroll_sensitivity * rel_offset,
+            about_point=point
+        )
 
     def on_key_release(
         self,
@@ -898,7 +958,7 @@ class Scene(object):
             self.hold_on_wait = False
 
     def on_resize(self, width: int, height: int) -> None:
-        self.camera.reset_pixel_shape(width, height)
+        pass
 
     def on_show(self) -> None:
         pass
@@ -956,3 +1016,14 @@ class SceneState():
 
 class EndScene(Exception):
     pass
+
+
+class ThreeDScene(Scene):
+    samples = 4
+    default_frame_orientation = (-30, 70)
+
+    def add(self, *mobjects, set_depth_test: bool = True):
+        for mob in mobjects:
+            if set_depth_test and not mob.is_fixed_in_frame():
+                mob.apply_depth_test()
+        super().add(*mobjects)

@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import TypeVar
-    from manimlib.typing import ManimColor, Vect3
+    from manimlib.typing import ManimColor, Vect3, Self
 
     T = TypeVar("T", bound=VMobject)
 
@@ -32,7 +32,7 @@ class DecimalNumber(VMobject):
         unit: str | None = None,  # Aligned to bottom unless it starts with "^"
         include_background_rectangle: bool = False,
         edge_to_fix: Vect3 = LEFT,
-        font_size: int = 48,
+        font_size: float = 48,
         text_config: dict = dict(),  # Do not pass in font_size here
         **kwargs
     ):
@@ -46,6 +46,7 @@ class DecimalNumber(VMobject):
         self.edge_to_fix = edge_to_fix
         self.font_size = font_size
         self.text_config = dict(text_config)
+        self.char_to_mob_map = dict()
 
         super().__init__(
             color=color,
@@ -62,14 +63,11 @@ class DecimalNumber(VMobject):
         self.set_submobjects([])
         self.text_config["font_size"] = self.get_font_size()
         num_string = self.num_string = self.get_num_string(number)
-        self.add(*(
-            Text(ns, **self.text_config)
-            for ns in num_string
-        ))
+        self.add(*map(self.char_to_mob, num_string))
 
         # Add non-numerical bits
         if self.show_ellipsis:
-            dots = Text("...", **self.text_config)
+            dots = self.char_to_mob("...")
             dots.arrange(RIGHT, buff=2 * dots[0].get_width())
             self.add(dots)
         if self.unit is not None:
@@ -111,12 +109,19 @@ class DecimalNumber(VMobject):
         num_string = num_string.replace("-", "–")
         return num_string
 
-    def init_data(self) -> None:
-        super().init_data()
-        self.data["font_size"] = np.array([self.font_size], dtype=float)
+    def char_to_mob(self, char: str) -> Tex | Text:
+        if char not in self.char_to_mob_map:
+            self.char_to_mob_map[char] = Text(char, **self.text_config)
+        result = self.char_to_mob_map[char].copy()
+        result.scale(self.get_font_size() / result.font_size)
+        return result
 
-    def get_font_size(self) -> int:
-        return int(self.data["font_size"][0])
+    def init_uniforms(self) -> None:
+        super().init_uniforms()
+        self.uniforms["font_size"] = self.font_size
+
+    def get_font_size(self) -> float:
+        return float(self.uniforms["font_size"])
 
     def get_formatter(self, **kwargs) -> str:
         """
@@ -158,7 +163,7 @@ class DecimalNumber(VMobject):
     def get_tex(self):
         return self.num_string
 
-    def set_value(self, number: float | complex):
+    def set_value(self, number: float | complex) -> Self:
         move_to_point = self.get_edge_center(self.edge_to_fix)
         style = self.family_members_with_points()[0].get_style()
         self.set_submobjects_from_number(number)
@@ -166,14 +171,16 @@ class DecimalNumber(VMobject):
         self.set_style(**style)
         return self
 
-    def _handle_scale_side_effects(self, scale_factor: float) -> None:
-        self.data["font_size"] *= scale_factor
+    def _handle_scale_side_effects(self, scale_factor: float) -> Self:
+        self.uniforms["font_size"] = scale_factor * self.uniforms["font_size"]
+        return self
 
     def get_value(self) -> float | complex:
         return self.number
 
-    def increment_value(self, delta_t: float | complex = 1) -> None:
+    def increment_value(self, delta_t: float | complex = 1) -> Self:
         self.set_value(self.get_value() + delta_t)
+        return self
 
 
 class Integer(DecimalNumber):
