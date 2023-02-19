@@ -1292,6 +1292,8 @@ class CustomGraph6(Scene):
                     "num_decimal_places": 2,
                 },
             },
+            height=FRAME_HEIGHT - 2,
+            width=FRAME_WIDTH - 2,
             )
         
         axes.add_coordinate_labels()
@@ -1827,10 +1829,15 @@ class AxesLabelsTex(Axes):
         return self
 
 class CustomGraph10(Scene):
+    x_range = (0,18,1)
+    y_range = (0,0.045,0.005)
+    sl1 = 5
+    sl2 = 6
+    ndp = 1
     def construct(self):
         axes = AxesLabelsTex(
-            (0,18,1), 
-            (0,0.04,0.01,),
+            self.x_range, 
+            self.y_range,
             axis_config={
                 "stroke_color": GREY_A,
                 "stroke_width": 2,
@@ -1840,9 +1847,16 @@ class CustomGraph10(Scene):
                     },
                 "include_tip":True,
                 },
+            y_axis_config={ 
+                "decimal_number_config": {
+                    "num_decimal_places": self.ndp,
+                    "font_size":35
+                    },
+                },
+            height=FRAME_HEIGHT - 2,
+            width=FRAME_WIDTH - 3,
             )
-        axes.add_coordinate_labels()
-        axes.scale(0.9618)
+        axes.add_coordinate_labels().center()
         x_label = Text("人数",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
         y_label = Text("概率",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
         
@@ -1863,36 +1877,80 @@ class CustomGraph10(Scene):
         # print(coords)   
         # print(transposed_coords[5][1:])
         denominator = 1000000
-        points1 = [axes.c2p(float(px),round(float(py)/denominator,4)) for px,py in zip(transposed_coords[0][1:],transposed_coords[5][1:])]
-        points2 = [axes.c2p(float(px),round(float(py)/denominator,4)) for px,py in zip(transposed_coords[0][1:],transposed_coords[6][1:])]
+        coords1 = [[float(x),round(float(y)/denominator,4)] for (x,y) in zip(transposed_coords[0][1:],transposed_coords[self.sl1][1:])]
+        coords2 = [[float(x),round(float(y)/denominator,4)] for (x,y) in zip(transposed_coords[0][1:],transposed_coords[self.sl2][1:])]
+        points1 = [axes.c2p(px,py) for px,py in coords1]
+        points2 = [axes.c2p(px,py) for px,py in coords2]
         # Set graph
         graph1 = DiscreteGraphFromSetPoints(points1,color=YELLOW_A,stroke_width=10)
-        graph2 = DiscreteGraphFromSetPoints(points2,color=RED,stroke_width=10,stroke_opacity=0.68)
+        graph2 = DiscreteGraphFromSetPoints(points2,color=RED_A,stroke_width=10,stroke_opacity=0.68)
         
-        text1 = Text("同花顺",font="思源黑体",font_size=36)
-        text2 = Text("豹子",font="思源黑体",font_size=36,color=RED)
+        text1 = Text(transposed_coords[self.sl1][0],font="思源黑体",font_size=36,color=YELLOW_E)
+        text2 = Text(transposed_coords[self.sl2][0],font="思源黑体",font_size=36,color=RED_E)
 
         # Set dots
         dots1 = VGroup(*[
-            Dot(radius=0.06,color=YELLOW_E).move_to([px,py,pz])
+            Dot(radius=0.06,fill_color=YELLOW_E).move_to([px,py,pz])
             for px,py,pz in points1])
         dots2 = VGroup(*[
-            Dot(radius=0.06,color=RED).move_to([px,py,pz])
+            Dot(radius=0.06,fill_color=RED_E).move_to([px,py,pz])
             for px,py,pz in points2])
         
-        text1.next_to(dots1[13],DOWN*1.4)
-        text2.next_to(dots1[12],UP*2)
+        ABC=VGroup()
+        for i,([px,py,pz],coords) in enumerate(zip(points1,coords1)):
+            direct = DR
+            tex = Tex(str(round(coords[1]*100,2))+"\\%",color=YELLOW_E).scale(0.36).next_to([px,py,pz],direct,buff=0.1)
+            ABC.add(tex)
+        AAA=VGroup()
         
-        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
-        self.add(bg)
+        for i,([px,py,pz],coords) in enumerate(zip(points2,coords2)):
+            direct = UL
+            tex = Tex(str(round(coords[1]*100,2))+"\\%",color=RED_E).scale(0.36).next_to([px,py,pz],direct,buff=0.1)
+            AAA.add(tex)    
+
+        text1.next_to(dots1[13],DOWN*2.6)
+        text2.next_to(dots2[12],UP*2.6)
+        
+        # fill_color=["#032348","#46246d","#31580a","#852211"]
+        # bg = FullScreenRectangle()
+        # self.add(bg)
+        
         self.add(axes.lines_x_axis,axes.lines_y_axis,axes,x_label,y_label)
         self.add(text1,text2)
-        self.play(ShowCreation(dots1,run_time=2))
-        self.play(ShowCreation(graph1,run_time=1))
-        self.play(ShowCreation(dots2,run_time=1))
-        self.play(ShowCreation(graph2,run_time=4))
+        self.play(ShowCreation(graph1,run_time=1),
+                  ShowCreation(dots1,run_time=1)
+                )
+        self.wait()
+        self.play(ShowCreation(graph2,run_time=1),
+                  ShowCreation(dots2,run_time=1)
+                )
         self.wait(3)
-       
+        
+        self.camera.frame.save_state()
+        for i in range(len(ABC)):
+            if i==0:
+                self.play(
+                        self.camera.frame.animate.scale(0.5).move_to(dots1[i]),
+                        FadeIn(ABC[i]),
+                        FadeIn(AAA[i])       
+                    )
+            else:
+                self.play(
+                        self.camera.frame.animate.move_to(dots1[i]),
+                        FadeIn(ABC[i]),
+                        FadeIn(AAA[i])       
+                    )
+
+        self.play(Restore(self.camera.frame))
+        self.wait(3)
+ 
+class CustomGraph11(CustomGraph10):
+    x_range = (0,18,1)
+    y_range = (0,0.65,0.1)
+    sl1 = 4
+    sl2 = 3
+    ndp = 0
+ 
 if __name__ == "__main__":
     from os import system
     system("manimgl {} CustomGraph10 -os".format(__file__))

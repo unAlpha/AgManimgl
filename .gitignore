@@ -17,6 +17,7 @@ develop-eggs/
 dist/
 manimlib.egg-info/
 
+media/
 downloads/
 eggs/
 .eggs/

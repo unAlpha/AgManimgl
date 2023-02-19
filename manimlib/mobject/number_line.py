@@ -175,7 +175,7 @@ class NumberLine(Line):
             num_mob.shift(num_mob[0].get_width() * LEFT / 2)
         if x == unit and unit_tex:
             center = num_mob.get_center()
-            num_mob.remove(num_mob[0])
+            # num_mob.remove(num_mob[0])
             num_mob.move_to(center)
         return num_mob
 
