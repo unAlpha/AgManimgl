@@ -823,10 +823,10 @@ class TexTextTransform3(Scene):
             "$$t_2^{\prime \prime}:\\text{制动力增加时间}$$",
             "$$a_m=\\varphi_m g:\\text{最大制动力加速度}$$",
             "$$\\varphi_m:\\text{峰值附着系数}$$",
-            font ='SimSun',
+            # font ='SimSun',
         )
         tex[0].scale(0.7)
-        tex[1:].arrange(DOWN, buff = 0.5,aligned_edge = LEFT)
+        # tex[1:].arrange(DOWN, buff = 0.5,aligned_edge = LEFT)
         tex[1:].scale(0.6)
         tex.center()
         tex.shift(0.3*UP)        
@@ -1953,4 +1953,4 @@ class CustomGraph11(CustomGraph10):
  
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} CustomGraph10 -os".format(__file__))
+    system("manimgl {} TexTextTransform3 -os".format(__file__))
