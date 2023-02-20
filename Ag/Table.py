@@ -457,17 +457,21 @@ class Table_alluse2(Scene):
         self.wait(1)    
 
 class Table():
-    CONFIG = {
-            "dx": 2.6,
-            "dy": 0.6,
-            "font": "Source Han Sans CN Regular",
-        }
-    def __init__(self, text, file_path, **kwargs):
-        digest_config(self, kwargs)
+    def __init__(
+        self, 
+        text, 
+        file_path, 
+        dx=2.6,
+        dy=0.6,
+        title_font="Source Han Sans CN Regular"
+    ):
+        self.dx = dx
+        self.dy = dy
+        self.title_font = title_font
         self.title = Text(
                 text,
                 font_size=36,
-                font =self.font,
+                font = self.title_font,
             )
         data = get_coords_from_csvdata(file_path)
         self.dataArray=np.array(data)
@@ -484,7 +488,7 @@ class Table():
             for j,dxx in zip(range(self.column),self.dx_list):
                 target_ij = Text(
                     str(self.dataArray[i,j]),
-                    font = self.font,
+                    font = self.title_font,
                     )
                 if i==0:
                     target_ij.scale(0.6)
@@ -748,7 +752,7 @@ class Fifa1(Scene):
         ble = Table(
                 self.t1,
                 self.path,
-                dx=1.73,
+                dx=1.75,
                 dy=0.5,
             )
         ble.dx_list[0] = 2
@@ -909,4 +913,4 @@ class Fifa7(Fifa1):
     
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Fifa7 -os".format(__file__))
+    system("manimgl {} Fifa3 -os".format(__file__))

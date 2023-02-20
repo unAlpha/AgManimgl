@@ -180,27 +180,49 @@ class PlotBarChart3(Scene):
         barsin = BarChart(y1,max_value=None)
         self.add(barsin)
         self.play(barsin.animate.change_bar_values(y2))
-        
         self.wait(2)
         
 class CoinFlips(Scene):
     def construct(self):
         eq = TexText(
-            "$${\\# \\text{试下} adf \\over \\# \\text{一二三}} = $$",
+            "$${\\# \\text{一1试试下} adf \\over \\# \\text{一二三}} = $$",
+            # "$$s=v_{0}\\left(t_{1}+t_{2}{ }^{\\prime}+\\frac{1}{2} t_{2}{ }^{\\prime \\prime}\\right)+\\frac{v_{0}^{2}}{2 a_{m}}-\\frac{a_{m} t_{2}^{\\prime \\prime 2}}{24}$$"
             # "{Num \\over Den}", "=", "0.500",
             # "{\\text{132}}",
-            # isolate={"Num", "Den", "\\# \\text{Heads}"}
+            isolate={"Num", "Den", "\\# \\text{Heads}"},
+            template="american_typewriter",
         )
         words = TexText("$$Vector...$$").next_to(eq,DOWN)
         self.add(eq)
         self.play(ShowCreation(words))
         self.wait()
+
+class demo(Scene):
+    def construct(self):
+        tex = TexText(
+            r"LSTM神经单元数学关系：",
+            r"""
+            $\begin{aligned} f_t&=\sigma(W_{f}x_t+U_fh_{t-1}+b_f)\\ 
+            i_t&=\sigma(W_ix_t+U_ih_{t-1}+b_i)\\ 
+            o_t&=\sigma(W_ox_t+U_oh_{t-1}+b_o)\\ 
+            g_t&=\tanh(W_gx_t+U_gh_{t-1}+b_g)\\
+                \\ 
+            c_t&=c_{t-1}\odot f_t+i_t\odot g_t\\ 
+            h_t&=o_t\odot \tanh(c_t) \end{aligned}$\\
+            """
+        )
+        self.add(tex)
         
 class MySceneR(Scene):
     def construct(self):
-        text = Tex(r"\fontfamily{Helvetica}\text{Some Text}")
-        self.add(text)  
+        # text = Tex(r"\fontfamily{Helvetica}\text{Some Text}")
+        title = Text(
+                "哈哈",
+                font_size=36,
+                font="Source Han Sans CN Regular",
+            )
+        self.add(title)  
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} CustomGraph -os".format(__file__)) 
+    system("manimgl {} CoinFlips -os".format(__file__)) 

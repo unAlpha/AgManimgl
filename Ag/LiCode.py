@@ -823,10 +823,10 @@ class TexTextTransform3(Scene):
             "$$t_2^{\prime \prime}:\\text{制动力增加时间}$$",
             "$$a_m=\\varphi_m g:\\text{最大制动力加速度}$$",
             "$$\\varphi_m:\\text{峰值附着系数}$$",
-            # font ='SimSun',
+            font ='SimSun',
         )
         tex[0].scale(0.7)
-        # tex[1:].arrange(DOWN, buff = 0.5,aligned_edge = LEFT)
+        tex[1:].arrange(DOWN, buff = 0.5,aligned_edge = LEFT)
         tex[1:].scale(0.6)
         tex.center()
         tex.shift(0.3*UP)        
@@ -1856,7 +1856,7 @@ class CustomGraph10(Scene):
             height=FRAME_HEIGHT - 2,
             width=FRAME_WIDTH - 3,
             )
-        axes.add_coordinate_labels().center()
+        axes.add_coordinate_labels().center().shift(0.068*(UP+LEFT))
         x_label = Text("人数",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
         y_label = Text("概率",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
         
@@ -1912,36 +1912,53 @@ class CustomGraph10(Scene):
         text2.next_to(dots2[12],UP*2.6)
         
         # fill_color=["#032348","#46246d","#31580a","#852211"]
-        # bg = FullScreenRectangle()
-        # self.add(bg)
+        bg = FullScreenRectangle(height=FRAME_HEIGHT*1.5,fill_color="#222222")
+        self.add(bg)
         
         self.add(axes.lines_x_axis,axes.lines_y_axis,axes,x_label,y_label)
-        self.add(text1,text2)
-        self.play(ShowCreation(graph1,run_time=1),
-                  ShowCreation(dots1,run_time=1)
-                )
+        # self.add(text1,text2)
+        self.play(
+            ShowCreation(graph2,run_time=1),
+            ShowCreation(dots2,run_time=1),
+            FadeIn(text2,scale=0.5)
+            )
         self.wait()
-        self.play(ShowCreation(graph2,run_time=1),
-                  ShowCreation(dots2,run_time=1)
-                )
+        self.play(
+            ShowCreation(dots1,run_time=1),
+            FadeIn(text1,scale=0.5)
+            )
         self.wait(3)
-        
+    
         self.camera.frame.save_state()
-        for i in range(len(ABC)):
-            if i==0:
-                self.play(
-                        self.camera.frame.animate.scale(0.5).move_to(dots1[i]),
-                        FadeIn(ABC[i]),
-                        FadeIn(AAA[i])       
-                    )
-            else:
-                self.play(
-                        self.camera.frame.animate.move_to(dots1[i]),
-                        FadeIn(ABC[i]),
-                        FadeIn(AAA[i])       
-                    )
-
-        self.play(Restore(self.camera.frame))
+        self.play(
+                self.camera.frame.animate.scale(0.5).move_to(dots1[1]),
+                axes.coordinate_labels.animate.set_style(fill_opacity=0.05,stroke_opacity=0),
+                )
+        self.play(                
+                FadeIn(ABC[0],scale=0.5),
+                FadeIn(AAA[0],scale=0.5)   
+                )
+        self.wait(1)
+        # self.play(
+        #         FadeIn(ABC[1],scale=0.5),
+        #         FadeIn(AAA[1],scale=0.5)       
+        #         )
+        self.wait(3)
+        self.play(
+                self.camera.frame.animate.move_to(dots1[-1]),
+                FadeIn(ABC[1:]),
+                FadeIn(AAA[1:]),
+                run_time=2,       
+                )
+        self.wait(1)
+        self.play(
+            Restore(self.camera.frame),
+            axes.coordinate_labels.animate.set_style(fill_opacity=1,stroke_opacity=1),
+            )
+        self.play(
+            ShowCreation(graph1),
+            graph1.animate.set_style(fill_opacity=0,stroke_opacity=0.8),
+            )
         self.wait(3)
  
 class CustomGraph11(CustomGraph10):
@@ -1953,4 +1970,4 @@ class CustomGraph11(CustomGraph10):
  
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} TexTextTransform3 -os".format(__file__))
+    system("manimgl {} CustomGraph11 -os".format(__file__))
