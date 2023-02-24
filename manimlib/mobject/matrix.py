@@ -18,10 +18,14 @@ from manimlib.mobject.types.vectorized_mobject import VMobject
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Sequence
+    from colour import Color
+    from typing import Union
+
     import numpy.typing as npt
+
     from manimlib.mobject.mobject import Mobject
-    from manimlib.typing import ManimColor, Vect3, Self
+
+    ManimColor = Union[str, Color]
 
 
 VECTOR_LABEL_SCALE_FACTOR = 0.8
@@ -32,13 +36,13 @@ def matrix_to_tex_string(matrix: npt.ArrayLike) -> str:
     if matrix.ndim == 1:
         matrix = matrix.reshape((matrix.size, 1))
     n_rows, n_cols = matrix.shape
-    prefix = R"\left[ \begin{array}{%s}" % ("c" * n_cols)
-    suffix = R"\end{array} \right]"
+    prefix = "\\left[ \\begin{array}{%s}" % ("c" * n_cols)
+    suffix = "\\end{array} \\right]"
     rows = [
         " & ".join(row)
         for row in matrix
     ]
-    return prefix + R" \\ ".join(rows) + suffix
+    return prefix + " \\\\ ".join(rows) + suffix
 
 
 def matrix_to_mobject(matrix: npt.ArrayLike) -> Tex:
@@ -72,88 +76,73 @@ def vector_coordinate_label(
 
 
 class Matrix(VMobject):
-    def __init__(
-        self,
-        matrix: Sequence[Sequence[str | float | VMobject]],
-        v_buff: float = 0.8,
-        h_buff: float = 1.0,
-        bracket_h_buff: float = 0.2,
-        bracket_v_buff: float = 0.25,
-        add_background_rectangles_to_entries: bool = False,
-        include_background_rectangle: bool = False,
-        element_alignment_corner: Vect3 = DOWN,
-        **kwargs
-    ):
+    CONFIG = {
+        "v_buff": 0.8,
+        "h_buff": 1.3,
+        "bracket_h_buff": 0.2,
+        "bracket_v_buff": 0.25,
+        "add_background_rectangles_to_entries": False,
+        "include_background_rectangle": False,
+        "element_to_mobject": Tex,
+        "element_to_mobject_config": {},
+        "element_alignment_corner": DOWN,
+    }
+
+    def __init__(self, matrix: npt.ArrayLike, **kwargs):
         """
         Matrix can either include numbers, tex_strings,
         or mobjects
         """
-        super().__init__()
-
-        mob_matrix = self.matrix_to_mob_matrix(matrix, **kwargs)
-        self.mob_matrix = mob_matrix
-
-        self.organize_mob_matrix(mob_matrix, v_buff, h_buff, element_alignment_corner)
+        VMobject.__init__(self, **kwargs)
+        mob_matrix = self.mob_matrix = self.matrix_to_mob_matrix(matrix)
+        self.organize_mob_matrix(mob_matrix)
         self.elements = VGroup(*it.chain(*mob_matrix))
         self.add(self.elements)
-        self.add_brackets(bracket_v_buff, bracket_h_buff)
+        self.add_brackets()
         self.center()
-        if add_background_rectangles_to_entries:
+        if self.add_background_rectangles_to_entries:
             for mob in self.elements:
                 mob.add_background_rectangle()
-        if include_background_rectangle:
+        if self.include_background_rectangle:
             self.add_background_rectangle()
 
-
-    def element_to_mobject(self, element: str | float | VMobject, **config) -> VMobject:
-        if isinstance(element, VMobject):
-            return element
-        return Tex(str(element), **config)
-
-    def matrix_to_mob_matrix(
-        self,
-        matrix: Sequence[Sequence[str | float | VMobject]],
-        **config
-    ) -> list[list[VMobject]]:
+    def matrix_to_mob_matrix(self, matrix: npt.ArrayLike) -> list[list[Mobject]]:
         return [
             [
-                self.element_to_mobject(item, **config)
+                self.element_to_mobject(item, **self.element_to_mobject_config)
                 for item in row
             ]
             for row in matrix
         ]
 
-    def organize_mob_matrix(
-        self,
-        matrix: list[list[VMobject]],
-        v_buff: float,
-        h_buff: float,
-        aligned_corner: Vect3,
-    ) -> Self:
+    def organize_mob_matrix(self, matrix: npt.ArrayLike):
         for i, row in enumerate(matrix):
             for j, elem in enumerate(row):
                 mob = matrix[i][j]
                 mob.move_to(
-                    i * v_buff * DOWN + j * h_buff * RIGHT,
-                    aligned_corner
+                    i * self.v_buff * DOWN + j * self.h_buff * RIGHT,
+                    self.element_alignment_corner
                 )
         return self
 
-    def add_brackets(self, v_buff: float, h_buff: float) -> Self:
+    def add_brackets(self):
         height = len(self.mob_matrix)
-        brackets = Tex("".join((
-            R"\left[\begin{array}{c}",
-            *height * [R"\quad \\"],
-            R"\end{array}\right]",
-        )))
-        brackets.set_height(self.get_height() + v_buff)
-        l_bracket = brackets[:len(brackets) // 2]
-        r_bracket = brackets[len(brackets) // 2:]
-        l_bracket.next_to(self, LEFT, h_buff)
-        r_bracket.next_to(self, RIGHT, h_buff)
-        brackets.set_submobjects([l_bracket, r_bracket])
-        self.brackets = brackets
-        self.add(*brackets)
+        bracket_pair = Tex("".join([
+            "\\left[",
+            "\\begin{array}{c}",
+            *height * ["\\quad \\\\"],
+            "\\end{array}",
+            "\\right]",
+        ]))[0]
+        bracket_pair.set_height(
+            self.get_height() + 1 * self.bracket_v_buff
+        )
+        l_bracket = bracket_pair[:len(bracket_pair) // 2]
+        r_bracket = bracket_pair[len(bracket_pair) // 2:]
+        l_bracket.next_to(self, LEFT, self.bracket_h_buff)
+        r_bracket.next_to(self, RIGHT, self.bracket_h_buff)
+        self.add(l_bracket, r_bracket)
+        self.brackets = VGroup(l_bracket, r_bracket)
         return self
 
     def get_columns(self) -> VGroup:
@@ -168,13 +157,13 @@ class Matrix(VMobject):
             for row in self.mob_matrix
         ])
 
-    def set_column_colors(self, *colors: ManimColor) -> Self:
+    def set_column_colors(self, *colors: ManimColor):
         columns = self.get_columns()
         for color, column in zip(colors, columns):
             column.set_color(color)
         return self
 
-    def add_background_to_entries(self) -> Self:
+    def add_background_to_entries(self):
         for mob in self.get_entries():
             mob.add_background_rectangle()
         return self
@@ -190,26 +179,23 @@ class Matrix(VMobject):
 
 
 class DecimalMatrix(Matrix):
-    def element_to_mobject(self, element: float, num_decimal_places: int = 1, **config) -> DecimalNumber:
-        return DecimalNumber(element, num_decimal_places=num_decimal_places, **config)
+    CONFIG = {
+        "element_to_mobject": DecimalNumber,
+        "element_to_mobject_config": {"num_decimal_places": 1}
+    }
 
 
 class IntegerMatrix(Matrix):
-    def __init__(
-        self,
-        matrix: npt.ArrayLike,
-        element_alignment_corner: Vect3 = UP,
-        **kwargs
-    ):
-        super().__init__(matrix, element_alignment_corner=element_alignment_corner, **kwargs)
-
-    def element_to_mobject(self, element: int, **config) -> Integer:
-        return Integer(element, **config)
+    CONFIG = {
+        "element_to_mobject": Integer,
+        "element_alignment_corner": UP,
+    }
 
 
 class MobjectMatrix(Matrix):
-    def element_to_mobject(self, element: VMobject, **config) -> VMobject:
-        return element
+    CONFIG = {
+        "element_to_mobject": lambda m: m,
+    }
 
 
 def get_det_text(
@@ -218,7 +204,7 @@ def get_det_text(
     background_rect: bool = False,
     initial_scale_factor: int = 2
 ) -> VGroup:
-    parens = Tex("()")
+    parens = Tex("(", ")")
     parens.scale(initial_scale_factor)
     parens.stretch_to_fit_height(matrix.get_height())
     l_paren, r_paren = parens.split()

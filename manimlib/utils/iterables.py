@@ -33,7 +33,7 @@ def list_difference_update(l1: Iterable[T], l2: Iterable[T]) -> list[T]:
     return [e for e in l1 if e not in l2]
 
 
-def adjacent_n_tuples(objects: Sequence[T], n: int) -> zip[tuple[T, ...]]:
+def adjacent_n_tuples(objects: Sequence[T], n: int) -> zip[tuple[T, T]]:
     return zip(*[
         [*objects[k:], *objects[:k]]
         for k in range(n)
@@ -91,7 +91,7 @@ def resize_array(nparray: np.ndarray, length: int) -> np.ndarray:
 
 def resize_preserving_order(nparray: np.ndarray, length: int) -> np.ndarray:
     if len(nparray) == 0:
-        return np.resize(nparray, length)
+        return np.zeros((length, *nparray.shape[1:]))
     if len(nparray) == length:
         return nparray
     indices = np.arange(length) * len(nparray) // length
@@ -101,8 +101,6 @@ def resize_preserving_order(nparray: np.ndarray, length: int) -> np.ndarray:
 def resize_with_interpolation(nparray: np.ndarray, length: int) -> np.ndarray:
     if len(nparray) == length:
         return nparray
-    if len(nparray) == 1 or array_is_constant(nparray):
-        return nparray[:1].repeat(length, axis=0)
     if length == 0:
         return np.zeros((0, *nparray.shape[1:]))
     cont_indices = np.linspace(0, len(nparray) - 1, length)
@@ -116,7 +114,7 @@ def resize_with_interpolation(nparray: np.ndarray, length: int) -> np.ndarray:
 def make_even(
     iterable_1: Sequence[T],
     iterable_2: Sequence[S]
-) -> tuple[Sequence[T], Sequence[S]]:
+) -> tuple[list[T], list[S]]:
     len1 = len(iterable_1)
     len2 = len(iterable_2)
     if len1 == len2:
@@ -126,14 +124,6 @@ def make_even(
         [iterable_1[(n * len1) // new_len] for n in range(new_len)],
         [iterable_2[(n * len2) // new_len] for n in range(new_len)]
     )
-
-
-def arrays_match(arr1: np.ndarray, arr2: np.ndarray) -> bool:
-    return arr1.shape == arr2.shape and (arr1 == arr2).all()
-
-
-def array_is_constant(arr: np.ndarray) -> bool:
-    return len(arr) > 0 and (arr == arr[0]).all()
 
 
 def hash_obj(obj: object) -> int:

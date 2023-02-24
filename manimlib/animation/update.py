@@ -16,35 +16,24 @@ class UpdateFromFunc(Animation):
     to be used when the state of one mobject is dependent
     on another simultaneously animated mobject
     """
+    CONFIG = {
+        "suspend_mobject_updating": False,
+    }
+
     def __init__(
         self,
         mobject: Mobject,
-        update_function: Callable[[Mobject], Mobject | None],
-        suspend_mobject_updating: bool = False,
+        update_function: Callable[[Mobject]],
         **kwargs
     ):
         self.update_function = update_function
-        super().__init__(
-            mobject,
-            suspend_mobject_updating=suspend_mobject_updating,
-            **kwargs
-        )
+        super().__init__(mobject, **kwargs)
 
     def interpolate_mobject(self, alpha: float) -> None:
         self.update_function(self.mobject)
 
 
-class UpdateFromAlphaFunc(Animation):
-    def __init__(
-        self,
-        mobject: Mobject,
-        update_function: Callable[[Mobject, float], Mobject | None],
-        suspend_mobject_updating: bool = False,
-        **kwargs
-    ):
-        self.update_function = update_function
-        super().__init__(mobject, suspend_mobject_updating=suspend_mobject_updating, **kwargs)
-
+class UpdateFromAlphaFunc(UpdateFromFunc):
     def interpolate_mobject(self, alpha: float) -> None:
         self.update_function(self.mobject, alpha)
 

@@ -6,16 +6,17 @@ import copy
 import numpy as np
 
 from manimlib.constants import DEFAULT_MOBJECT_TO_MOBJECT_BUFFER, SMALL_BUFF
-from manimlib.constants import DOWN, LEFT, ORIGIN, RIGHT, UP, DL, DR, UL
+from manimlib.constants import DOWN, LEFT, ORIGIN, RIGHT, UP
 from manimlib.constants import PI
 from manimlib.animation.composition import AnimationGroup
 from manimlib.animation.fading import FadeIn
 from manimlib.animation.growing import GrowFromCenter
+from manimlib.mobject.svg.tex_mobject import SingleStringTex
 from manimlib.mobject.svg.tex_mobject import Tex
 from manimlib.mobject.svg.tex_mobject import TexText
 from manimlib.mobject.svg.text_mobject import Text
-from manimlib.mobject.types.vectorized_mobject import VGroup
 from manimlib.mobject.types.vectorized_mobject import VMobject
+from manimlib.utils.config_ops import digest_config
 from manimlib.utils.iterables import listify
 from manimlib.utils.space_ops import get_norm
 
@@ -26,29 +27,31 @@ if TYPE_CHECKING:
 
     from manimlib.animation.animation import Animation
     from manimlib.mobject.mobject import Mobject
-    from manimlib.typing import Vect3
 
 
-class Brace(Tex):
+class Brace(SingleStringTex):
+    CONFIG = {
+        "buff": 0.2,
+        "tex_string": r"\underbrace{\qquad}"
+    }
+
     def __init__(
         self,
         mobject: Mobject,
-        direction: Vect3 = DOWN,
-        buff: float = 0.2,
-        tex_string: str = R"\underbrace{\qquad}",
+        direction: np.ndarray = DOWN,
         **kwargs
     ):
-        super().__init__(tex_string, **kwargs)
-
+        digest_config(self, kwargs, locals())
         angle = -math.atan2(*direction[:2]) + PI
         mobject.rotate(-angle, about_point=ORIGIN)
-        left = mobject.get_corner(DL)
-        right = mobject.get_corner(DR)
+        left = mobject.get_corner(DOWN + LEFT)
+        right = mobject.get_corner(DOWN + RIGHT)
         target_width = right[0] - left[0]
 
+        super().__init__(self.tex_string, **kwargs)
         self.tip_point_index = np.argmin(self.get_all_points()[:, 1])
         self.set_initial_width(target_width)
-        self.shift(left - self.get_corner(UL) + buff * DOWN)
+        self.shift(left - self.get_corner(UP + LEFT) + self.buff * DOWN)
         for mob in mobject, self:
             mob.rotate(angle, about_point=ORIGIN)
 
@@ -107,24 +110,23 @@ class Brace(Tex):
 
 
 class BraceLabel(VMobject):
-    label_constructor: type = Tex
+    CONFIG = {
+        "label_constructor": Tex,
+        "label_scale": 1,
+        "label_buff": DEFAULT_MOBJECT_TO_MOBJECT_BUFFER  
+    }
 
     def __init__(
         self,
         obj: VMobject | list[VMobject],
         text: str | Iterable[str],
         brace_direction: np.ndarray = DOWN,
-        label_scale: float = 1.0,
-        label_buff: float = DEFAULT_MOBJECT_TO_MOBJECT_BUFFER,
         **kwargs
     ) -> None:
-        super().__init__(**kwargs)
+        VMobject.__init__(self, **kwargs)
         self.brace_direction = brace_direction
-        self.label_scale = label_scale
-        self.label_buff = label_buff
-
         if isinstance(obj, list):
-            obj = VGroup(*obj)
+            obj = VMobject(*obj)
         self.brace = Brace(obj, brace_direction, **kwargs)
 
         self.label = self.label_constructor(*listify(text), **kwargs)
@@ -172,4 +174,6 @@ class BraceLabel(VMobject):
 
 
 class BraceText(BraceLabel):
-    label_constructor: type = TexText
+    CONFIG = {
+        "label_constructor": TexText
+    }

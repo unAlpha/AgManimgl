@@ -213,16 +213,54 @@ class demo(Scene):
         )
         self.add(tex)
         
+class MyCone(Surface):
+    CONFIG = {
+        "resolution": (101, 51),
+        "radius": 1,
+        "u_range": (0, 1),
+        "v_range": (0, 2*PI),
+    }
+
+    def uv_func(self, u: float, v: float) -> np.ndarray:
+        return self.radius * np.array([
+            u * np.cos(v),
+            u * np.sin(v),
+            u
+        ])
+
+class MyCone2(Surface):
+    CONFIG = {
+        "resolution": (101, 51),
+        "radius": 1,
+        "u_range": (0, 1),
+        "v_range": (0, 2*PI),
+    }
+
+    def uv_func(self, u: float, v: float) -> np.ndarray:
+        return self.radius * np.array([
+            0.25+u * np.cos(v),
+            u * np.sin(v),
+            0.5-u
+        ])
+
 class MySceneR(Scene):
     def construct(self):
-        # text = Tex(r"\fontfamily{Helvetica}\text{Some Text}")
-        title = Text(
-                "哈哈",
-                font_size=36,
-                font="Source Han Sans CN Regular",
-            )
-        self.add(title)  
-        
+        text = Tex(r"\fontfamily{Helvetica}\text{Some Text}")
+        # title = Text(
+        #         "哈哈",
+        #         font_size=36,
+        #         font="Source Han Sans CN Regular",
+        #     )
+        self.add(text)
+# fill_color=["#032348","#46246d","#31580a","#852211",]
+
+class Bg(Scene):
+    def construct(self):
+        bg = FullScreenRectangle()
+        colors = ["#032348","#46246d","#31580a","#852211",]
+        bg.set_color_by_gradient(*colors)
+        self.add(bg)
+
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} CoinFlips -os".format(__file__)) 
+    system("manimgl {} demo -os".format(__file__)) 

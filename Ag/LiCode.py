@@ -1773,6 +1773,8 @@ class PlotBarChart2(Scene):
                     "num_decimal_places": 0,
                 },
             },
+            height=FRAME_HEIGHT - 2,
+            width=FRAME_WIDTH - 3,
         )
         
         axes.add_coordinate_labels()
@@ -1845,7 +1847,7 @@ class CustomGraph10(Scene):
                     "width": 0.2,
                     "length": 0.36,
                     },
-                "include_tip":True,
+                "include_tip":False,
                 },
             y_axis_config={ 
                 "decimal_number_config": {
@@ -1872,7 +1874,7 @@ class CustomGraph10(Scene):
         for y_point in list(zip([axes.x_axis.x_max]*len(y_p), y_p, [0]*len(y_p))):
             axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point),color=GREY_D))
             
-        coords = get_coords_from_csvdata(r"Ag\data_files\金花方法2")
+        coords = get_coords_from_csvdata(r"Ag/data_files/金花方法2")
         transposed_coords = [list(x) for x in zip(*coords)]
         # print(coords)   
         # print(transposed_coords[5][1:])
@@ -1963,11 +1965,11 @@ class CustomGraph10(Scene):
  
 class CustomGraph11(CustomGraph10):
     x_range = (0,18,1)
-    y_range = (0,0.65,0.1)
+    y_range = (0,0.7,0.1)
     sl1 = 4
     sl2 = 3
     ndp = 0
  
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} CustomGraph11 -os".format(__file__))
+    system("manimgl {} CustomGraph6 -os".format(__file__))

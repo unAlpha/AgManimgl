@@ -1,23 +1,31 @@
-uniform float is_fixed_in_frame;
-uniform mat4 view;
-uniform float focal_distance;
+// Assumes the following uniforms exist in the surrounding context:
+// uniform vec2 frame_shape;
+// uniform float focal_distance;
+// uniform float is_fixed_in_frame;
 
-const float DEFAULT_FRAME_HEIGHT = 8.0;
-const float ASPECT_RATIO = 16.0 / 9.0;
-const float X_SCALE = 2.0 / DEFAULT_FRAME_HEIGHT / ASPECT_RATIO;
-const float Y_SCALE = 2.0 / DEFAULT_FRAME_HEIGHT;
+const vec2 DEFAULT_FRAME_SHAPE = vec2(8.0 * 16.0 / 9.0, 8.0);
 
-void emit_gl_Position(vec3 point){
+float perspective_scale_factor(float z, float focal_distance){
+    return max(0.0, focal_distance / (focal_distance - z));
+}
+
+
+vec4 get_gl_Position(vec3 point){
     vec4 result = vec4(point, 1.0);
     if(!bool(is_fixed_in_frame)){
-        result = view * result;
+        result.x *= 2.0 / frame_shape.x;
+        result.y *= 2.0 / frame_shape.y;
+        float psf = perspective_scale_factor(result.z, focal_distance);
+        if (psf > 0){
+            result.xy *= psf;
+            // TODO, what's the better way to do this?
+            // This is to keep vertices too far out of frame from getting cut.
+            result.z *= 0.01;
+        }
+    } else{
+        result.x *= 2.0 / DEFAULT_FRAME_SHAPE.x;
+        result.y *= 2.0 / DEFAULT_FRAME_SHAPE.y;
     }
-    // Essentially a projection matrix
-    result.x *= X_SCALE;
-    result.y *= Y_SCALE;
-    result.z /= focal_distance;
-    result.w = 1.0 - result.z;
-    // Flip and scale to prevent premature clipping
-    result.z *= -0.1;
-    gl_Position = result;
+    result.z *= -1;
+    return result;
 }

@@ -1,55 +1,51 @@
-from __future__ import annotations
-
 from manimlib.constants import BLACK, GREY_E
 from manimlib.constants import FRAME_HEIGHT
 from manimlib.mobject.geometry import Rectangle
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from manimlib.typing import ManimColor
+from manimlib.utils.config_ops import digest_config
 
 
 class ScreenRectangle(Rectangle):
-    def __init__(
-        self,
-        aspect_ratio: float = 16.0 / 9.0,
-        height: float = 4,
-        **kwargs
-    ):
-        super().__init__(
-            width=aspect_ratio * height,
-            height=height,
-            **kwargs
+    CONFIG = {
+        "aspect_ratio": 16.0 / 9.0,
+        "height": 4
+    }
+
+    def __init__(self, **kwargs):
+        Rectangle.__init__(self, **kwargs)
+        self.set_width(
+            self.aspect_ratio * self.get_height(),
+            stretch=True
         )
 
 
 class FullScreenRectangle(ScreenRectangle):
-    def __init__(
-        self,
-        height: float = FRAME_HEIGHT,
-        fill_color: ManimColor = GREY_E,
-        fill_opacity: float = 1,
-        stroke_width: float = 0,
-        **kwargs,
-    ):
-        super().__init__(
-            height=height,
-            fill_color=fill_color,
-            fill_opacity=fill_opacity,
-            stroke_width=stroke_width,
-        )
+    CONFIG = {
+        "height": FRAME_HEIGHT,
+        "fill_color": GREY_E,
+        "fill_opacity": 1,
+        "stroke_width": 0,
+    }
 
 
 class FullScreenFadeRectangle(FullScreenRectangle):
-    def __init__(
-        self,
-        stroke_width: float = 0.0,
-        fill_color: ManimColor = BLACK,
-        fill_opacity: float = 0.7,
-        **kwargs,
-    ):
-        super().__init__(
-            stroke_width=stroke_width,
-            fill_color=fill_color,
-            fill_opacity=fill_opacity,
+    CONFIG = {
+        "stroke_width": 0,
+        "fill_color": BLACK,
+        "fill_opacity": 0.7,
+    }
+
+
+class PictureInPictureFrame(Rectangle):
+    CONFIG = {
+        "height": 3,
+        "aspect_ratio": 16.0 / 9.0
+    }
+
+    def __init__(self, **kwargs):
+        digest_config(self, kwargs)
+        Rectangle.__init__(
+            self,
+            width=self.aspect_ratio * self.height,
+            height=self.height,
+            **kwargs
         )
