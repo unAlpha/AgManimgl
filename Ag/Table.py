@@ -456,6 +456,8 @@ class Table_alluse2(Scene):
 
         self.wait(1)    
 
+
+# 新创表格，通用性强
 class Table():
     def __init__(
         self, 
@@ -463,15 +465,18 @@ class Table():
         file_path, 
         dx=2.6,
         dy=0.6,
-        title_font="Source Han Sans CN Regular"
+        gap = 2e-2,
+        txfont = 'Sans',
+        title_font= "Source Han Sans CN Regular"
     ):
         self.dx = dx
         self.dy = dy
-        self.title_font = title_font
+        self.gap = gap
+        self.txfont = txfont
         self.title = Text(
                 text,
                 font_size=36,
-                font = self.title_font,
+                font = title_font,
             )
         data = get_coords_from_csvdata(file_path)
         self.dataArray=np.array(data)
@@ -488,7 +493,7 @@ class Table():
             for j,dxx in zip(range(self.column),self.dx_list):
                 target_ij = Text(
                     str(self.dataArray[i,j]),
-                    font = self.title_font,
+                    font = self.txfont,
                     )
                 if i==0:
                     target_ij.scale(0.6)
@@ -497,34 +502,62 @@ class Table():
                     target_ij.scale(0.5)
                 target_ij.shift(np.array([sum(self.dx_list[0:j+1])-dxx/2,-(sum(self.dy_list[0:i+1])-dyy/2),0]))
                 dataTxt.add(target_ij)
-            if (i+1)%2:
-                fop = 0.2;
-            else:
-                fop = 0.1;
-            target_i = Rectangle(
-                    width=sum(self.dx_list),
-                    height=dyy,
-                    color=BLUE,
-                    fill_color=BLUE,
-                    fill_opacity=fop,
-                    stroke_opacity=0,
-                    # stroke_color=WHITE,
-                    # stroke_width=DEFAULT_STROKE_WIDTH/2,
-                ).move_to(target_ij, coor_mask=np.array([0,1,0]))
-            target_i.next_to(ORIGIN,RIGHT,buff=0,coor_mask=np.array([1,0,0]))
-            dataTxtBackground.add(target_i)
-        dataTxtBackground[0].set_style(fill_opacity=0.618)
+                if (i+1)%2:
+                    fop = 0.2;
+                else:
+                    fop = 0.1;
+                target_i = Rectangle(
+                        width=dxx-self.gap,
+                        height=dyy-self.gap,
+                        color=BLUE,
+                        fill_color=BLUE,
+                        fill_opacity=fop,
+                        stroke_opacity=0,
+                        # stroke_color=WHITE,
+                        # stroke_width=DEFAULT_STROKE_WIDTH/2,
+                    ).move_to(target_ij)
+                dataTxtBackground.add(target_i)
+        dataTxtBackground[0:self.column].set_style(fill_opacity=0.618)
         self.table = VGroup(dataTxtBackground,dataTxt).center()
         
-        
         self.tex_column = VGroup()
+        self.bg = VGroup()
         for i in range(0,len(dataTxt),self.column):
-            self.tex_column.add(dataTxt[i:i+self.column])
-            
-        self.bg = dataTxtBackground
+            self.tex_column.add(dataTxt[i:i+self.column])   
+            self.bg.add(dataTxtBackground[i:i+self.column])        
         
         self.title.next_to(self.table,UP)
-        
+
+    def replace_part(self,locAcontent):
+        """
+        # locAcontent = (
+        #     ([1,1], "\\frac{9}{100} \\times \\frac{99}{100} ", RED),
+        #     ([1,2], "\\frac{91}{100} \\times \\frac{1}{100} ", YELLOW_E),)
+        """
+        for (x,y,z) in locAcontent:
+            self.tex_column[x[0]][x[1]].become(
+                Tex(
+                    y,
+                    color = z,
+                    font_size = 22,
+                    ).move_to(self.tex_column[x[0]][x[1]])         
+                )
+
+class P2(Scene):
+    def construct(self):
+        title = "P2表格替换"
+        path = r"Ag\data_files\P2"
+        ble = Table(title, path)
+        ble.arrange_table()
+
+        locAcontent = (
+            ([1,1], "\\frac{9}{100} \\times \\frac{99}{100} ", RED),
+            ([1,2], "\\frac{91}{100} \\times \\frac{1}{100} ", YELLOW_E),)
+        ble.replace_part(locAcontent)
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        self.add(bg, ble.table, ble.title)
+
 class Table_use1(Scene):
     def construct(self):
         ble = Table(
@@ -775,15 +808,13 @@ class Fifa1(Scene):
         
         bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
         self.add(bg)
-        self.play(FadeIn(ble.title,scale=0.618),
-                  FadeIn(ble.bg[0], scale=0.5),
-                  FadeIn(ble.tex_column[0], scale=0.9)
-            )
+        self.play(FadeIn(ble.title,scale=0.618))
         self.play(
-                LaggedStartMap(FadeIn,ble.bg[1:],scale=0.9,lag_ratio=0.1),
-                LaggedStartMap(FadeIn,ble.tex_column[1:],scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.bg[0:],scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column[0:],scale=0.9,lag_ratio=0.1),
                 run_time=1
             )
+        
         if self.ptxt != None:
             for pm in pvg:
                 self.play(FadeIn(pm,scale=0.9))
@@ -982,7 +1013,7 @@ class GPT_end2(Scene):
         ble.title.scale(1.3).next_to(ble.table,UP,buff=MED_LARGE_BUFF)
         self.play(FadeIn(ble.title,scale=0.618),
                   FadeIn(ble.bg[0], scale=0.5),
-                  FadeIn(ble.tex_column[0], scale=0.9)
+                  FadeIn(ble.tex_column[0], scale=0.618)
             )
         self.play(
                 FlashAround(ble.table),
@@ -994,4 +1025,4 @@ class GPT_end2(Scene):
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Fifa7 -o".format(__file__))
+    system("manimgl {} P2 -os".format(__file__))
