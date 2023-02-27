@@ -495,7 +495,7 @@ class Table():
                     target_ij.set_color(ORANGE)
                 else:
                     target_ij.scale(0.5)
-                target_ij.shift(np.array([(j-1/2)*dxx,-(i-1/2)*dyy,0]))
+                target_ij.shift(np.array([sum(self.dx_list[0:j+1])-dxx/2,-(sum(self.dy_list[0:i+1])-dyy/2),0]))
                 dataTxt.add(target_ij)
             if (i+1)%2:
                 fop = 0.2;
@@ -511,10 +511,11 @@ class Table():
                     # stroke_color=WHITE,
                     # stroke_width=DEFAULT_STROKE_WIDTH/2,
                 ).move_to(target_ij, coor_mask=np.array([0,1,0]))
+            target_i.next_to(ORIGIN,RIGHT,buff=0,coor_mask=np.array([1,0,0]))
             dataTxtBackground.add(target_i)
-        dataTxt.move_to(dataTxtBackground[-1],coor_mask=np.array([1,0,0]))
         dataTxtBackground[0].set_style(fill_opacity=0.618)
-        self.table = VGroup(dataTxtBackground,dataTxt).scale(1).center()
+        self.table = VGroup(dataTxtBackground,dataTxt).center()
+        
         
         self.tex_column = VGroup()
         for i in range(0,len(dataTxt),self.column):
@@ -746,16 +747,16 @@ class Fifa1(Scene):
     t1 = "世界杯决赛某博彩公司开出的赔率和销售彩票金额比例"
     path = r"Z:\LiFiles\2022年\12月份\足彩\素材\抽水"
     ptxt = [
-        "$$\\text{总销售额：}34.6+32.47+35.59=102.66\\text{元}$$",
-        "$$\\text{抽水：}102.66-100=2.66\\text{元}$$"]
+        "总销售额：$34.6+32.47+35.59=102.66$元",
+        "抽水：$102.66-100=2.66$元"]
     def construct(self):
         ble = Table(
                 self.t1,
                 self.path,
-                dx=1.75,
+                dx=1.6,
                 dy=0.5,
             )
-        ble.dx_list[0] = 2
+        ble.dx_list[0] = 3
         ble.dy_list[0] = 0.6
         ble.arrange_table()
 
@@ -910,7 +911,87 @@ class Fifa7(Fifa1):
         "$$\\text{总花费：}25+28.57+35.59=89.16\\text{元}$$",
         "$$\\text{利润：}100-89.16=10.84\\text{元}$$",
         ]
+
+class GPT_p(Scene):
+    title = "GPT高考物理测试汇总"
+    path = r"./Ag/data_files/GPT物理测试"
+    def construct(self):
+        ble = Table(
+                self.title,
+                self.path,
+                dx=1.73,
+                dy=0.5,
+            )
+        ble.dx_list[0] = 2.1
+        ble.dy_list[0] = 0.6
+        ble.arrange_table()
+        ble.table.scale(1.26).shift(UP*0.1)
+        ble.title.scale(1.3).next_to(ble.table,UP,buff=MED_LARGE_BUFF)
+        
+        self.play(FadeIn(ble.title,scale=0.618),
+                  FadeIn(ble.bg[0], scale=0.5),
+                  FadeIn(ble.tex_column[0], scale=0.9)
+            )
+        self.play(
+                LaggedStartMap(FadeIn,ble.bg[1:],scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column[1:],scale=0.9,lag_ratio=0.1),
+                run_time=1
+            )
+        self.wait()
+
+class GPT_b(GPT_p):
+    title = "GPT高考生物测试汇总"
+    path = r"./Ag/data_files/GPT生物测试"
+
+class GPT_h(GPT_p):
+    title = "GPT高考历史测试汇总"
+    path = r"./Ag/data_files/GPT历史测试"
+
+class GPT_z(GPT_p):
+    title = "GPT高考政治测试汇总"
+    path = r"./Ag/data_files/GPT政治测试"
+
+class GPT_e1(GPT_p):
+    title = "GPT高考英语测试汇总（客观题）"
+    path = r"./Ag/data_files/GPT英语测试-1"
+
+class GPT_e2(GPT_p):
+    title = "GPT高考英语测试汇总（主观题）"
+    path = r"./Ag/data_files/GPT英语测试-2"
+
+class GPT_y(GPT_p):
+    title = "GPT高考语文写作测试汇总"
+    path = r"./Ag/data_files/GPT语文测试"
     
+class GPT_end1(GPT_p):
+    title = "GPT高考各科正确率"
+    path = r"./Ag/data_files/GPT测试统计1"
+
+class GPT_end2(Scene):
+    title = "GPT高考得分情况"
+    path = r"./Ag/data_files/GPT测试统计2"
+    def construct(self):
+        ble = Table(
+                self.title,
+                self.path,
+                dx=1.5,
+                dy=0.5,
+            )
+        ble.dx_list[2] = 2.68
+        ble.arrange_table()
+        ble.title.scale(1.3).next_to(ble.table,UP,buff=MED_LARGE_BUFF)
+        self.play(FadeIn(ble.title,scale=0.618),
+                  FadeIn(ble.bg[0], scale=0.5),
+                  FadeIn(ble.tex_column[0], scale=0.9)
+            )
+        self.play(
+                FlashAround(ble.table),
+                LaggedStartMap(FadeIn,ble.bg[1:],scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column[1:],scale=0.9,lag_ratio=0.1),
+                run_time=1
+            )
+        self.wait()
+        
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Fifa3 -os".format(__file__))
+    system("manimgl {} Fifa7 -o".format(__file__))

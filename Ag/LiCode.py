@@ -1969,7 +1969,7 @@ class CustomGraph11(CustomGraph10):
     sl1 = 4
     sl2 = 3
     ndp = 0
- 
+
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} CustomGraph6 -os".format(__file__))
+    system("manimgl {} CustomGraph11 -o".format(__file__))

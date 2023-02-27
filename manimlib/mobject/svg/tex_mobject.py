@@ -320,7 +320,6 @@ class TexText(Tex):
         "arg_separator": "",
     }
 
-
 class BulletedList(TexText):
     CONFIG = {
         "buff": MED_LARGE_BUFF,

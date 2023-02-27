@@ -196,22 +196,6 @@ class CoinFlips(Scene):
         self.add(eq)
         self.play(ShowCreation(words))
         self.wait()
-
-class demo(Scene):
-    def construct(self):
-        tex = TexText(
-            r"LSTM神经单元数学关系：",
-            r"""
-            $\begin{aligned} f_t&=\sigma(W_{f}x_t+U_fh_{t-1}+b_f)\\ 
-            i_t&=\sigma(W_ix_t+U_ih_{t-1}+b_i)\\ 
-            o_t&=\sigma(W_ox_t+U_oh_{t-1}+b_o)\\ 
-            g_t&=\tanh(W_gx_t+U_gh_{t-1}+b_g)\\
-                \\ 
-            c_t&=c_{t-1}\odot f_t+i_t\odot g_t\\ 
-            h_t&=o_t\odot \tanh(c_t) \end{aligned}$\\
-            """
-        )
-        self.add(tex)
         
 class MyCone(Surface):
     CONFIG = {
@@ -259,8 +243,26 @@ class Bg(Scene):
         bg = FullScreenRectangle()
         colors = ["#032348","#46246d","#31580a","#852211",]
         bg.set_color_by_gradient(*colors)
+        mark = TexText(r"\color{red}{$\surd$}")
         self.add(bg)
+        self.add(mark)
+
+class demo(Scene):
+    def construct(self):
+        tex = TexText(
+            r"LSTM神经单元数学关系：",
+            r"""晃
+            $\begin{aligned} f_t&=\sigma(W_{f}x_t+U_fh_{t-1}+b_f)\\ 
+            i_t&=\sigma(W_ix_t+U_ih_{t-1}+b_i)\\ 
+            o_t&=\sigma(W_ox_t+U_oh_{t-1}+b_o)\\ 
+            g_t&=\tanh(W_gx_t+U_gh_{t-1}+b_g)\\
+                \\ 
+            c_t&=c_{t-1}\odot f_t+i_t\odot g_t\\ 
+            h_t&=o_t\odot \tanh(c_t) \end{aligned}$\\
+            """
+        )
+        self.add(tex)
 
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} demo -os".format(__file__)) 
+    system("manimgl {} Bg -os".format(__file__)) 
