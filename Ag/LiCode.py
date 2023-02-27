@@ -1904,7 +1904,6 @@ class CustomGraph10(Scene):
             tex = Tex(str(round(coords[1]*100,2))+"\\%",color=YELLOW_E).scale(0.36).next_to([px,py,pz],direct,buff=0.1)
             ABC.add(tex)
         AAA=VGroup()
-        
         for i,([px,py,pz],coords) in enumerate(zip(points2,coords2)):
             direct = UL
             tex = Tex(str(round(coords[1]*100,2))+"\\%",color=RED_E).scale(0.36).next_to([px,py,pz],direct,buff=0.1)
