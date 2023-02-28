@@ -993,6 +993,10 @@ class GPT_e2(GPT_p):
 class GPT_y(GPT_p):
     title = "GPT高考语文写作测试汇总"
     path = r"./Ag/data_files/GPT语文测试"
+
+class GPT_m(GPT_p):
+    title = "GPT高考数学测试（客观题）"
+    path = r"./Ag/data_files/GPT数学测试"
     
 class GPT_end1(GPT_p):
     title = "GPT高考各科正确率"
@@ -1025,4 +1029,4 @@ class GPT_end2(Scene):
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} -ws".format(__file__))
+    system("manimgl {} GPT_m -os".format(__file__))

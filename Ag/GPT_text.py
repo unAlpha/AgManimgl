@@ -883,7 +883,7 @@ class English3(Scene):
             \\qquad Li Hua
             }
         """
-    Pos = 1
+    Pos = 0
     f = 28
     def construct(self):
         question = TexText(self.Q, font_size=self.f,alignment="\\raggedright")
@@ -1074,11 +1074,14 @@ class Math(Scene):
             )
         self.wait()
         
+        # 正常使用
         # self.play(qas.animate.to_edge(DOWN,buff=2.8),run_time=8,rate_func=linear)
         # answer.next_to(qas, DOWN, buff=0.5)
         
+        # 截图使用
         answer.next_to(qas, DOWN, buff=0.3)
         VGroup(answer,qas).center().scale(0.5)
+        # system("manimgl {} Math -os -r 1200x1900".format(__file__))
            
         self.wait()
         self.play(ShowIncreasingSubsets(*answer),run_time=1) 
@@ -1127,9 +1130,18 @@ class Language1(Scene):
         question = TexText(self.Q, font_size=self.f,alignment="\\raggedright")
         question.to_edge(UP,buff=1)
         answer= TexText(self.Ans, color=YELLOW, font_size=self.f, alignment="\\raggedright")
-        answer.next_to(question, DOWN, buff=0.5)
         bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
         self.add(bg)
+        
+        # 正常使用
+        # answer.next_to(question, DOWN, buff=0.5)
+        
+        # 截图使用
+        bg.scale(1.5)
+        answer.next_to(question, DOWN, buff=0.3)
+        VGroup(answer,question).center().scale(1.6)
+        # system("manimgl {} Language1 -os -r 1100x450".format(__file__))
+    
         self.play(
             FadeIn(question,scale=0.618),
             )
@@ -1158,8 +1170,8 @@ class Language2(Scene):
             FadeIn(question,scale=0.618),
             )
         self.wait(2)
-        self.play(FadeOut(question,shift=UP))
-        self.wait(2)
+        # self.play(FadeOut(question,shift=UP))
+        # self.wait(2)
     
 class Language2Ans(Scene):
     Ans = """
@@ -1199,4 +1211,4 @@ class Language2Ans(Scene):
 
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Math -os".format(__file__))
+    system("manimgl {} Language1 -os -r 1100x450".format(__file__))
