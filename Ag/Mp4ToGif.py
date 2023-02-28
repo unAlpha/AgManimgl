@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 import os
-file_path = r'Z:\LiFiles\2023年\2月份\同花顺\交付\mp4togif'
+
+file_path = r'Z:\LiFiles\2023年\2月份\GPT\交付\mp4togif'
 files_names = os.listdir(file_path)
 for files_name in files_names:
     # if files_name == "Thumbs.db": continue
@@ -27,21 +28,42 @@ for files_name in files_names:
 #     /Users/pengyinzhong/科普/李永乐/科普视频-loc/看不懂的数字/交付/mp4togif/单张图/image-%3d.jpg"
 # )
 
-# #裁切视频并转成gif
+#裁切图片的一部分
 # import os
-# file_path = 'Z:/LiFiles/2021年/11月份/约瑟夫环/素材/gif'
+# file_path = r'E:\Dropbox\manim\AgManimgl\media\images'
 # files_names = os.listdir(file_path)
 # for files_name in files_names:
 #     # if files_name == "Thumbs.db": continue
-#     if ".mp4" in files_name: 
+#     if ".png" in files_name: 
 #         the_file=os.path.join(file_path, files_name)
 #         name = the_file.split('.')[0]
-#         Resolution = 720
-#         Width = 300
-#         Height = 300
-#         x = (Resolution*1920/1080-Width)/2
-#         y = (Resolution-Height)/2
-#         order = "ffmpeg -i %s.mp4 -y -r 10 -vf scale=-1:%s,crop=%s:%s:%s:%s %s.gif"%(name,Resolution,Width,Height,x,y,name)
+#         new_name = os.path.join(file_path,"trim",files_name)
+#         print(new_name)
+#         Resolution = 1080
+#         Width = 1272
+#         Height = 740
+#         x = 90
+#         y = 90
+#         order = "ffmpeg -i %s.png -y -r 10 -vf scale=-1:%s,crop=%s:%s:%s:%s %s"%(name,Resolution,Width,Height,x,y,new_name)
 #         print(order)
 #         os.system(order)
-#         print("gif generated OK")
+#         print("png trim generated OK")
+
+#裁切视频并转成gif
+import os
+file_path = r'Z:\LiFiles\2023年\2月份\GPT\交付\mp4togif'
+files_names = os.listdir(file_path)
+for files_name in files_names:
+    # if files_name == "Thumbs.db": continue
+    if ".mp4" in files_name: 
+        the_file=os.path.join(file_path, files_name)
+        name = the_file.split('.')[0]
+        Resolution = 1080
+        Width = 1600
+        Height = 1080
+        x = (Resolution*1920/1080-Width)/2
+        y = (Resolution-Height)/2
+        order = "ffmpeg -i %s.mp4 -y -r 10 -vf scale=-1:%s,crop=%s:%s:%s:%s %s.gif"%(name,Resolution,Width,Height,x,y,name)
+        print(order)
+        os.system(order)
+        print("gif generated OK")

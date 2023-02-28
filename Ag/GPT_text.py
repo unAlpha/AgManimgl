@@ -65,6 +65,7 @@ class Physics1(Scene):
         self.play(ShowIncreasingSubsets(*answer),run_time=3)
         self.wait(5)
 
+
 class Physics2(Physics1):
     Q = """
         \\parbox{11cm}{
@@ -246,12 +247,13 @@ class Biology4(Physics1):
     C = "C. 改变光照时间"
     D = "D. 施用植物生长调节剂"
     Ans = """
-        \\textbf{-
+        \\textbf{
             \\parbox{11cm}{
             答：A. 置于微重力场是指在太空等微重力环境下进行的实验处理，
-            对地球上的植物生长没有直接的应用价值，因此常用的园艺措施中不包括置于微重力场。
-            其他选项中，改变温度、改变光照时间和施用植物生长调节剂都是常用的园艺处理方法，
-            以控制植物的生长和开花时间。
+            对地球上的植物生长没有直接的应用价值，因此常用的园艺措施中
+            不包括置于微重力场。其他选项中，改变温度、改变光照时间和施
+            用植物生长调节剂都是常用的园艺处理方法，以控制植物的生长和
+            开花时间。
         }
         """
     Pos = 0
@@ -901,7 +903,6 @@ class English3(Scene):
         self.play(ShowIncreasingSubsets(*answer),run_time=1) 
         self.wait(2)
 
-
 class Math(Scene):
     Ans = """
         \\textbf{
@@ -919,7 +920,7 @@ class Math(Scene):
             }
         }
         """
-    def construct(self):
+    def construct(self):     
         configs1 ={
             "Q" : """
                 \\parbox{11cm}{
@@ -1072,8 +1073,13 @@ class Math(Scene):
             AnimationGroup(*[FadeIn(obj,scale=0.8,shift=UP) for obj in qas],lag_ratio=0.1)
             )
         self.wait()
-        self.play(qas.animate.to_edge(DOWN,buff=2.8),run_time=8,rate_func=linear)
-        answer.next_to(qas, DOWN, buff=0.5) 
+        
+        # self.play(qas.animate.to_edge(DOWN,buff=2.8),run_time=8,rate_func=linear)
+        # answer.next_to(qas, DOWN, buff=0.5)
+        
+        answer.next_to(qas, DOWN, buff=0.3)
+        VGroup(answer,qas).center().scale(0.5)
+           
         self.wait()
         self.play(ShowIncreasingSubsets(*answer),run_time=1) 
         self.wait(2)
@@ -1190,7 +1196,7 @@ class Language2Ans(Scene):
         self.play(ShowIncreasingSubsets(*answer[0:6]),run_time=3)
         self.play(answer.animate.to_edge(DOWN,buff=1),run_time=7)
         self.wait(2)
-  
+
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Math -o".format(__file__))
+    system("manimgl {} Math -os".format(__file__))

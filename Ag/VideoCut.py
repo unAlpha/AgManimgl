@@ -2,12 +2,12 @@ from manimlib import *
 from moviepy.editor import *
 from os import system
 
-video_path = r"Z:\LiFiles\2023年\2月份\地震\交付"
+video_path = r"Z:\LiFiles\2023年\2月份\GPT\交付"
 media_path = r"E:\Dropbox\manim\AgManimgl\media\videos"  
-video_name = "地震异常-tt2"
-Word = "土耳其大地震前的蓝光是怎么回事？地震还有哪些前兆？"
+video_name = "GP高考测试-tt高帧"
+Word = "ChatGPT参加北京高考，能考上哪个大学？你能比它分数更高吗？"
 GeneratorFalse = False
-num_clip = 3
+num_clip = 6
 clip_times=[
         # ["01:00:00:00","01:00:00:00"],
         # ["01:00:00:00","01:00:00:00"],

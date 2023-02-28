@@ -1025,4 +1025,4 @@ class GPT_end2(Scene):
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} P2 -os".format(__file__))
+    system("manimgl {} -ws".format(__file__))
