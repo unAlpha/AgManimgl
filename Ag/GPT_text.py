@@ -65,7 +65,6 @@ class Physics1(Scene):
         self.play(ShowIncreasingSubsets(*answer),run_time=3)
         self.wait(5)
 
-
 class Physics2(Physics1):
     Q = """
         \\parbox{11cm}{
@@ -254,6 +253,7 @@ class Biology4(Physics1):
             不包括置于微重力场。其他选项中，改变温度、改变光照时间和施
             用植物生长调节剂都是常用的园艺处理方法，以控制植物的生长和
             开花时间。
+            }
         }
         """
     Pos = 0
@@ -277,6 +277,7 @@ class Biology5(Physics1):
             答：错误的解释是A. 切除手术后，对侧肾上腺提高了肾上腺皮质激素的分泌量。
             因为肾上腺皮质激素的分泌主要是由下丘脑-垂体-肾上腺皮质轴向调节的，
             而非另一侧肾上腺的作用。...
+            }
         }
         """
     Pos = 0
@@ -295,7 +296,10 @@ class Biology6(Physics1):
     Ans = """
         \\textbf{
             \\parbox{11cm}{
-            答案：A. 免疫防御.金黄色葡萄球菌是一种常见的细菌，易在人体皮肤损伤时侵入伤口并引起感染。在人体免疫系统中，免疫防御是指通过免疫细胞、抗体等免疫因子对病原体进行消灭和清除，保护机体免受病原体侵害。在清除金黄色葡萄球菌的过程中，免疫系统发挥的基本功能是免疫防御。
+            答案：A. 免疫防御.金黄色葡萄球菌是一种常见的细菌，易在人体皮肤损伤时侵入伤口并引起感染。
+            在人体免疫系统中，免疫防御是指通过免疫细胞、抗体等免疫因子对病原体进行消灭和清除，
+            保护机体免受病原体侵害。在清除金黄色葡萄球菌的过程中，免疫系统发挥的基本功能是免疫防御。
+            }
         }
         """
     Pos = 0
@@ -317,6 +321,7 @@ class Biology7(Physics1):
             答：D. 将接受注射的囊胚均分为二，可发育成两只幼鼠是错误的。
             将接受注射的囊胚均分为两部分无法发育成两只幼鼠，
             因为内细胞团细胞的注射只会在一个囊胚中发育，...
+            }
         }
         """
     Pos = 0
@@ -337,6 +342,7 @@ class Biology8(Physics1):
         \\textbf{
             \\parbox{11cm}{
             答案是A。加双缩脲试剂B液会与A液中的蛋白质结合产生沉淀，因此应该先加B液再加A液。
+            }
         }
         """
     Pos = 0
@@ -359,6 +365,7 @@ class Biology9(Physics1):
             回答：D. 模拟生物体维持pH的稳定是一个定性实验，
             不需要对实验结果进行精确定量。选项A、C需要对光照强度和生长素类
             调节剂浓度进行精确的定量测量，选项B需要准确地确定DNA的含量和纯度。
+            }
         }
         """
     Pos = 0
@@ -382,6 +389,7 @@ class Biology10(Physics1):
             答：D. 将濒危植物与其近缘种杂交培育观赏植物。这一项工作不符合植物易地保护的宗旨，
             易地保护的目标是保护植物物种多样性、维护生态系统稳定和保障人类福利，
             而不是杂交培育观赏植物。...
+            }
         }
         """
     Pos = 0
@@ -405,6 +413,7 @@ class History1(Physics1):
             \\parbox{11cm}{
             答：B，考古发现具有多元文化特征，反映了中华文明的多元一体性。
             }
+        }
         """
     Pos = 0
     n_r = 4
@@ -426,6 +435,7 @@ class History2(Physics1):
         \\textbf{
             \\parbox{11cm}{
             答：A，北宋注重推行社会教化，修建亭台馆榭供民众游玩，并将其作为政务之一。
+            }
         }
         """
     Pos = 0
@@ -445,6 +455,7 @@ class History3(Physics1):
         \\textbf{
             \\parbox{11cm}{
             答. C，上古丝绸之路和中世纪东西方交流等历史事件反映了古代商路便利了东西方之间的文化交流。
+            }
         }
         """
     Pos = 0
@@ -467,7 +478,9 @@ class History4(Physics1):
     Ans = """
         \\textbf{
             \\parbox{11cm}{
-            答：A，有了“开眼看世界”的意识，表明中日两国的有识之士认识到需要学习西方的先进技术和制度，提高中华民族的综合素质。        }
+            答：A，有了“开眼看世界”的意识，表明中日两国的有识之士认识到需要学习西方的先进技术和制度，提高中华民族的综合素质。
+            }
+        }
         """
     Pos = 0
     h_b = -0.2
@@ -488,6 +501,7 @@ class History5(Physics1):
         \\textbf{
             \\parbox{11cm}{
             答：D，英国要求清政府保证长江沿岸各省不被租押或让予他国，清政府则成功维护了主权完整。
+                }
             }
         """
     Pos = 0
@@ -511,6 +525,7 @@ class History6(Physics1):
             \\parbox{11cm}{
             答：D，王若飞等人的逝世引起了中国社会各界的广泛关注，表明当时中国社会各界企盼国家实现和平民主。
             }
+        }
         """
     Pos = 0
     h_b = 0.3
@@ -531,6 +546,7 @@ class History7(Physics1):
             \\parbox{11cm}{
             答：A，高校课程的调整贯彻了新民主主义和社会主义教育方针。
             }
+        }
         """
     Pos = 0
     n_r = 4
@@ -554,6 +570,7 @@ class History8(Physics1):
             \\parbox{11cm}{
             答：A，此次活动是中国重视发展周边关系的具体实践。
             }
+        }
         """
     Pos = 0
     n_r = 4
@@ -580,6 +597,7 @@ class History9(Physics1):
             \\parbox{11cm}{
             答：B，马丁·贝尔纳的观点是希腊文明的源头在西亚和北非，而字母文字、雕刻艺术、冶铁技术均来自该地区。
             }
+        }
         """
     Pos = 0 
     n_r = 1
@@ -604,6 +622,7 @@ class History10(Physics1):
             \\parbox{11cm}{
             答：B，下院形成标志着君主立宪制建立。
             }
+        }
         """
     Pos = 0
     n_r = 4
@@ -628,6 +647,7 @@ class History11(Physics1):
         \\textbf{
             \\parbox{11cm}{
             答：D，国际法包括联合国宪章在内的一套国际规则和准则。
+                }
             }
         """
     Pos = 0
@@ -655,6 +675,7 @@ class History12(Physics1):
         \\textbf{
             \\parbox{11cm}{
             答：A，斯威夫特的经营模式体现了产业分工不断细化，得益于铁路交通业的发展。
+                }
             }
         """
     Pos = 0
@@ -682,6 +703,7 @@ class History13(Physics1):
             $\\textcircled{2}$是俄国十月革命后苏维埃政权的建立；$\\textcircled{3}$是1972年尼克松访华之后的一句话；
             $\\textcircled{4}$是《慕尼黑协定》签订后，纳粹占领捷克斯洛伐克的声明。
             因此，答案为C，$\\textcircled{2}$$\\textcircled{1}$$\\textcircled{4}$$\\textcircled{3}$。
+                }
             }
         """
     Pos = 0
@@ -1211,4 +1233,4 @@ class Language2Ans(Scene):
 
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Language1 -os -r 1100x450".format(__file__))
+    system("manimgl {} Math -os -r 1200x1900".format(__file__))

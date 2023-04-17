@@ -2,10 +2,10 @@ from manimlib import *
 from moviepy.editor import *
 from os import system
 
-video_path = r"Z:\LiFiles\2023年\2月份\GPT\交付"
+video_path = r"Z:\LiFiles\2023年\4月份\三体\交付"
 media_path = r"E:\Dropbox\manim\AgManimgl\media\videos"  
-video_name = "GP高考测试-tt高帧"
-Word = "ChatGPT参加北京高考，能考上哪个大学？你能比它分数更高吗？"
+video_name = "三体-tt2"
+Word = "三体问题究竟是什么？为什么说科学的尽头是神学？"
 GeneratorFalse = False
 num_clip = 6
 clip_times=[

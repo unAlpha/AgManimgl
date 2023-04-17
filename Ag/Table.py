@@ -1026,7 +1026,203 @@ class GPT_end2(Scene):
                 run_time=1
             )
         self.wait()
+ 
+class MidPrompt(Scene):
+    title = "Midjourney常用参数表"
+    path = r"./Ag/data_files/基本命令"
+    def construct(self):
+        ble = Table(
+                self.title,
+                self.path,
+                dx=2,
+                dy=0.618,
+            )
+        ble.dy_list[0] = 0.72
+        ble.arrange_table()
+        ble.table.scale(0.8)
+        ble.title.scale(1).next_to(ble.table,UP,buff=MED_SMALL_BUFF)
+        self.play(FadeIn(ble.title,scale=0.618),
+                  FadeIn(ble.bg[0], scale=0.5),
+                  FadeIn(ble.tex_column[0], scale=0.618)
+            )
+        self.play(
+                FlashAround(ble.table),
+                LaggedStartMap(FadeIn,ble.bg[1:],scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column[1:],scale=0.9,lag_ratio=0.1),
+                run_time=1
+            )
+        self.wait()
+ 
+ 
+class ShotPrompt(Scene):
+    title = "摄影镜头"
+    path = r"Z:\PengVideo\短视频\4月份\1_真实照片\视角"
+    def construct(self):
+        ble = Table(
+                self.title,
+                self.path,
+                dx=2,
+                dy=0.618,
+                gap = 6e-2
+            )
+        ble.dy_list[0] = 0.72
+        ble.dx_list[0] = 3
+        ble.dx_list[1] = 4
+        ble.dx_list[2] = 2
+        ble.dx_list[3] = 7
+        ble.arrange_table()
+        ble.table.scale(0.46).shift(DOWN*0.168)
+        ble.title.scale(1).next_to(ble.table,UP,buff=MED_SMALL_BUFF)
+        
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)        
+        
+        self.play(FadeIn(ble.title,scale=0.618),
+                  FadeIn(ble.bg[0], scale=0.5),
+                  FadeIn(ble.tex_column[0], scale=0.618)
+            )
+        self.play(
+                FlashAround(ble.table),
+                LaggedStartMap(FadeIn,ble.bg[1:],scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column[1:],scale=0.9,lag_ratio=0.1),
+                run_time=1
+            )
+        self.wait()
+
+
+class Baccarat1(Scene):
+    title = "百家乐游戏庄闲获胜概率"
+    path = r"Z:\LiFiles\2023年\4月份\赌徒\素材\百家乐"
+    def construct(self):
+        ble = Table(
+                self.title,
+                self.path,
+                dx=2,
+                dy=0.618,
+            )
+        ble.dy_list[0] = 0.72
+        ble.arrange_table()
+        ble.table.scale(1.3)
+        ble.title.scale(1.3).next_to(ble.table,UP,buff=MED_SMALL_BUFF)
+        
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        
+        self.play(FadeIn(ble.title,scale=0.618),
+                  FadeIn(ble.bg[0], scale=0.5),
+                  FadeIn(ble.tex_column[0], scale=0.618)
+            )
+        self.play(
+                FlashAround(ble.table),
+                LaggedStartMap(FadeIn,ble.bg[1:],scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column[1][0],scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column[2][0],scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column[3][0],scale=0.9,lag_ratio=0.1),
+                run_time=1
+            )
+        for i in range(1,4):
+            self.wait()
+            self.play(
+                    FadeIn(ble.tex_column[i][1],scale=0.5,),
+                    run_time=1,
+                )
+        self.wait()
+        
+        for i in range(1,4):
+            self.wait()
+            self.play(
+                    FadeIn(ble.tex_column[i][2],scale=0.5,),
+                    run_time=1,
+                )
+        self.wait()
+  
+
+  
+class Baccarat2(Fifa1):
+    t1 = "百家乐游戏赌场优势"
+    path = r"Z:\LiFiles\2023年\4月份\赌徒\素材\赌场优势"
+    ptxt = [
+        "$$\\text{下注庄家1元，数学期望：}$$",
+        "$$E=45.86 \\% \\times 1.95 +44.62 \\% \\times 0+9.52 \\% \\times 1=0.9894 \\text{元}$$"]
+    def construct(self):
+        ble = Table(
+                self.t1,
+                self.path,
+                dx=1.6,
+                dy=0.5,
+            )
+        ble.dx_list[0] = 2
+        ble.dy_list[0] = 0.6
+        ble.arrange_table()
+
+        if self.ptxt != None:
+            ble.table.shift(UP).scale(1.2)
+            ble.title.next_to(ble.table,UP*1.5).scale(1.1)
+            pvg = VGroup()
+            for p in self.ptxt:
+                pvg.add(TexText(p,font_size=35,))
+
+            pvg.arrange(DOWN)
+            pvg.next_to(ble.table,DOWN*2)
+        else:
+            ble.table.shift(UP*0.5).scale(1.2)
+            ble.title.next_to(ble.table,UP*1.5).scale(1.1)
+        
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        self.play(FadeIn(ble.title,scale=0.618))
+        self.play(
+                LaggedStartMap(FadeIn,ble.bg[0:],scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column[0:],scale=0.9,lag_ratio=0.1),
+                run_time=1
+            )
+        
+        if self.ptxt != None:
+            for pm in pvg:
+                self.play(FadeIn(pm,scale=0.9))
+        self.play(
+                FlashAround(ble.tex_column[1][3]),
+                Indicate(ble.tex_column[1][3]),
+                )     
+                
+        
+        RTPvg1 = VGroup(TexText("下注闲家1元，数学期望：",font_size=35,).move_to(pvg[0]),
+                        TexText("$$E=45.86\\% \\times 0+44.62\\% \\times 2+9.52\\% \\times 1=0.9876 \\text{元}$$",font_size=35,).move_to(pvg[1]))
+
+        RTPvg2 = VGroup(TexText("下注平局1元，数学期望：",font_size=35,).move_to(pvg[0]),
+                        TexText("$$E=45.86\\% \\times 0+44.62\\% \\times 0+9.52\\% \\times 9=0.8568 \\text{元}$$",font_size=35,).move_to(pvg[1]))
+                  
+        self.wait(2)
+        self.play(
+            ReplacementTransform(pvg[0], RTPvg1[0]),
+            ReplacementTransform(pvg[1], RTPvg1[1]),
+            )
+        self.play(FlashAround(ble.tex_column[2][3]),
+                  Indicate(ble.tex_column[2][3]),
+                  )   
+        
+        self.wait(2)
+        self.play(
+            ReplacementTransform(RTPvg1[0], RTPvg2[0]),
+            ReplacementTransform(RTPvg1[1], RTPvg2[1]),
+            )
+        self.play(FlashAround(ble.tex_column[3][3]),
+                  Indicate(ble.tex_column[3][3]),
+                  ) 
+        self.wait(2)
+        
+        self.play(
+            FadeOut(RTPvg2),
+            VGroup(ble.table,ble.title).animate.shift(DOWN*0.8).scale(1.15),
+            )
+        self.wait(2)
+        self.play(ShowCreationThenFadeAround(ble.tex_column[1][4]))
+        self.wait(2)
+        self.play(ShowCreationThenFadeAround(ble.tex_column[2][4]))
+        self.wait(2)
+        self.play(ShowCreationThenFadeAround(ble.tex_column[3][4]))
+        self.wait(2)
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} GPT_m -os".format(__file__))
+    system("manimgl {} Baccarat1 -o".format(__file__))

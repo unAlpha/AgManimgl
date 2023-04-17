@@ -1969,6 +1969,218 @@ class CustomGraph11(CustomGraph10):
     sl2 = 3
     ndp = 0
 
+class AxesLabelsTex_US(Axes):    
+    def add_coordinate_labels(
+        self,
+        **kwargs
+    ):
+        x_numbers = self.get_x_axis().get_tick_range()
+        y_numbers = self.get_y_axis().get_tick_range()
+        self.coordinate_labels = VGroup()
+        
+        x_txt = [
+                "2019/01",
+                "02",
+                "03",
+                "04",
+                "05",
+                "06",
+                "07",
+                "08",
+                "09",
+                "10",
+                "11",
+                "12",
+                "2020/01",
+                "02",
+                "03",
+                "04",
+                "05",
+                "06",
+                "07",
+                "08",
+                "09",
+                "10",
+                "11",
+                "12",
+                "2021/01",
+                "02",
+                "03",
+                "04",
+                "05",
+                "06",
+                "07",
+                "08",
+                "09",
+                ]
+        
+        for number,txt in zip(x_numbers,x_txt):
+            axis = self.get_x_axis()
+            value = number
+            number_mob = axis.get_number_mobject(value, **kwargs)
+            num_txt = Text(txt,font_size=16)
+            if len(txt)>3:
+                num_txt.move_to(number_mob).rotate(PI/4).shift(RIGHT*0.2)
+            else:
+                num_txt.move_to(number_mob).rotate(PI/4).shift(RIGHT*0.3+UP*0.1)
+            self.coordinate_labels.add(num_txt)
+        for number in y_numbers:
+            axis = self.get_y_axis()
+            value = number
+            kwargs["unit"] = 1
+            kwargs["font_size"]=36
+            # kwargs["unit_tex"] = "\\%"
+            number_mob = axis.get_number_mobject(value, **kwargs)
+            self.coordinate_labels.add(number_mob)
+        self.add(self.coordinate_labels)
+        return self
+
+class US_Interest_Rate(Scene):
+    def construct(self):
+        axes = AxesLabelsTex_US(
+            (0,35,1), 
+            (0,3,0.5),
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 2,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                    },
+                "include_tip":False,
+                },
+            y_axis_config={ 
+                "decimal_number_config": {
+                    "num_decimal_places": 1,
+                    "font_size":35
+                    },
+                },
+            height=FRAME_HEIGHT - 2,
+            width=FRAME_WIDTH - 3,
+            )
+        axes.add_coordinate_labels().center().shift(0.068*(UP+LEFT))
+        x_label = Text("月份",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
+        y_label = Text("利率",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
+        
+        # 加上全部的线
+        axes.lines_x_axis=VGroup()
+        axes.lines_y_axis=VGroup()
+        x_p=[x for x in np.arange(*axes.x_range)]
+        x_p.append(axes.x_axis.x_max)
+        y_p=[x for x in np.arange(*axes.y_range)]
+        y_p.append(axes.y_axis.x_max)
+        for x_point in list(zip(x_p, [axes.y_axis.x_max]*len(x_p), [0]*len(x_p))):
+            axes.lines_x_axis.add(axes.get_v_line(axes.c2p(*x_point),color=GREY_D))
+        for y_point in list(zip([axes.x_axis.x_max]*len(y_p), y_p, [0]*len(y_p))):
+            axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point),color=GREY_D))
+            
+        coords = get_coords_from_csvdata(r"Ag/data_files/US利率")
+        transposed_coords = [list(x) for x in zip(*coords)]
+        print(transposed_coords)
+        
+        # print(coords)   
+        # print(transposed_coords[5][1:])
+        coords1 = [[float(x),float(y)] for (x,y) in zip(transposed_coords[0][1:],transposed_coords[1][1:])]
+        points1 = [axes.c2p(px,py) for px,py in coords1]
+        # Set graph
+        graph1 = DiscreteGraphFromSetPoints(points1,color=YELLOW_A,stroke_width=10)
+        # text1 = Text(transposed_coords[1][0],font="思源黑体",font_size=36,color=YELLOW_E)
+
+        # Set dots
+        dots1 = VGroup(*[
+            Dot(radius=0.06,fill_color=YELLOW_E).move_to([px,py,pz])
+            for px,py,pz in points1])
+        
+        ABC=VGroup()
+        for i,([px,py,pz],coords) in enumerate(zip(points1,coords1)):
+            if i in [7,8,9,14]:
+                direct = UR
+            else:
+                direct = UP*1.5
+            tex = Tex(str(round(coords[1],2)),color=YELLOW_E).scale(0.26).next_to([px,py,pz],direct,buff=0.1)
+            ABC.add(tex)
+
+
+        # text1.next_to(dots1[13],DOWN*2.6)
+        
+        fill_color=["#032348","#46246d","#31580a","#852211"]
+        # bg = FullScreenRectangle(height=FRAME_HEIGHT*1.5,fill_color="#222222")
+        bg = FullScreenRectangle(fill_color=fill_color)
+        self.add(bg)
+        
+        self.add(axes.lines_x_axis,axes.lines_y_axis,axes,x_label,y_label)
+        self.play(
+            ShowCreation(graph1,run_time=5),
+            ShowCreation(dots1,run_time=5),
+            ShowCreation(ABC,run_time=5),
+            # FadeIn(text1,scale=0.5)
+            )
+        self.wait(3)
+
+class US_Rescue(Scene):
+    def construct(self):
+        pc_data = [
+            # 百分比形式
+            (0.16, BLUE, "2020/03/06《冠状病毒准备和应对法案》83亿美元"),
+            (0.35, RED, "2020/03/18《家庭第一冠状病毒应对法案》192亿美元"),
+            (39.9, GOLD, "2020/03/27《冠状病毒援助、救济和经济安全法案》22000"),
+            (8.78, TEAL_D, "2020/04/24《付款保护计划和医疗保健增强法案》4840亿美元"),
+            (0.02, PURPLE_C, "2020/09/30《灾难税收救济法案》16亿美元"),
+            (16.33, GREEN, "2020/12/27《新冠病毒应对与救济法案》9000亿美元"),
+            (34.44, MAROON, "2021/03/11《美国救助计划法案》19000万亿美元"),
+           
+        ]
+        pie_chart = PieChart(y_buff=MED_LARGE_BUFF)
+        pc_arcs = pie_chart.craet_arcs(pc_data)
+        pc_legends = pie_chart.create_legends(pc_data).scale(0.5)
+        VGroup(pc_arcs,pc_legends).arrange(RIGHT, buff=LARGE_BUFF*1.1).shift(RIGHT*0.15)
+        fill_color=["#032348","#46246d","#31580a","#852211"]
+        bg = FullScreenRectangle(fill_color=fill_color)
+        self.add(bg)
+        self.play(
+            LaggedStartMap(ShowCreation,pc_arcs,lag_ratio=1),
+            LaggedStartMap(Write,pc_legends,lag_ratio=1),
+            run_time=5,
+        )
+
+        # highlight_items = [0, 1, 2, 3, 4, 5, 6, ]
+        # for item in highlight_items:
+        #     self.play(
+        #         Transform(
+        #             pc_arcs,
+        #             pie_chart.highlight_items_arcs(pc_arcs.copy(),item)
+        #         ),
+        #         Transform(
+        #             pc_legends,
+        #             pie_chart.highlight_items_legends(pc_legends.copy(),item)
+        #         ),
+        #         rate_func=there_and_back_with_pause,
+        #         run_time = 2,
+        #     )
+        self.wait(3)            
+
+class TaylorFormula(Scene):
+    def construct(self):
+        tex = TexText(
+                "$$ i=i^*+a\left(N-N^*)-b\left(U-U^*) $$",
+                "$$ i:\\text{名义利率} $$",
+                "$$ i^*:\\text{实际利率} $$",
+                "$$ N:\\text{通货憉胀率} $$",
+                "$$ N^*:\\text{目标通货膨胀率} $$",
+                "$$ U:\\text{失业率} $$",
+                "$$ U^*:\\text{自然失业率} $$",
+                font ='SimSun',
+            )
+        
+        tex.arrange(DOWN, buff = 0.5,aligned_edge = LEFT)
+        tex.scale(0.618)
+        tex[1:].shift(UP*0.3+RIGHT*0.5,).scale(0.8)
+        
+        self.play(ShowCreation(tex[0]))
+        self.play(FlashAround(tex[0]))
+        self.play(LaggedStartMap(FadeIn,tex[1:],shift=UP))
+        self.wait()
+
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} CustomGraph11 -o".format(__file__))
+    system("manimgl {} US_Rescue -o".format(__file__))

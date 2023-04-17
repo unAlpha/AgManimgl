@@ -16,7 +16,7 @@
 import os
 import io
 
-file_path = '/Users/pengyinzhong/Downloads/2月份/GPT/字幕/mp3/'
+file_path = r'C:\Users\ag_zh\Videos'
 files_names = os.listdir(file_path)
 import sys  
 # reload(sys)  
