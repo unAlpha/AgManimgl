@@ -2181,6 +2181,98 @@ class TaylorFormula(Scene):
         self.play(LaggedStartMap(FadeIn,tex[1:],shift=UP))
         self.wait()
 
+
+class Fire1(Scene):
+    Q = """
+         1. 遇到火灾，你应该首先：
+        """
+    A = "A. 立刻逃生"
+    B = "B. 大喊大叫"
+    f = 45
+    n_r = 2
+    n_c = 1
+    h_b = 0.688
+    v_b = 0.22
+    al = ORIGIN
+    def construct(self):
+        # question = TexText(self.Q, font_size=self.f,alignment="\\raggedright")
+        question = Text(
+                self.Q,
+                font_size=self.f+5,
+                font = "Source Han Sans CN Regular",
+            )
+        
+        abcd = VGroup()
+        AA = TexText(self.A,font_size=self.f,alignment="\\raggedright")
+        BB = TexText(self.B,font_size=self.f,alignment="\\raggedright")
+        for a in [AA,BB]:
+            abcd.add(
+                VGroup(
+                    a,
+                    SurroundingRectangle(a,
+                                        fill_color=YELLOW,
+                                        fill_opacity=0.2,
+                                        stroke_opacity=0.5,
+                                        color=YELLOW,
+                                        buff=0.08,
+                                        )    
+                        ))
+        abcd.arrange_in_grid(
+            self.n_r,
+            self.n_c,
+            h_buff=self.h_b,
+            v_buff=self.v_b,
+            aligned_edge=LEFT
+            )
+        question.to_edge(UL,buff=3)
+        abcd.next_to(question,DOWN,buff=0.5,aligned_edge=self.al)
+        VGroup(question,abcd).center().shift(0.68*UP)
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        self.play(
+            ShowIncreasingSubsets(question),
+            AnimationGroup(*[FadeIn(obj,scale=0.8,shift=UP) for obj in abcd],lag_ratio=0.1)
+            )
+        self.wait(5)
+
+class Fire2(Fire1):
+    Q = """
+         2. 火灾逃生时，你应该：
+        """
+    A = "A. 用日常姿势快速奔跑"
+    B = "B. 弯腰跑同时用湿毛巾捂住口鼻"
+    al = LEFT
+    
+class Fire3(Fire1):
+    Q = """
+         3. 楼梯里有烟你应该：
+        """
+    A = "A. 乘坐电梯"
+    B = "B. 不坐电梯"
+
+class Fire4(Fire1):
+    Q = """
+         4. 火灾逃生时遇到门你应该：
+        """
+    A = "A. 快速开门"
+    B = "B. 先用手模门把手"
+
+class Fire5(Fire1):
+    Q = """
+         5. 火灾逃生时你经过门后应该：
+        """
+    A = "A. 让门开着"
+    B = "B. 把门关上"
+
+class Fire6(Fire1):
+    Q = """
+         6. 火势太大无法逃生你应该：
+        """
+    A = "A. 强行穿越火场"
+    B = "\\parbox{6cm}{B. 返回房间用湿毛巾堵住房门缝隙，打开窗户等待救援}"
+    v_b=-.05
+    al = LEFT
+
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} US_Rescue -o".format(__file__))
+    system("manimgl {} Fire6 -o".format(__file__))

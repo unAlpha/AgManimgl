@@ -16,7 +16,7 @@
 import os
 import io
 
-file_path = r'C:\Users\ag_zh\Videos'
+file_path = r'Z:\LiFiles\2023年\4月份\欧洲经济泡沫\交付'
 files_names = os.listdir(file_path)
 import sys  
 # reload(sys)  

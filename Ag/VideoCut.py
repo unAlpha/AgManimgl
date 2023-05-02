@@ -2,12 +2,12 @@ from manimlib import *
 from moviepy.editor import *
 from os import system
 
-video_path = r"Z:\LiFiles\2023年\4月份\三体\交付"
+video_path = r"Z:\LiFiles\2023年\4月份\星舰\交付"
 media_path = r"E:\Dropbox\manim\AgManimgl\media\videos"  
-video_name = "三体-tt2"
-Word = "三体问题究竟是什么？为什么说科学的尽头是神学？"
+video_name = "星舰-tt2"
+Word = "“星舰”为何会爆炸？SpaceX能否帮助人类移民火星？"
 GeneratorFalse = False
-num_clip = 6
+num_clip = 4
 clip_times=[
         # ["01:00:00:00","01:00:00:00"],
         # ["01:00:00:00","01:00:00:00"],

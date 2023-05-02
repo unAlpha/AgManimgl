@@ -467,12 +467,14 @@ class Table():
         dy=0.6,
         gap = 2e-2,
         txfont = 'Sans',
-        title_font= "Source Han Sans CN Regular"
+        title_font= "Source Han Sans CN Regular",
+        no_focus = False,
     ):
         self.dx = dx
         self.dy = dy
         self.gap = gap
         self.txfont = txfont
+        self.no_focus = no_focus
         self.title = Text(
                 text,
                 font_size=36,
@@ -495,7 +497,7 @@ class Table():
                     str(self.dataArray[i,j]),
                     font = self.txfont,
                     )
-                if i==0:
+                if i==0 and self.no_focus==False:
                     target_ij.scale(0.6)
                     target_ij.set_color(ORANGE)
                 else:
@@ -503,9 +505,9 @@ class Table():
                 target_ij.shift(np.array([sum(self.dx_list[0:j+1])-dxx/2,-(sum(self.dy_list[0:i+1])-dyy/2),0]))
                 dataTxt.add(target_ij)
                 if (i+1)%2:
-                    fop = 0.2;
+                    fop = 0.2
                 else:
-                    fop = 0.1;
+                    fop = 0.1
                 target_i = Rectangle(
                         width=dxx-self.gap,
                         height=dyy-self.gap,
@@ -542,6 +544,7 @@ class Table():
                     font_size = 22,
                     ).move_to(self.tex_column[x[0]][x[1]])         
                 )
+
 
 class P2(Scene):
     def construct(self):
@@ -1053,7 +1056,6 @@ class MidPrompt(Scene):
             )
         self.wait()
  
- 
 class ShotPrompt(Scene):
     title = "摄影镜头"
     path = r"Z:\PengVideo\短视频\4月份\1_真实照片\视角"
@@ -1088,7 +1090,6 @@ class ShotPrompt(Scene):
                 run_time=1
             )
         self.wait()
-
 
 class Baccarat1(Scene):
     title = "百家乐游戏庄闲获胜概率"
@@ -1135,9 +1136,7 @@ class Baccarat1(Scene):
                     run_time=1,
                 )
         self.wait()
-  
 
-  
 class Baccarat2(Fifa1):
     t1 = "百家乐游戏赌场优势"
     path = r"Z:\LiFiles\2023年\4月份\赌徒\素材\赌场优势"
@@ -1222,7 +1221,67 @@ class Baccarat2(Fifa1):
         self.wait(2)
         self.play(ShowCreationThenFadeAround(ble.tex_column[3][4]))
         self.wait(2)
+
+class Question1(Scene):
+    title = "你能够回答下面这些问题吗"
+    path = r"Z:\LiFiles\2023年\4月份\火灾\问题"
+    def construct(self):
+        ble = Table(
+                self.title,
+                self.path,
+                dx=1.2,
+                dy=0.618,
+                no_focus=True
+            )
+        ble.dy_list[0] = 0.618
+        ble.dx_list[1] = 5.6
+        ble.arrange_table()
+        ble.table.scale(1.4).shift(UP*0.2)
+        ble.title.scale(0.8).next_to(ble.table,UP,buff=MED_SMALL_BUFF)
+        
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        ble.bg[0].set_style(fill_opacity=0.2),    
+        # frame = self.camera.frame
+        # frame.scale(0.8)
+        self.play(
+                FlashAround(ble.table),
+                LaggedStartMap(FadeIn,ble.bg,scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column,scale=0.9,lag_ratio=0.1),
+                
+                run_time=1
+            )
+        self.wait()
+        
+        for i in range(0,ble.row):
+            if (i+1)%2:
+                fop = 0.2
+            else:
+                fop = 0.1
+            if i == 0:
+                self.play(
+                    FlashAround(ble.bg[i]),
+                    ble.bg[i][1].animate.set_style(fill_opacity=0.8),
+                    ble.bg[i][0].animate.set_style(fill_opacity=0.8),
+                    ble.tex_column[i][1].animate.set_color(ORANGE).scale(1.1),
+                    ble.tex_column[i][0].animate.set_color(ORANGE).scale(1.1),
+                    )
+                self.wait(2)
+            else:
+                self.play(
+                    ble.bg[i-1].animate.set_style(fill_opacity=fop),
+                    ble.tex_column[i-1][0].animate.scale(1/1.1).set_color(WHITE),
+                    ble.tex_column[i-1][1].animate.scale(1/1.1).set_color(WHITE),
+                    
+                    FlashAround(ble.bg[i]),
+                    # frame.animate.move_to(ble.tex_column[i+1],coor_mask=np.array([0, 1, 0])),
+                    ble.bg[i].animate.set_style(fill_opacity=0.8),
+                    ble.tex_column[i][0].animate.scale(1.1).set_color(ORANGE),
+                    ble.tex_column[i][1].animate.scale(1.1).set_color(ORANGE),
+                    )
+                self.wait(2)
+   
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Baccarat1 -o".format(__file__))
+    system("manimgl {} Question -o".format(__file__))

@@ -164,11 +164,7 @@ class Time2(Scene):
             )
             self.wait(3)
        
-                
-
-
-
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Time2 -ot -r 2048x1152".format(__file__))
+    system("manimgl {} Time1 -ot -r 2048x1152".format(__file__))
