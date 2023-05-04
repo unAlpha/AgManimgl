@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 import os
 
-file_path = r'Z:\LiFiles\2023年\4月份\三体\素材'
+file_path = r'Z:\PengVideo\短视频\5月份\换装'
 files_names = os.listdir(file_path)
 for files_name in files_names:
     # if files_name == "Thumbs.db": continue

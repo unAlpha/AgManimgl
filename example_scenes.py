@@ -667,6 +667,6 @@ class ControlsExample(Scene):
 
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} UpdatersExample -os".format(__file__))
+    system("manimgl {} TexTransformExample -o".format(__file__))
     
 # See https://github.com/3b1b/videos for many, many more
