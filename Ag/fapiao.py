@@ -1,7 +1,7 @@
 import os
 import fitz
 
-root_dir = r'E:\Dropbox\发票\3月份\3月份电子发票'
+root_dir = r'E:\Dropbox\发票\4月份\新建文件夹'
 repeat_dir = r'E:\Dropbox\发票\2月份\2月份电子发票'
 
 def fapiao_read(text):

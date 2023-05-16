@@ -2,12 +2,12 @@ from manimlib import *
 from moviepy.editor import *
 from os import system
 
-video_path = r"Z:\LiFiles\2023年\4月份\星舰\交付"
+video_path = r"Z:\LiFiles\2023年\5月份\马斯洛\交付"
 media_path = r"E:\Dropbox\manim\AgManimgl\media\videos"  
-video_name = "星舰-tt2"
-Word = "“星舰”为何会爆炸？SpaceX能否帮助人类移民火星？"
+video_name = "马斯洛-tt2"
+Word = "“五一”挤死也要旅游，图个啥？用马斯洛需求层次理论分析一下"
 GeneratorFalse = False
-num_clip = 4
+num_clip = 2
 clip_times=[
         # ["01:00:00:00","01:00:00:00"],
         # ["01:00:00:00","01:00:00:00"],

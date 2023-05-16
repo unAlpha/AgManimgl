@@ -489,50 +489,54 @@ class WordsChange4(Scene):
     Q = [
         """
         \\parbox{13cm}{
-        full body portrait of a asia beautiful woman 25 years old,\\par
-        wearing in a black coat,\\par
-        black short hair, green eyes, walkink on the street, professional photography,\\par
-        --ar 2:3 --s 1000 --q 2 --v 5
+            full body portrait of a asia beautiful woman 25 years old,\\par
+            wearing in a black coat,\\par
+            black short hair, green eyes, walkink on the street, professional photography,\\par
+            --ar 2:3 --s 1000 --q 2 --v 5
         }
         """,
         """
         \\parbox{13cm}{
-        https://s.mj.run/RpAaYjJjlZs\\par
-        full body portrait of a asia beautiful woman 25 years old,\\par
-        Wearing calvin klein cropped gilet cream, in the style of minimalist: spare simplicity, soft, muted color palette, serene minimalism, light magenta and dark gray, elongated forms, precisionist style, dark beige and sky-blue,\\par
-        black short hair, green eyes, walkink on the street, professional photography,\\par
-        --ar 2:3 --s 1000 --q 2 --v 5 --iw 2 --seed 322570267
+            https://s.mj.run/RpAaYjJjlZs \\par
+            full body portrait of a asia beautiful woman 25 years old,\\par
+            Wearing calvin klein cropped gilet cream, in the style of minimalist: spare simplicity, soft, muted color palette, serene minimalism, light magenta and dark gray, elongated forms, precisionist style, dark beige and sky-blue,\\par
+            black short hair, green eyes, walkink on the street, professional photography,\\par
+            --ar 2:3 --s 1000 --q 2 --v 5 --iw 2 --seed 322570267
         }
         """
         ]
 
     Q_words = [
-        "https://s.mj.run/RpAaYjJjlZs",
-        "wearing in a black coat,",
-        "Wearing calvin klein cropped gilet cream, in the style of minimalist: spare simplicity, soft, muted color palette, serene minimalism, light magenta and dark gray, elongated forms, precisionist style, dark beige and sky-blue,",
-        "-iw 2 --seed 322570267",
+        ["https://s.mj.run/RpAaYjJjlZs",YELLOW],
+        ["wearing in a black coat,",BLUE],
+        ["Wearing calvin klein cropped gilet cream, in the style of minimalist: spare simplicity, soft, muted color palette, serene minimalism, light magenta and dark gray, elongated forms, precisionist style, dark beige and sky-blue,",BLUE],
+        ["-iw 2 --seed 322570267",RED],
         ]
+    title1 = "原始提示词"
     def construct(self):
         Vg_q = VGroup()
+        title1 = Text(self.title1,color=WHITE,font = '阿里巴巴普惠体 2.0',font_size=36,)
         for i in range(len(self.Q)):
-            questions = TexText(
-                self.Q[i], isolate=self.Q_words, font_size=28, alignment="\\raggedright"
-            )
+            questions = TexText(self.Q[i], 
+                                isolate=[qw[0] for qw in self.Q_words], 
+                                font_size=28, 
+                                alignment="\\raggedright")
             Vg_q.add(questions)
 
-        Vg_q[0].set_color_by_tex(self.Q_words[1], BLUE)
-        Vg_q[1].set_color_by_tex(self.Q_words[0], YELLOW)
-        Vg_q[1].set_color_by_tex(self.Q_words[2], BLUE)
-        Vg_q[1].set_color_by_tex(self.Q_words[3], RED)
-            
+            for i in range(len(self.Q_words)):
+                questions.set_color_by_tex(self.Q_words[i][0], self.Q_words[i][1])
+
+        
         Vg_q.arrange(DOWN, aligned_edge=LEFT, buff=0.86).shift(UP*0.3)
         Vg_q[0].save_state()
+        always(title1.next_to, Vg_q[0], UP,buff=0.236)    
         arr = CurvedArrow(Vg_q[0].get_left(),Vg_q[1].get_left(),buff=1).shift(LEFT*0.25)
 
         bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
         self.add(bg) 
         
         self.play(
+            FadeIn(title1,scale=0.618,),
             FadeIn(Vg_q[0].center(),shift=LEFT,scale=0.618,)
             )
         self.wait(1)
@@ -660,6 +664,9 @@ class Picture2Show(Scene):
         ["需求衣服","AgPics/内衣2",6.2],
         ["结合体","AgPics/内衣3",6.2]
         ]
+    ar_buf = 0.5
+    ar_scl = 0.96
+    shi_up = 0.236
     def construct(self):
         VGcg = Group()
         for i in range(len(self.Coat)):    
@@ -671,7 +678,7 @@ class Picture2Show(Scene):
             cg_vg = Group(coattxt,pic_vg).arrange(DOWN,buff=0.25)
             VGcg.add(cg_vg)       
     
-        VGcg.arrange(RIGHT,buff=0.5,aligned_edge=UP).shift(UP*0.236).scale(0.96)
+        VGcg.arrange(RIGHT,buff=self.ar_buf,aligned_edge=UP).shift(UP*self.shi_up).scale(self.ar_scl)
 
         bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
         self.add(bg) 
@@ -800,14 +807,13 @@ class WordsChange5(WordsChange4):
         }
         """
     ]
-
+    
     Q_words = [
-        "https://s.mj.run/KPWQrtp02rU",
-        "wearing in a black coat,",
-        "posing in black super short tights, super short sleeves, soft and rounded forms, solapunk, clear edge definition,",
-        "--iw 2 --seed 322570267",
-    ]
-
+        ["https://s.mj.run/KPWQrtp02rU",YELLOW],
+        ["wearing in a black coat,",BLUE],
+        ["posing in black super short tights, super short sleeves, soft and rounded forms, solapunk, clear edge definition,",BLUE],
+        ["--iw 2 --seed 322570267",RED],
+        ]
 
 class PictureShow5(PictureShow4):
     Q = ["""
@@ -849,7 +855,254 @@ class Picture4Show(Picture2Show):
         ["垫图3","AgPics/美3",6.2]
         ]
 
-      
+class WordsChange6(Scene):
+    Q = """
+        \\parbox{12cm}{
+        https://s.mj.run/fne5AtRlmSw \\par
+        https://s.mj.run/JeWk45qTnd4 \\par
+        https://s.mj.run/24a86cE2ygk \\par
+        full body, Wearing a swimsuit, by the beach，black short hair, green eyes, professional photography,\\par
+        --ar 2:3 --s 1000 --q 2 --v 5
+        }
+        """
+    Q_words = [
+        ["https://s.mj.run/fne5AtRlmSw",YELLOW],
+        ["https://s.mj.run/JeWk45qTnd4",YELLOW],
+        ["https://s.mj.run/24a86cE2ygk",YELLOW],
+        ["--ar 2:3 --s 1000 --q 2 --v 5",RED],
+        ]
+    title1 = "提示词："
+    def construct(self):
+        title1 = Text(self.title1,color=WHITE,font = '阿里巴巴普惠体 2.0',font_size=36,)
+        questions = TexText(self.Q, 
+                            isolate=[qw[0] for qw in self.Q_words], 
+                            font_size=32, 
+                            alignment="\\raggedright").shift(UP*0.618)
+        for i in range(len(self.Q_words)):
+            questions.set_color_by_tex(self.Q_words[i][0], self.Q_words[i][1])
+            
+        title1.next_to(questions,UP, aligned_edge=LEFT, buff=0.236).shift(RIGHT*0.1)
+        
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg) 
+        
+        self.play(
+            FadeIn(title1,shift=DOWN,scale=0.618,),
+            FadeIn(questions,shift=LEFT,scale=0.618,),
+            )
+        self.play(
+            FlashAround(questions)
+            )
+        self.wait(1)
+
+class Picture5Show(Picture2Show):
+    Coat = [
+        ["效果图1","AgPics/3-1",6.2],
+        ["效果图2","AgPics/3-2",6.2],
+        ["效果图3","AgPics/3-3",6.2],
+        ["效果图4","AgPics/3-4",6.2],
+        ] 
+    ar_buf = 0.236
+    ar_scl = 0.8
+    shi_up = 0.382
+
+class Picture6Show(Picture2Show):
+    Coat = [
+        ["Remix效果1","AgPics/fw1",6.2],
+        ["Remix效果2","AgPics/fw2",6.2],
+        ] 
+    ar_buf = 0.618
+    ar_scl = 1
+    shi_up = 0.23
+
+class Picture7Show(Picture2Show):
+    Coat = [
+        ["风衣1","AgPics/fy1",6.2],
+        ["风衣2","AgPics/fy2",6.2],
+        ] 
+    ar_buf = 0.618
+    ar_scl = 1
+    shi_up = 0.23
+
+class WordsChange7(WordsChange4):
+    Q = [
+        """
+        \\parbox{12cm}{
+        https://s.mj.run/fne5AtRlmSw \\par
+        https://s.mj.run/JeWk45qTnd4 \\par
+        https://s.mj.run/24a86cE2ygk \\par
+        full body, Wearing a swimsuit, by the beach，black short hair, green eyes, professional photography,\\par
+        --ar 2:3 --s 1000 --q 2 --v 5
+        }
+        """,
+        """
+        \\parbox{12cm}{
+        https://s.mj.run/fne5AtRlmSw \\par
+        https://s.mj.run/JeWk45qTnd4 \\par
+        https://s.mj.run/24a86cE2ygk \\par
+        full body, Wearing a windbreaker, by the beach，black short hair, green eyes, professional photography,\\par
+        --ar 2:3 --s 1000 --q 2 --v 5
+        }
+        """
+    ]
+    
+    Q_words = [
+        ["https://s.mj.run/fne5AtRlmSw",YELLOW],
+        ["https://s.mj.run/JeWk45qTnd4",YELLOW],
+        ["https://s.mj.run/24a86cE2ygk",YELLOW],
+        ["swimsuit",RED],
+        ["windbreaker",RED],
+        ]
+
+class Picture8Show(Picture2Show):
+    Coat = [
+        ["Windbreaker1","AgPics/fyy1",6.2],
+        ["Windbreaker2","AgPics/fyy2",6.2],
+        ["Windbreaker3","AgPics/fyy3",6.2],
+        ["Windbreaker4","AgPics/fyy4",6.2],
+        ] 
+    ar_buf = 0.236
+    ar_scl = 0.8
+    shi_up = 0.382
+
+class Picture9Show(Picture2Show):
+    Coat = [
+        ["原生成图","AgPics/fyy3",6.2],
+        ["Remix加长头发等","AgPics/tf1",6.2],
+        ] 
+    ar_buf = 0.618
+    ar_scl = 1
+    shi_up = 0.23
+
+class WordsChange8(WordsChange4):
+    Q = [
+        """
+        \\parbox{12cm}{
+        https://s.mj.run/fne5AtRlmSw \\par
+        https://s.mj.run/JeWk45qTnd4 \\par
+        https://s.mj.run/24a86cE2ygk \\par
+        full body, Wearing a windbreaker, by the beach，black short hair, green eyes, professional photography,\\par
+        --ar 2:3 --s 1000 --q 2 --v 5
+        }
+        """,
+        """
+        \\parbox{12cm}{
+        https://s.mj.run/fne5AtRlmSw \\par
+        https://s.mj.run/JeWk45qTnd4 \\par
+        https://s.mj.run/24a86cE2ygk \\par
+        full body, Wearing a [\\qquad\\qquad\\qquad], by the beach，black short hair, green eyes, professional photography,\\par
+        --ar 2:3 --s 1000 --q 2 --v 5 --seed 4128857600
+        }
+        """
+    ]
+    
+    Q_words = [
+        ["https://s.mj.run/fne5AtRlmSw",YELLOW],
+        ["https://s.mj.run/JeWk45qTnd4",YELLOW],
+        ["https://s.mj.run/24a86cE2ygk",YELLOW],
+        ["windbreaker",RED],
+        ["[\\qquad\\qquad\\qquad]",RED],
+        ["--seed 4128857600",BLUE]
+        ]
+
+class Picture10Show(Scene):
+    Coat = [
+        ["Windbreaker 风衣","AgPics/31-1",6.2],
+        ["Windbreaker 风衣","AgPics/31-2",6.2],
+        ["White dress 白裙","AgPics/32-1",6.2],
+        ["White dress 白裙","AgPics/32-2",6.2],
+        ["Jacket 夹克","AgPics/33-1",6.2],
+        ["Jacket 夹克","AgPics/33-2",6.2],
+        ["Blouse 衬衫","AgPics/34-1",6.2],
+        ["Blouse 衬衫","AgPics/34-2",6.2],
+        ["T-shirt T恤","AgPics/35-1",6.2],
+        ["Sweater 毛衣","AgPics/35-2",6.2],
+        ["Shorts 短裤","AgPics/36-1",6.2],
+        ["Hoodie 连帽衫","AgPics/36-2",6.2],
+    ]
+    ar_buf = 0.618
+    ar_scl = 1
+    shi_up = 0.23
+    npps = 2
+    def construct(self):
+        num_pics_per_scene = self.npps
+        previous_VGcg = Group()
+        
+        for j in range(0, len(self.Coat), num_pics_per_scene):
+            current_pics = self.Coat[j:j+num_pics_per_scene]
+
+            VGcg = Group()
+            for i in range(len(current_pics)):    
+                coattxt = Text(current_pics[i][0],color=WHITE,font = '阿里巴巴普惠体 2.0',font_size=40,)
+                pic_vg = Group()
+                pic = ImageMobject(current_pics[i][1],height=current_pics[i][2])
+                border = SurroundingRectangle(pic,color=WHITE,stroke_width=0,buff=0)
+                pic_vg.add(pic,border)
+                cg_vg = Group(coattxt,pic_vg).arrange(DOWN,buff=0.25)
+                VGcg.add(cg_vg)       
+        
+            VGcg.arrange(RIGHT,buff=self.ar_buf,aligned_edge=UP).shift(UP*self.shi_up).scale(self.ar_scl)
+            bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+            self.add(bg) 
+            
+            if previous_VGcg:
+                self.play(
+                    LaggedStart(
+                        FadeOut(previous_VGcg,shift=LEFT),
+                        LaggedStartMap(FadeIn,VGcg,shift=LEFT,lag_ratio=0.2,),
+                        lag_ratio=0.1,
+                        run_time=2,
+                    )
+                )
+                previous_VGcg.remove(*previous_VGcg)
+            else:
+                self.play(
+                    LaggedStartMap(FadeIn,VGcg,shift=LEFT,scale=1,lag_ratio=0.5),
+                    run_time=2,
+                )
+            self.wait(2)
+            if j + num_pics_per_scene >= len(self.Coat): 
+                self.play(FadeOut(VGcg))
+            previous_VGcg.add(VGcg)
+
+class Picture11Show(Picture10Show):
+    Coat = [
+        ["黑色外套","AgPics/国人黑外套",6.2],
+        ["白色外套","AgPics/国人白外套",6.2],
+        ["红色外套","AgPics/国人红外套",6.2],
+        ["黄色外套","AgPics/国人黄外套",6.2],
+        
+        ["隆胸效果1","AgPics/2-2",6.2],
+        ["隆胸效果1","AgPics/4-2",6.2],
+        ["隆胸效果1","AgPics/隆胸3",6.2],
+        ["隆胸效果1","AgPics/隆胸4",6.2],
+        
+        ["姿态效果1","AgPics/3-1",6.2],
+        ["姿态效果2","AgPics/3-2",6.2],
+        ["姿态效果3","AgPics/3-3",6.2],
+        ["姿态效果4","AgPics/3-4",6.2],  
+        
+        ["Windbreaker 风衣","AgPics/31-1",6.2],
+        ["Windbreaker 风衣","AgPics/31-2",6.2],
+        ["White dress 白裙","AgPics/32-1",6.2],
+        ["White dress 白裙","AgPics/32-2",6.2],
+        
+        ["Jacket 夹克","AgPics/33-1",6.2],
+        ["Jacket 夹克","AgPics/33-2",6.2],
+        ["Blouse 衬衫","AgPics/34-1",6.2],
+        ["Blouse 衬衫","AgPics/34-2",6.2],
+        
+        ["T-shirt T恤","AgPics/35-1",6.2],
+        ["Sweater 毛衣","AgPics/35-2",6.2],
+        ["Shorts 短裤","AgPics/36-1",6.2],
+        ["Hoodie 连帽衫","AgPics/36-2",6.2],        
+    ]
+    ar_buf = 0.236
+    ar_scl = 0.8
+    shi_up = 0.382
+    npps = 4
+
+               
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Picture4Show -o -r 2048x1152".format(__file__))
+    system("manimgl {} WordsChange6 -o -r 2048x1152".format(__file__))
