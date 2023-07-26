@@ -1280,8 +1280,88 @@ class Question1(Scene):
                     ble.tex_column[i][1].animate.scale(1.1).set_color(ORANGE),
                     )
                 self.wait(2)
-   
+
+class Question2(Scene):
+    title = "ChatGPT4 缺点与问题"
+    path = r"Z:\PengVideo\短视频\6月份\AI高考\ChatGPT卷\GPT缺点"
+    def construct(self):
+        ble = Table(
+                self.title,
+                self.path,
+                dx=1.2,
+                dy=0.618,
+                no_focus=True
+            )
+        ble.dy_list[0] = 0.618
+        ble.dx_list[1] = 5.6
+        ble.arrange_table()
+        ble.table.scale(1.4).shift(UP*0.2)
+        ble.title.scale(0.8).next_to(ble.table,UP,buff=MED_SMALL_BUFF)
+        ble.bg[0].set_style(fill_opacity=0.2),    
+        self.play(
+                FlashAround(ble.table),
+                LaggedStartMap(FadeIn,ble.bg,scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column,scale=0.9,lag_ratio=0.1),
+                
+                run_time=1
+            )
+        self.wait()
+        
+        for i in range(0,ble.row):
+            if (i+1)%2:
+                fop = 0.2
+            else:
+                fop = 0.1
+            if i == 0:
+                self.play(
+                    FlashAround(ble.bg[i]),
+                    ble.bg[i][1].animate.set_style(fill_opacity=0.8),
+                    ble.bg[i][0].animate.set_style(fill_opacity=0.8),
+                    ble.tex_column[i][1].animate.set_color(ORANGE).scale(1.1),
+                    ble.tex_column[i][0].animate.set_color(ORANGE).scale(1.1),
+                    )
+                self.wait(2)
+            else:
+                self.play(
+                    ble.bg[i-1].animate.set_style(fill_opacity=fop),
+                    ble.tex_column[i-1][0].animate.scale(1/1.1).set_color(WHITE),
+                    ble.tex_column[i-1][1].animate.scale(1/1.1).set_color(WHITE),
+                    
+                    FlashAround(ble.bg[i]),
+                    # frame.animate.move_to(ble.tex_column[i+1],coor_mask=np.array([0, 1, 0])),
+                    ble.bg[i].animate.set_style(fill_opacity=0.8),
+                    ble.tex_column[i][0].animate.scale(1.1).set_color(ORANGE),
+                    ble.tex_column[i][1].animate.scale(1.1).set_color(ORANGE),
+                    )
+                self.wait(2)
+
+
+class Table_use7(Scene):
+    def construct(self):
+        ble = Table(
+                "北宋各地方进士人数比较",
+                r"Z:\LiFiles\2023年\7月份\科举制度新\素材\进士",
+                dx=2.2,
+                dy=0.6
+            )
+        ble.dx_list[0] = 2.5
+        ble.dy_list[0] = 0.8
+        ble.arrange_table()
+        ble.table.scale(0.86).shift(0.2*UP)
+        ble.title.scale(1.2).shift(0.2*UP)
+                
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        self.play(FadeIn(ble.title,scale=0.618),
+                  FadeIn(ble.bg[0], scale=0.5),
+                  FadeIn(ble.tex_column[0], scale=0.9)
+            )
+        self.play(
+                LaggedStartMap(FadeIn,ble.bg[1:],scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column[1:],scale=0.9,lag_ratio=0.1),
+                run_time=3
+            )   
         
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Question -o".format(__file__))
+    system("manimgl {} Table_use7 -o".format(__file__))

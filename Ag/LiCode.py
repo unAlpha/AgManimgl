@@ -2273,6 +2273,120 @@ class Fire6(Fire1):
     v_b=-.05
     al = LEFT
 
+
+class Formula3(Scene):
+    def construct(self):
+        text =Text("计算公式",font_size=68,font="思源黑体",gradient=[RED,YELLOW],weight=BOLD)
+        tex1 =TexText(r"""
+                      $$
+                      \text{本金}  =\sum_{i=0}^{n T} \frac{\text {第} i \text {期支付金额}}{(1+x)^{i / n}}
+                      \left\{\begin{array}{l}n \text {:每年还款次数} \\ T: \text {还款年限} \\ x: I R R \text {利率}\end{array}\right.
+                      $$
+                      """
+                        )
+        tex2 =TexText(r"""
+                      $$
+                      \text{当}
+                      \left\{\begin{array}{l} \text {本金}=1 \\ \text {第} i \text {期支付金额}=\frac{1}{12}+0.005 \\ n=12 \\ T=1 \end{array} \right\}
+                      \text{时},  x=13.3 \% 
+                      $$
+                      """,)
+        tex = VGroup(text,tex1,tex2).arrange(DOWN).scale(0.8).shift(UP*0.236)
+        tex2.shift(RIGHT*0.36)
+        text.shift(UP*0.5)
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        self.play(
+            ShowCreation(tex),
+        )
+        self.wait()
+
+
+class TeslaFormula(Scene):
+    def construct(self):
+        tex1 = TexText(
+                "$$ P_\\text{损} = I^2 \\times R $$",
+                font ='SimSun',
+            )
+        tex2 = TexText(
+                "$$ P_\\text{损}:\\text{线路损耗的功耗} $$",
+                "$$ I:\\text{流过电线的电流} $$",
+                "$$ R:\\text{线路电阻} $$",
+                font ='SimSun',
+                color = GREY
+            )
+        tex2.scale(0.6)
+        tex2.arrange(DOWN, buff = 0.2,aligned_edge = LEFT)
+        VGroup(tex1,tex2).arrange(DOWN, 
+                                  buff = 0.4,
+                                  aligned_edge = ORIGIN)\
+            .scale(1.5).shift(UP*0.16)
+            
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        
+        self.play(ShowCreation(tex1))
+        self.play(FlashAround(tex1))
+        self.play(LaggedStartMap(FadeIn,tex2,shift=UP))
+        self.wait()
+        
+        tex11 = TexText(
+                "$$ P_\\text{总} = U \\times I $$",
+                font ='SimSun',
+            )
+        tex22 = TexText(
+                "$$ P_\\text{总}:\\text{输电线的功率} $$",
+                "$$ U:\\text{电压} $$",
+                "$$ I:\\text{电流} $$",
+                font ='SimSun',
+                color = GREY
+            )        
+        tex22.scale(0.6)
+        tex22.arrange(DOWN, buff = 0.2,aligned_edge = LEFT)
+        VGroup(tex11,tex22).arrange(DOWN, 
+                                  buff = 0.4,
+                                  aligned_edge = ORIGIN)\
+            .scale(1.5).shift(UP*0.16)       
+
+        self.play(
+            TransformMatchingTex(tex1,tex11),
+            TransformMatchingTex(tex2,tex22)
+            )
+        self.wait(3)
+
+class Txt1(Scene):
+    def construct(self):
+        title="《劝学》"
+        txt = (
+            "富家不用买良田，书中自有千钟粟。",
+            "安居不用架高堂，书中自有黄金屋。",
+            "出门莫恨无人随，书中车马多如簇。",
+            "娶妻莫恨无良媒，书中自有颜如玉。",
+            "男儿欲遂平生志，五经勤向窗前读。"
+            )
+        
+        txtT = []
+        for i in range(5):
+            txtTmp = Text(
+                txt[i],
+                font_size=45,
+                font = "Source Han Sans CN Regular",
+                          )
+            txtT.append(txtTmp)
+        titleText = Text(
+                title,
+                font_size=56,
+                font = "Source Han Sans CN Regular",
+                         )
+        TxtGroup=VGroup(*txtT).arrange(DOWN,buff=0.3)
+        VGroup(titleText,TxtGroup).arrange(DOWN,buff=0.4).shift(0.2*UP)
+        # bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        # self.add(bg,titleText)
+        self.add(titleText)
+        self.play(LaggedStartMap(Write,TxtGroup,lag_ratio=1.2),run_time=10)
+        self.wait()
+
+
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Fire6 -o".format(__file__))
+    system("manimgl {} PieChartScene -os".format(__file__))

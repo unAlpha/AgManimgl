@@ -32,6 +32,7 @@ class Table():
         gap = 2e-2,
         txfont = "Microsoft JhengHei",
         title_font= "Source Han Sans",
+        txt_color = WHITE,
         no_focus = False,
         all_op=0.5
     ):
@@ -40,6 +41,7 @@ class Table():
         self.gap = gap
         self.txfont = txfont
         self.title_font = title_font
+        self.txt_color = txt_color
         self.no_focus = no_focus
         self.all_op = all_op
         self.title = Text(
@@ -66,7 +68,7 @@ class Table():
                         str(self.dataArray[i,j]),
                         font = 'Sans',
                         weigth='BLOD',
-                        color = ORANGE,
+                        color = YELLOW,
                         font_size=30,
                         )
                 else:
@@ -74,7 +76,7 @@ class Table():
                         str(self.dataArray[i,j]),
                         font = self.txfont,
                         weigth='Regular',
-                        color = WHITE,
+                        color = self.txt_color,
                         font_size=22,
                         )    
                 target_ij.shift(np.array([sum(self.dx_list[0:j+1])-dxx/2,-(sum(self.dy_list[0:i+1])-dyy/2),0]))
@@ -112,14 +114,17 @@ class Table():
         #     ([1,2], "\\frac{91}{100} \\times \\frac{1}{100} ", YELLOW_E),)
         """
         for (x,y,z) in locAcontent:
-            self.tex_column[x[0]][x[1]].become(
-                Tex(
-                    y,
-                    color = z,
-                    font_size = fonsz,
-                    ).move_to(self.tex_column[x[0]][x[1]])         
-                )
-            
+            if y=="":
+                x.set_color(z)
+            else:
+                x.become(
+                    Tex(
+                        y,
+                        color = z,
+                        font_size = fonsz,
+                        ).move_to(x)         
+                    )
+                  
     def merger_part(self,locs,op=0):
         """
         # loc = ([0,1],[0,2])
@@ -140,7 +145,6 @@ class Table():
         self.bg[locs[op][0]][locs[op][1]].stretch_to_fit_width(center_width)
         self.bg[locs[op][0]][locs[op][1]].move_to(center).set_style(fill_opacity=0.36+self.all_op,fill_color=BLUE)
         self.tex_column[locs[0][0]][locs[0][1]].move_to(center).scale(1.2)
-    
 
 class AutoGPTvsChatGPT2(Scene):
     title = "AutoGPT VS ChatGPT"
@@ -217,25 +221,25 @@ class GPTsummary(Scene):
         ble.title.scale(0.9).next_to(ble.table,UP,buff=MED_LARGE_BUFF)
         
         locAcontent = (
-            ([1,1], 
+            (ble.tex_column[1][1], 
              """
              \\parbox{6cm}{
              联网、自我分析、可直接输出文件
              }""",
              WHITE),
-            ([1,2], 
+            (ble.tex_column[1][2], 
             """
             \\parbox{6cm}{
             有技术门槛、程序容易出错、效率低、费用极高、gpt-3.5-turbo、不能直接输出中文
             }""",
              RED),
-            ([2,1], 
+            (ble.tex_column[2][1], 
             """
             \\parbox{6cm}{
             拿来就用、效率高、相对来说费用底、GPT4模型
             }""",
              WHITE),
-            ([2,2], 
+            (ble.tex_column[2][2], 
             """
             \\parbox{6cm}{
             内容知识偏旧、不能联网
@@ -411,6 +415,34 @@ class BezierGenate(Scene):
         
         return super().construct()
 
+
+class Xigao(Scene):
+    title = "洗稿内容与原创链接"
+    path = r"Z:\PengVideo\短视频\7月份\洗稿赚钱\表格2"
+    def construct(self):
+        ble = Table(
+                self.title,
+                self.path,
+                dx=2,
+                dy=0.45,
+                all_op=0.2
+            )
+        ble.dy_list[0] = 0.6
+        ble.dx_list[0] = 1
+        ble.dx_list[2] = 6
+        # ble.dx_list[1] = 5.6
+        ble.arrange_table()
+        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        self.add(bg)
+        self.play(
+                FlashAround(ble.table),
+                FadeIn(ble.title,scale=0.5,shift=DOWN),
+                LaggedStartMap(FadeIn,ble.bg,scale=0.9,lag_ratio=0.1),
+                LaggedStartMap(FadeIn,ble.tex_column,scale=0.9,lag_ratio=0.1),
+                run_time=1
+            )
+        self.wait()
+
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} GPTsummary -ot -r 2048x1152".format(__file__))
+    system("manimgl {} Xigao -o -r 2048x1152".format(__file__))

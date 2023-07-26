@@ -1,20 +1,20 @@
 # -*- coding: UTF-8 -*-
 import os
 
-file_path = r'Z:\LiFiles\2023年\4月份\星舰\交付\giftomp4'
+file_path = r'Z:\PengVideo\短视频\6月份\换脸\素材4'
 files_names = os.listdir(file_path)
 for files_name in files_names:
     # if files_name == "Thumbs.db": continue
-    if ".mp4" in files_name: 
-    # if ".gif" in files_name: 
+    # if ".mp4" in files_name: 
+    if ".gif" in files_name: 
         the_file=os.path.join(file_path, files_name)
         name = the_file.split('.')[0]
-    #     # gif转mp4
-    #     order = "ffmpeg -f gif -i %s.gif %s.mp4"%(name,name)
+        # gif转mp4
+        order = "ffmpeg -f gif -i %s.gif %s.mp4"%(name,name)
         
         # mp4转gif
         # order = "ffmpeg -i %s.mp4 -an -y -r 10 -vf scale=-1:500 %s.gif"%(name,name)
-        order = "ffmpeg -i %s.mp4 -an -y -r 6 -maxrate 0.1K -vf scale=960:-1 %s.gif"%(name,name)
+        # order = "ffmpeg -i %s.mp4 -an -y -r 6 -maxrate 0.1K -vf scale=960:-1 %s.gif"%(name,name)
         # # 压缩视频
         # order = "ffmpeg -i %s.mp4 -vf scale=1280:-1 -c:v libx264 -preset veryslow -crf 24 %s%s.mp4"%(name,name,"low")
         print(order)

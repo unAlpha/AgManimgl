@@ -2,12 +2,12 @@ from manimlib import *
 from moviepy.editor import *
 from os import system
 
-video_path = r"Z:\LiFiles\2023年\5月份\马斯洛\交付"
+video_path = r"Z:\LiFiles\2023年\6月份\暗物质\交付"
 media_path = r"E:\Dropbox\manim\AgManimgl\media\videos"  
-video_name = "马斯洛-tt2"
-Word = "“五一”挤死也要旅游，图个啥？用马斯洛需求层次理论分析一下"
+video_name = "暗物质-tt"
+Word = "暗物质是如何发现的？一起来做2023年北京高考物理题"
 GeneratorFalse = False
-num_clip = 2
+num_clip = 3
 clip_times=[
         # ["01:00:00:00","01:00:00:00"],
         # ["01:00:00:00","01:00:00:00"],

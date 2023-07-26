@@ -16,7 +16,7 @@
 import os
 import io
 
-file_path = r'Z:\PengVideo\短视频\5月份\OneKey\交付\Onekey-tt'
+file_path = r"C:\Users\ag_zh\Desktop"
 files_names = os.listdir(file_path)
 import sys  
 # reload(sys)  

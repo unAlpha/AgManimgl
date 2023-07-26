@@ -169,7 +169,25 @@ class CustomGraph(Scene):
             },
             )
         
+    
         axes.add_coordinate_labels()
+        
+        axes.lines_x_axis=VGroup()
+        axes.lines_y_axis=VGroup()
+        x_p=[x for x in np.arange(*axes.x_range)]
+        x_p.append(axes.x_axis.x_max)
+        y_p=[x for x in np.arange(*axes.y_range)]
+        y_p.append(axes.y_axis.x_max)
+        for x_point in list(zip(x_p, [axes.y_axis.x_max]*len(x_p), [0]*len(x_p))):
+            axes.lines_x_axis.add(axes.get_v_line(axes.c2p(*x_point),color=GREY_D))  
+        for x_point in list(zip(x_p, [-axes.y_axis.x_max]*len(x_p), [0]*len(x_p))):
+            axes.lines_x_axis.add(axes.get_v_line(axes.c2p(*x_point),color=GREY_D))        
+        for y_point in list(zip([axes.x_axis.x_max]*len(y_p), y_p, [0]*len(y_p))):
+            axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point),color=GREY_D))
+        for y_point in list(zip([-axes.x_axis.x_max]*len(y_p), y_p, [0]*len(y_p))):
+            axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point),color=GREY_D))
+        
+        
         self.add(axes.scale(0.8))
 
 class PlotBarChart3(Scene):
@@ -263,6 +281,7 @@ class demo(Scene):
         )
         self.add(tex)
 
+
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Bg -os".format(__file__)) 
+    system("manimgl {} CenteredTypeWriter -os".format(__file__)) 

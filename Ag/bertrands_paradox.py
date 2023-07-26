@@ -1,4 +1,4 @@
-from Ag._3b1bProj.manim_imports_ext import *
+from manim_imports_ext import *
 
 if __name__ == "__main__":
     from os import system

@@ -1,22 +1,22 @@
 # <code># -- coding:UTF-8 --<code>
 # 把srt字幕处理成无时间的txt
-# path = "/Users/pengyinzhong/Downloads/诺贝尔经济_yt.txt"
-# newFile = open("/Users/pengyinzhong/Downloads/诺贝尔经济文本.txt", 'w')
+path = "/Users/pengyinzhong/Downloads/诺贝尔经济_yt.txt"
+newFile = open("/Users/pengyinzhong/Downloads/诺贝尔经济文本.txt", 'w')
 
-# with open(path,'r',encoding='utf-8') as fc:
-#     for line in fc.readlines()[2::4]:
-#         newFile.write(line)
-# newFile.close()
-
-name = "对话栏目"
-path = f"/Users/pengyinzhong/Downloads/公益课表格/{name}.txt"
-path_ = f"/Users/pengyinzhong/Downloads/公益课表格/{name}_.txt"
-newFile = open(path_, 'w')
 with open(path,'r',encoding='utf-8') as fc:
-    # for line in reversed(fc.readlines()[4::7]):
-    for line in fc.readlines()[4::7]:
-        newFile.write(line)     
+    for line in fc.readlines()[2::4]:
+        newFile.write(line)
 newFile.close()
+
+# name = "对话栏目"
+# path = f"/Users/pengyinzhong/Downloads/公益课表格/{name}.txt"
+# path_ = f"/Users/pengyinzhong/Downloads/公益课表格/{name}_.txt"
+# newFile = open(path_, 'w')
+# with open(path,'r',encoding='utf-8') as fc:
+#     # for line in reversed(fc.readlines()[4::7]):
+#     for line in fc.readlines()[4::7]:
+#         newFile.write(line)     
+# newFile.close()
 
 
 

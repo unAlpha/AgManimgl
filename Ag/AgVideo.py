@@ -1102,7 +1102,73 @@ class Picture11Show(Picture10Show):
     shi_up = 0.382
     npps = 4
 
-               
+class AdobePS(Picture10Show):
+    def construct(self):
+        func_list = [
+            "1、从无到有",
+            "2、无中生有",
+            "3、凭空消失",
+            "4、起死回生",
+            "5、无限扩展",
+            "6、神形百变",
+            "7、瞬间移动",
+            "8、融为一体",
+            "9、柳暗花明",
+            "10、乘风破浪"
+        ]
+        pvg = VGroup()
+        for p in func_list:
+            pvg.add(Text(p, font = "Source Han Sans",font_size=50,))
+        pvg.shift(RIGHT*6)
+        
+        title = Text("Generative Fill",weight=BOLD,font_size=120,)
+        title.set_color_by_gradient(BLUE, YELLOW, RED)
+        
+        Arrvg = VGroup()
+        for i in range(len(pvg)):
+            Arr = always_redraw(lambda i=i: Arrow(title.get_right(), pvg[i].get_left(), color=RED, buff=0.25))
+            Arrvg.add(Arr)
+            
+        self.play(FadeIn(title,scale=0.5,shift=RIGHT),)
+        self.wait()
+        
+        self.add(Arrvg[:8])
+        self.play(
+            title.animate.shift(LEFT*3).scale(0.618),
+            *[FadeIn(p, rate_func=linear) for p in pvg[:8]],
+            pvg[:8].animate.arrange(DOWN,buff=0.3).shift(RIGHT*3),
+        )
+        self.wait()    
+        self.add(Arrvg[8:])
+        pvg[8:].next_to(pvg[7],DOWN,buff=0)
+        pvg[8:].set_color(BLUE)
+        self.play(
+            *[FadeIn(p, rate_func=linear) for p in pvg[8:]],
+            pvg.animate.arrange(DOWN,buff=0.2).shift(RIGHT*3),
+        )
+        self.wait() 
+        pvg_BOLD = VGroup()
+        for p in func_list:
+            pvg_BOLD.add(Text(p, font = "Source Han Sans",font_size=120,weight=BOLD))
+        pvg_BOLD[8:].set_color(BLUE)
+        
+        for i in range(len(func_list)):
+            self.play(
+                FadeOut(title),
+                FadeOut(pvg),
+                FadeOut(Arrvg),
+                TransformFromCopy(pvg[i],pvg_BOLD[i])
+            )
+            self.wait(2)
+            self.play(
+                FadeIn(title),
+                FadeIn(pvg),
+                FadeIn(Arrvg),
+                FadeOut(pvg_BOLD[i]),
+            )
+            self.wait(2)
+      
+              
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} WordsChange6 -o -r 2048x1152".format(__file__))
+    system("manimgl {} CodeInter -os -r 2048x1152".format(__file__))
