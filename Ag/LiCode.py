@@ -2181,7 +2181,6 @@ class TaylorFormula(Scene):
         self.play(LaggedStartMap(FadeIn,tex[1:],shift=UP))
         self.wait()
 
-
 class Fire1(Scene):
     Q = """
          1. 遇到火灾，你应该首先：
@@ -2273,7 +2272,6 @@ class Fire6(Fire1):
     v_b=-.05
     al = LEFT
 
-
 class Formula3(Scene):
     def construct(self):
         text =Text("计算公式",font_size=68,font="思源黑体",gradient=[RED,YELLOW],weight=BOLD)
@@ -2300,7 +2298,6 @@ class Formula3(Scene):
             ShowCreation(tex),
         )
         self.wait()
-
 
 class TeslaFormula(Scene):
     def construct(self):
@@ -2386,7 +2383,361 @@ class Txt1(Scene):
         self.play(LaggedStartMap(Write,TxtGroup,lag_ratio=1.2),run_time=10)
         self.wait()
 
+class AxesLabelsTex100(Axes):
+    def add_coordinate_labels(
+        self,
+        **kwargs
+    ):
+        x_numbers = self.get_x_axis().get_tick_range()
+        y_numbers = self.get_y_axis().get_tick_range()
+        self.coordinate_labels = VGroup()
+        for number in x_numbers:
+            axis = self.get_x_axis()
+            value = number
+            number_mob = axis.get_number_mobject(value, **kwargs)
+            self.coordinate_labels.add(number_mob)
+        for number in y_numbers:
+            axis = self.get_y_axis()
+            value = number
+            kwargs["unit"] = 1000
+            kwargs["unit_tex"] = "k"
+            number_mob = axis.get_number_mobject(value, **kwargs)
+            self.coordinate_labels.add(number_mob)
+        self.add(self.coordinate_labels)
+        return self
+
+class CompoundInterest(Scene):
+    x_range = (0,20,2)
+    y_range = (0,35000,5000)
+    sl1 = 1
+    ndp = 1
+    def construct(self):
+        axes = AxesLabelsTex100(
+            self.x_range, 
+            self.y_range,
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 2,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                    },
+                "include_tip":False,
+                },
+            y_axis_config={ 
+                "decimal_number_config": {
+                    "num_decimal_places": self.ndp,
+                    "font_size":35
+                    },
+                },
+            height=FRAME_HEIGHT - 2,
+            width=FRAME_WIDTH - 3,
+            )
+        axes.add_coordinate_labels().center().shift(0.068*(UP+LEFT))
+        x_label = Text("复利周期/年",font="思源黑体").next_to(axes.x_axis.get_corner(UR),UP)
+        y_label = Text("Fv/元",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
+        
+        # 加上全部的线
+        axes.lines_x_axis=VGroup()
+        axes.lines_y_axis=VGroup()
+        x_p=[x for x in np.arange(*axes.x_range)]
+        x_p.append(axes.x_axis.x_max)
+        y_p=[x for x in np.arange(*axes.y_range)]
+        y_p.append(axes.y_axis.x_max)
+        for x_point in list(zip(x_p, [axes.y_axis.x_max]*len(x_p), [0]*len(x_p))):
+            axes.lines_x_axis.add(axes.get_v_line(axes.c2p(*x_point),color=GREY_D))
+        for y_point in list(zip([axes.x_axis.x_max]*len(y_p), y_p, [0]*len(y_p))):
+            axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point),color=GREY_D))
+            
+        coords = get_coords_from_csvdata(r"/Users/pengyinzhong/Downloads/72法则/文档/本息总额")
+        transposed_coords = [list(x) for x in zip(*coords)]
+        # print(coords)   
+        # print(transposed_coords[5][1:])
+        denominator = 1
+        div = 10
+        coords1 = [[float(x),round(float(y)/denominator,4)] for (x,y) in zip(transposed_coords[0][1::div],transposed_coords[self.sl1][1::div])]
+        points1 = [axes.c2p(px,py) for px,py in coords1]
+        # Set graph
+        graph1 = DiscreteGraphFromSetPoints(points1,color=RED_A,stroke_width=10)        
+        text1 = Text("""
+                    本金10000元，年化利率6%
+                    不同复利周期下20年本息总和
+                    """,
+                    font="思源黑体",
+                    font_size=40,
+                    alignment="center",
+                    color=RED_A
+                )
+        fig = VGroup(axes.lines_x_axis,axes.lines_y_axis,axes,x_label,y_label,graph1)
+        VGroup(text1,fig.scale(0.83)).arrange(DOWN).shift(0.236*UP)
+        fig.shift(RIGHT*0.2)
+        # fill_color=["#032348","#46246d","#31580a","#852211"]
+        bg = FullScreenRectangle(height=FRAME_HEIGHT*1.5,fill_color="#222222")
+        self.add(bg)
+        
+        self.play(
+            ShowCreation(axes.lines_x_axis),
+            ShowCreation(axes.lines_y_axis),
+            ShowCreation(axes),
+            ShowCreation(x_label),
+            ShowCreation(y_label),
+            )
+    
+        self.play(
+            ShowCreation(graph1,run_time=3),
+            FadeIn(text1,scale=3)
+            )
+        self.wait(3)
+
+class YYAxes(Axes):
+    CONFIG = {
+        "right_y_axis_config": {},
+        "right_y_range": [0, 1, 0.1],  # Default right y range
+    }
+
+    def __init__(
+        self,
+        x_range = None,
+        y_range = None,
+        right_y_range = None,
+        **kwargs
+    ):
+        CoordinateSystem.__init__(self, **kwargs)
+        VGroup.__init__(self, **kwargs)
+
+        if x_range is not None:
+            self.x_range[:len(x_range)] = x_range
+        if y_range is not None:
+            self.y_range[:len(y_range)] = y_range
+            
+        if right_y_range is not None:
+            self.right_y_range = right_y_range
+            
+        self.x_axis = self.create_axis(
+            self.x_range, self.x_axis_config, self.width,
+        )
+        self.y_axis = self.create_axis(
+            self.y_range, self.y_axis_config, self.height
+        )
+        self.y_axis.rotate(90 * DEGREES, about_point=ORIGIN)
+
+        self.right_y_axis = self.create_axis(
+            self.right_y_range, self.right_y_axis_config, self.height
+        )
+        self.right_y_axis.rotate(90 * DEGREES, about_point=ORIGIN)
+        self.right_y_axis.move_to(
+                # self.x_axis.number_to_point(self.x_axis.x_max),
+                self.x_axis.number_to_point(self.x_axis.number_to_point(0)),
+                coor_mask = np.array([1, 0, 0])
+            )
+        self.axes = VGroup(self.x_axis, self.y_axis, self.right_y_axis)
+        self.add(*self.axes)
+        self.center()
+
+    def add_coordinate_labels(
+        self,
+        x_values = None,
+        y_values = None,
+        right_y_values = None,
+        **kwargs
+    ):  
+        if x_values == None:
+            x_numbers = self.get_x_axis().get_tick_range()
+        if y_values == None:
+            y_numbers = self.get_y_axis().get_tick_range()
+        if right_y_values == None:
+            right_y_numbers = self.get_right_y_axis().get_tick_range()
+        self.coordinate_labels = VGroup()
+        for number in x_numbers:
+            axis = self.get_x_axis()
+            value = number
+            kwargs["unit"] = 0.01
+            kwargs["unit_tex"] = "\\%"
+            number_mob = axis.get_number_mobject(value, **kwargs)
+            self.coordinate_labels.add(number_mob)
+        for number in y_numbers:
+            axis = self.get_y_axis()
+            value = number
+            number_mob = axis.get_number_mobject(value,)
+            self.coordinate_labels.add(number_mob)
+
+        for number in right_y_numbers:
+            axis = self.get_right_y_axis()
+            value = number
+            if value != 0:    
+                number_mob = axis.get_number_mobject(value,direction=RIGHT)
+            self.coordinate_labels.add(number_mob)
+        self.add(self.coordinate_labels)
+        return self
+
+    def get_right_graph(self, func_right, **kwargs):
+        # Create a new Axes object for the right y-axis with same configuration
+        right_axes = Axes(
+            x_range=self.x_range,
+            y_range=self.right_y_range,
+            axis_config=self.axis_config,
+            x_axis_config=self.x_axis_config,
+            y_axis_config=self.right_y_axis_config,
+            height=self.height,
+            width=self.width,
+        )
+
+        # Draw the right graph using the right coordinate system
+        right_graph = right_axes.get_graph(func_right, **kwargs)
+        
+        # Shift the right graph to align with the right y-axis
+        # right_graph.shift(self.right_y_axis.n2p(0) - right_axes.y_axis.n2p(0))
+        self.add(right_graph)
+
+        return right_graph
+    
+    def get_right_y_axis(self):
+        return self.right_y_axis  
+      
+class Rule72(Scene):
+    x_range = (0,0.2,0.02)
+    y_range = (0,80,10)
+    right_y_range = (0,0.4,0.05)
+    # right_y_range = (0,80,10)
+    sl1 = 1
+    sl2 = 2
+    ndp = 0
+    def construct(self):
+        axes = YYAxes(
+            self.x_range, 
+            self.y_range,
+            self.right_y_range,
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 2,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                    },
+                "include_tip":False,
+                },
+            x_axis_config={ 
+                "decimal_number_config": {
+                    "num_decimal_places": 1,
+                    "font_size":35
+                    },
+                },
+            y_axis_config={ 
+                "decimal_number_config": {
+                    "num_decimal_places": self.ndp,
+                    "font_size":35
+                    },
+                },
+            right_y_axis_config={ 
+                "decimal_number_config": {
+                    "num_decimal_places": 2,
+                    "font_size":35
+                    },
+                },
+            height=FRAME_HEIGHT - 2,
+            width=FRAME_WIDTH - 3,
+            )
+        
+        # 加上全部的线
+        axes.lines_x_axis=VGroup()
+        axes.lines_y_axis=VGroup()
+        x_p=[x for x in np.arange(*axes.x_range)]
+        x_p.append(axes.x_axis.x_max)
+        y_p=[x for x in np.arange(*axes.y_range)]
+        y_p.append(axes.y_axis.x_max)
+        for x_point in list(zip(x_p, [axes.y_axis.x_max]*len(x_p), [0]*len(x_p))):
+            axes.lines_x_axis.add(axes.get_v_line(axes.c2p(*x_point),color=GREY_D))
+        for y_point in list(zip([axes.x_axis.x_max]*len(y_p),y_p, [0]*len(y_p))):
+            axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point),color=GREY_D))
+    
+        graph1 = axes.get_graph(
+            lambda x: math.log(2) / math.log(1 + x),
+            x_range = (1e-2,0.2,1e-3),
+            use_smoothing=False,
+            color=YELLOW,
+            stroke_width=7,
+            )
+        graph2 = axes.get_graph(
+            lambda x: 72/100/x, 
+            x_range = (1e-2,0.2,1e-3),
+            use_smoothing=False,
+            color=RED_A,
+            stroke_width=5,
+            )
+        graph3 = axes.get_right_graph(
+            lambda x: abs(math.log(2) / math.log(1 + x) - 72/100/x), 
+            x_range = (2e-2,0.2,1e-4),
+            use_smoothing=False,
+            color=RED,
+            stroke_width=2,
+            )
+        axes.right_y_axis.move_to(
+                axes.x_axis.number_to_point(axes.x_axis.x_max),
+                coor_mask = np.array([1, 0, 0])
+            ) 
+        axes.add_coordinate_labels()
+        x_label = Text("利率",font="思源黑体").next_to(axes.x_axis.get_corner(UR),RIGHT)
+        y_label = Text("翻倍周期",font="思源黑体").next_to(axes.y_axis.get_corner(UR),RIGHT)
+        right_y_label = Text("误差",font="思源黑体").next_to(axes.right_y_axis.get_corner(UP),UP)
+        text1 = Text("不同利率时本息翻倍周期数",font="思源黑体",font_size=50,color=RED_A)
+
+        legend = VGroup(
+            VGroup(Line(start=ORIGIN,end=RIGHT,color=YELLOW, stroke_width=4), 
+                   TexText("$$\\text{标准计算：}$$","$$N = \\frac{ln2}{ln(1+r)}$$", font_size=24).arrange(RIGHT))\
+                .arrange(RIGHT, buff=0.2),
+            VGroup(Line(start=ORIGIN,end=RIGHT,color=RED_A, stroke_opacity=0.92, stroke_width=4), 
+                   TexText("$$\\text{七二法则：}$$","$$N = \\frac{72}{100r}$$", font_size=24).arrange(RIGHT))\
+                .arrange(RIGHT, buff=0.2),
+            VGroup(Line(start=ORIGIN,end=RIGHT,color=RED, stroke_opacity=0.92, stroke_width=4), 
+                   TexText("$$\\text{误差：}$$","$$\\left|\\frac{ln2}{ln(1+r)}-\\frac{72}{100r}\\right|$$", font_size=24).arrange(RIGHT))\
+                .arrange(RIGHT, buff=0.2),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.36).scale(0.86)
+        legend.next_to(axes.get_corner(RIGHT), RIGHT, buff=-5).shift(DOWN*2.5)
+        lgbg = BackgroundRectangle(legend,buff=0.1)
+
+        # fig = VGroup(axes,
+        #              x_label,
+        #              y_label,
+        #              graph1,
+        #              graph2,
+        #              graph3,
+        #              lgbg,
+        #              legend
+        #              )
+        # VGroup(text1,fig).arrange(DOWN)
+        # fig.shift(RIGHT*0.2)
+        text1.to_edge(UP,buff=0.1)
+        # fill_color=["#032348","#46246d","#31580a","#852211"]
+    
+        bg = FullScreenRectangle(height=FRAME_HEIGHT*1.5,fill_color="#222222")
+        self.camera.frame.scale(1.1) 
+        self.add(bg,axes.lines_x_axis,axes.lines_y_axis,axes,x_label,y_label,right_y_label)
+        # self.play(
+        #     ShowCreation(axes.lines_x_axis),
+        #     ShowCreation(axes.lines_y_axis),
+        #     ShowCreation(axes),
+        #     ShowCreation(x_label),
+        #     ShowCreation(y_label),
+        #     ShowCreation(right_y_label),
+        #     )
+    
+        self.play(
+            ShowCreation(graph1,run_time=3),
+            ShowCreation(graph2,run_time=3),
+            ShowCreation(graph3,run_time=3),
+            FadeIn(lgbg),
+            FadeIn(legend),
+            FadeIn(text1,scale=0.618)
+            )
+        self.camera.frame.save_state()
+        self.play(self.camera.frame.animate.scale(0.5).shift(2.618*LEFT+1.75*DOWN))
+        self.wait(1)
+        self.play(self.camera.frame.animate.shift(6.18*RIGHT),run_time=3)
+        self.wait(1)
+        self.play(Restore(self.camera.frame),)
+        self.wait(3)
+
 
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} PieChartScene -os".format(__file__))
+    system("manimgl {} Rule72 -o".format(__file__))

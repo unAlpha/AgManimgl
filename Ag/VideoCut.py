@@ -2,10 +2,10 @@ from manimlib import *
 from moviepy.editor import *
 from os import system
 
-video_path = r"Z:\LiFiles\2023年\6月份\暗物质\交付"
+video_path = r"/Users/pengyinzhong/Downloads/切割/交付"
 media_path = r"E:\Dropbox\manim\AgManimgl\media\videos"  
-video_name = "暗物质-tt"
-Word = "暗物质是如何发现的？一起来做2023年北京高考物理题"
+video_name = "地震预警_tt"
+Word = "宜宾地震，成都如何提前61秒预警？李永乐老师讲地震预警原理"
 GeneratorFalse = False
 num_clip = 3
 clip_times=[

@@ -208,7 +208,6 @@ class Cos(Ex):
         "gap_time" : 0.5,
     }
 
-
 class XoneX(Ex):
     CONFIG = {
         "x_range" : (-2, 2, 1),
@@ -603,7 +602,6 @@ class TexTaylorNum(Scene):
         )         
         self.wait() 
 
-
 class TexTransform1(Scene):
     CONFIG={
         "tex1":"-1",
@@ -629,7 +627,6 @@ class TexTransform1(Scene):
             **play_kw
         )
         self.wait()
-
 
 class TexTransform2(Scene):
     CONFIG={
@@ -668,7 +665,6 @@ class TexTransform2(Scene):
             Write(arr_lg))
         
         self.wait()
-
 
 class TexTaylorNum2(Scene):
     CONFIG = {
@@ -727,6 +723,7 @@ class TexTaylorNum2(Scene):
 
         
         self.wait(2)        
+
 if __name__ == "__main__":
     from os import system
     system("manimgl {} Cos -o".format(__file__))
