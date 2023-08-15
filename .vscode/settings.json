@@ -18,5 +18,9 @@
         "*.mqh": "cpp",
         "*.mq4": "cpp",
         "*.mq5": "cpp"
-    }
+    },
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "python.formatting.provider": "none"
 }
