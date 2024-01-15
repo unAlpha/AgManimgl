@@ -56,23 +56,28 @@ class SurfaceMesh(VGroup):
             path = VMobject()
             low_ui = full_nv * int(math.floor(ui))
             high_ui = full_nv * int(math.ceil(ui))
-            path.set_points_smoothly(interpolate(
-                nudged_points[low_ui:low_ui + full_nv],
-                nudged_points[high_ui:high_ui + full_nv],
-                ui % 1
-            ))
+            path.set_points_smoothly(
+                interpolate(
+                    nudged_points[low_ui : low_ui + full_nv],
+                    nudged_points[high_ui : high_ui + full_nv],
+                    ui % 1,
+                )
+            )
             self.add(path)
         for vi in v_indices:
             path = VMobject()
-            path.set_points_smoothly(interpolate(
-                nudged_points[int(math.floor(vi))::full_nv],
-                nudged_points[int(math.ceil(vi))::full_nv],
-                vi % 1
-            ))
+            path.set_points_smoothly(
+                interpolate(
+                    nudged_points[int(math.floor(vi)) :: full_nv],
+                    nudged_points[int(math.ceil(vi)) :: full_nv],
+                    vi % 1,
+                )
+            )
             self.add(path)
 
 
 # 3D shapes
+
 
 class Sphere(Surface):
     CONFIG = {
@@ -83,11 +88,9 @@ class Sphere(Surface):
     }
 
     def uv_func(self, u: float, v: float) -> np.ndarray:
-        return self.radius * np.array([
-            np.cos(u) * np.sin(v),
-            np.sin(u) * np.sin(v),
-            -np.cos(v)
-        ])
+        return self.radius * np.array(
+            [np.cos(u) * np.sin(v), np.sin(u) * np.sin(v), -np.cos(v)]
+        )
 
 
 class Torus(Surface):
@@ -125,19 +128,12 @@ class Cylinder(Surface):
 
 
 class Line3D(Cylinder):
-    CONFIG = {
-        "width": 0.05,
-        "resolution": (21, 25)
-    }
+    CONFIG = {"width": 0.05, "resolution": (21, 25)}
 
     def __init__(self, start: np.ndarray, end: np.ndarray, **kwargs):
         digest_config(self, kwargs)
         axis = end - start
-        super().__init__(
-            height=get_norm(axis),
-            radius=self.width / 2,
-            axis=axis
-        )
+        super().__init__(height=get_norm(axis), radius=self.width / 2, axis=axis)
         self.shift((start + end) / 2)
 
 
@@ -154,11 +150,7 @@ class Disk3D(Surface):
         self.scale(self.radius)
 
     def uv_func(self, u: float, v: float) -> np.ndarray:
-        return np.array([
-            u * np.cos(v),
-            u * np.sin(v),
-            0
-        ])
+        return np.array([u * np.cos(v), u * np.sin(v), 0])
 
 
 class Square3D(Surface):
@@ -199,10 +191,12 @@ class Cube(SGroup):
         radius = square.get_height() / 2
         square.move_to(radius * OUT)
         result = [square]
-        result.extend([
-            square.copy().rotate(PI / 2, axis=vect, about_point=ORIGIN)
-            for vect in compass_directions(4)
-        ])
+        result.extend(
+            [
+                square.copy().rotate(PI / 2, axis=vect, about_point=ORIGIN)
+                for vect in compass_directions(4)
+            ]
+        )
         result.append(square.copy().rotate(PI, RIGHT, about_point=ORIGIN))
         return result
 
@@ -211,7 +205,9 @@ class Cube(SGroup):
 
 
 class Prism(Cube):
-    def __init__(self, width: float = 3.0, height: float = 2.0, depth: float = 1.0, **kwargs):
+    def __init__(
+        self, width: float = 3.0, height: float = 2.0, depth: float = 1.0, **kwargs
+    ):
         super().__init__(**kwargs)
         for dim, value in enumerate([width, height, depth]):
             self.rescale_to_fit(value, dim, stretch=True)
@@ -237,7 +233,9 @@ class VCube(VGroup):
 
 
 class VPrism(VCube):
-    def __init__(self, width: float = 3.0, height: float = 2.0, depth: float = 1.0, **kwargs):
+    def __init__(
+        self, width: float = 3.0, height: float = 2.0, depth: float = 1.0, **kwargs
+    ):
         super().__init__(**kwargs)
         for dim, value in enumerate([width, height, depth]):
             self.rescale_to_fit(value, dim, stretch=True)
@@ -300,7 +298,7 @@ class Prismify(VGroup):
         super().__init__(**kwargs)
         vect = depth * direction
         self.add(vmobject.copy())
-        points = vmobject.get_points()[::vmobject.n_points_per_curve]
+        points = vmobject.get_points()[:: vmobject.n_points_per_curve]
         for p1, p2 in adjacent_pairs(points):
             wall = VMobject()
             wall.match_style(vmobject)

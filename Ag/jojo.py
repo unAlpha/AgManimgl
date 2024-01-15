@@ -16,21 +16,20 @@
 import os
 import io
 
-file_path = r"C:\Users\ag_zh\Desktop"
+file_path = r"Z:\PengVideo\短视频\10月份\AI数字人教学\网页"
 files_names = os.listdir(file_path)
-import sys  
-# reload(sys)  
+import sys
+
+# reload(sys)
 # sys.setdefaultencoding('utf-8')
 for files_name in files_names:
     if files_name.endswith(".txt"):
         path = os.path.join(file_path, files_name)
-        newpath = os.path.join(
-            file_path,
-            files_name.split(".")[0]+'_lan.txt')
-        newFile = open(newpath, 'w')
+        newpath = os.path.join(file_path, files_name.split(".")[0] + "_lan.txt")
+        newFile = open(newpath, "w")
         print(path)
         print(newFile)
-        with io.open(path,'r',encoding='utf-8') as fc:
+        with io.open(path, "r", encoding="utf-8") as fc:
             for line in fc.readlines()[2::4]:
                 newFile.write(line)
         newFile.close()
@@ -77,8 +76,8 @@ for files_name in files_names:
 #     matches = re.findall(r'--\w+|\d+:\d+|[A-Za-z0-9]+', text)
 #     char_list = [char for char in text if char.isalpha() and '\u4e00' <= char <= '\u9fff']
 #     char_list.extend(match for match in matches if len(match) > 0)
-#     return char_list   
- 
+#     return char_list
+
 # Q_words = []
 # Ans_characters = []
 
@@ -94,7 +93,7 @@ for files_name in files_names:
 # print(Q_words)
 # print("\nAns characters:")
 # print(Ans_characters)
-   
+
 # # 读取文件名中的信息并重名命
 # import os
 # import re
@@ -102,7 +101,7 @@ for files_name in files_names:
 # files_names = os.listdir(file_path)
 # filter_num_function = re.compile(r'[第](.*?)[首]', re.S)
 # filter_name_function = re.compile(r'[《](.*?)[》]', re.S)
-# num =[re.findall(filter_num_function, files_names[i])[0][3:] for i in range(len(files_names))] 
+# num =[re.findall(filter_num_function, files_names[i])[0][3:] for i in range(len(files_names))]
 # name =[re.findall(filter_name_function, files_names[i])[0] for i in range(len(files_names))]
 # print(num,name)
 
@@ -153,7 +152,7 @@ for files_name in files_names:
 #                 line = line.replace(old_str,new_str,n)
 #             file_data += line
 #     with io.open(file,"w",encoding="utf-8") as f:
-#         f.write(file_data)  
+#         f.write(file_data)
 
 # def main():
 #     base = 'D:\Program Files\Blackmagic Design\DaVinci Resolve\Fusion\Templates\Edit'
@@ -163,8 +162,8 @@ for files_name in files_names:
 #         print(file+" Replace OK")
 # if __name__ == '__main__':
 #     main()
-        
-        
+
+
 # # 文件夹名替换
 # import os
 # file_path = 'E:\Dropbox\manim\AgManim\media\Physics_HL'
@@ -195,4 +194,3 @@ for files_name in files_names:
 #     return List
 
 # print(josephus(8,3))
-

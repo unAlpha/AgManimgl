@@ -1,22 +1,32 @@
 # -*- coding: UTF-8 -*-
 import os
 
-file_path = r'Z:\PengVideo\短视频\6月份\换脸\素材4'
+file_path = r"Z:\PengVideo\短视频\10月份\英伟达"
 files_names = os.listdir(file_path)
 for files_name in files_names:
     # if files_name == "Thumbs.db": continue
-    # if ".mp4" in files_name: 
-    if ".gif" in files_name: 
-        the_file=os.path.join(file_path, files_name)
-        name = the_file.split('.')[0]
+    if ".mp4" in files_name:
+        # if ".gif" in files_name:
+        the_file = os.path.join(file_path, files_name)
+        name = the_file.split(".")[0]
         # gif转mp4
-        order = "ffmpeg -f gif -i %s.gif %s.mp4"%(name,name)
-        
+        # order = "ffmpeg -f gif -i %s.gif %s.mp4"%(name,name)
+
         # mp4转gif
         # order = "ffmpeg -i %s.mp4 -an -y -r 10 -vf scale=-1:500 %s.gif"%(name,name)
-        # order = "ffmpeg -i %s.mp4 -an -y -r 6 -maxrate 0.1K -vf scale=960:-1 %s.gif"%(name,name)
+        order = "ffmpeg -i %s.mp4 -an -y -r 6 -maxrate 0.1K -vf scale=960:-1 %s.gif" % (
+            name,
+            name,
+        )
         # # 压缩视频
         # order = "ffmpeg -i %s.mp4 -vf scale=1280:-1 -c:v libx264 -preset veryslow -crf 24 %s%s.mp4"%(name,name,"low")
+
+        # mp4转mp3
+        # order = "ffmpeg -i %s.mp4 -an -y -r 10 -vf scale=-1:500 %s.gif"%(name,name)
+        order = "ffmpeg -i %s.mp4 -vn %s.mp3" % (
+            name,
+            name,
+        )
         print(order)
         os.system(order)
         print("gif generated OK")
@@ -28,13 +38,13 @@ for files_name in files_names:
 #     /Users/pengyinzhong/科普/李永乐/科普视频-loc/看不懂的数字/交付/mp4togif/单张图/image-%3d.jpg"
 # )
 
-#裁切图片的一部分
+# 裁切图片的一部分
 # import os
 # file_path = r'E:\Dropbox\manim\AgManimgl\media\images'
 # files_names = os.listdir(file_path)
 # for files_name in files_names:
 #     # if files_name == "Thumbs.db": continue
-#     if ".png" in files_name: 
+#     if ".png" in files_name:
 #         the_file=os.path.join(file_path, files_name)
 #         name = the_file.split('.')[0]
 #         new_name = os.path.join(file_path,"trim",files_name)
@@ -55,7 +65,7 @@ for files_name in files_names:
 # files_names = os.listdir(file_path)
 # for files_name in files_names:
 #     # if files_name == "Thumbs.db": continue
-#     if ".mp4" in files_name: 
+#     if ".mp4" in files_name:
 #         the_file=os.path.join(file_path, files_name)
 #         name = the_file.split('.')[0]
 #         Resolution = 1080

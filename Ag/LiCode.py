@@ -3343,7 +3343,160 @@ class Rule72(Scene):
         self.wait(3)
 
 
+from scipy.spatial import ConvexHull
+
+
+class Connect3DPoints(ThreeDScene):
+    def construct(self):
+        # 定义你的三维点
+        def plf(verts):
+            vertices = verts
+            points = [np.array(point) for point in vertices]
+
+            # 转换为manim的3D点
+            m_points = [Sphere(radius=0.1).move_to(point) for point in points]
+
+            # lines = []
+            # for i in range(len(points)):
+            #     for j in range(i + 1, len(points)):
+            #         lines.append(Line3D(points[i], points[j]))
+
+            # 获取顶点的凸包
+            hull = ConvexHull(vertices)
+
+            # 从simplices中提取边，并确保每条边只被记录一次
+            edges_set = set()
+
+            for simplex in hull.simplices:
+                for i in range(3):
+                    edge = tuple(sorted([simplex[i], simplex[(i + 1) % 3]]))
+                    edges_set.add(edge)
+
+            edges = list(edges_set)
+
+            # 使用这些边创建线段
+            lines = [
+                Line3D(
+                    points[edge[0]],
+                    points[edge[1]],
+                    opacity=1,
+                )
+                for edge in edges
+            ]
+
+            # hull.simplices 包含了组成凸包的三角形的索引
+            faces_indices = hull.simplices
+            faces = [
+                Polygon(
+                    *[points[i] for i in face],
+                    fill_opacity=1,
+                    fill_color=BLUE,
+                    stroke_width=0,
+                )
+                for face in faces_indices
+            ]
+            return m_points, lines, faces
+
+        verts11 = [[0, 0, 1], [0, 1, 0], [1, 0, 0], [0, -1, 0], [-1, 0, 0], [0, 0, -1]]
+        verts21 = [
+            [0, 0, 2],
+            [0, 2, 0],
+            [2, 0, 0],
+            [0, -2, 0],
+            [-2, 0, 0],
+            [0, 0, -2],
+        ]
+        verts22 = [
+            [0, 1, 1],
+            [0, 1, -1],
+            [0, -1, 1],
+            [0, -1, -1],
+            [1, 0, 1],
+            [1, 0, -1],
+            [-1, 0, 1],
+            [-1, 0, -1],
+            [1, 1, 0],
+            [1, -1, 0],
+            [-1, 1, 0],
+            [-1, -1, 0],
+        ]
+        verts31 = [
+            [0, 0, 3],
+            [0, 3, 0],
+            [3, 0, 0],
+            [0, -3, 0],
+            [-3, 0, 0],
+            [0, 0, -3],
+        ]
+        verts32 = [
+            [0, 1, 2],
+            [0, 1, -2],
+            [0, -1, 2],
+            [0, -1, -2],
+            [1, 0, 2],
+            [1, 0, -2],
+            [-1, 0, 2],
+            [-1, 0, -2],
+            [2, 0, 1],
+            [-2, 0, 1],
+            [2, 0, -1],
+            [-2, 0, -1],
+            [0, 2, 1],
+            [0, -2, 1],
+            [0, 2, -1],
+            [0, -2, -1],
+            [2, 1, 0],
+            [-2, 1, 0],
+            [2, -1, 0],
+            [-2, -1, 0],
+            [1, 2, 0],
+            [1, -2, 0],
+            [-1, 2, 0],
+            [-1, -2, 0],
+        ]
+        verts33 = [
+            [1, 1, 1],
+            [1, 1, -1],
+            [-1, 1, 1],
+            [1, -1, 1],
+            [-1, -1, 1],
+            [-1, 1, -1],
+            [1, -1, -1],
+            [-1, -1, -1],
+        ]
+        m_points11, lines11, faces11 = plf(verts11)
+
+        # k=1 的内外点线面
+        t1 = Group(*m_points11, *lines11, *faces11).scale(1)
+
+        # k=2 外点线面
+        m_points21, lines21, faces21 = plf(verts21)
+        t21 = Group(*m_points21, *lines21, *faces21)
+        # k=2 内点
+        m_points22, lines22, faces22 = plf(verts22)
+        t2 = Group(t21, *m_points22).scale(1)
+
+        # k=3 外点线面
+        m_points31, lines31, faces31 = plf(verts31)
+        t31 = Group(*m_points31, *lines31, *faces31)
+        # k=3 内点
+        m_points32, lines32, faces32 = plf(verts32)
+        m_points33, lines33, faces33 = plf(verts33)
+        t3 = Group(t31, *m_points32, *m_points33).scale(1)
+
+        self.add(t3)
+
+        frame = self.camera.frame
+        frame.set_euler_angles(
+            theta=-30 * DEGREES,
+            phi=70 * DEGREES,
+        )
+        frame.add_updater(lambda m, dt: m.increment_theta(-0.1 * dt))
+
+        self.wait(10)
+
+
 if __name__ == "__main__":
     from os import system
 
-    system("manimgl {} Cucurbitaceae -o".format(__file__))
+    system("manimgl {} Connect3DPoints -os".format(__file__))
