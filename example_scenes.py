@@ -414,7 +414,7 @@ class CoordinateSystemExample(Scene):
 
 class GraphExample(Scene):
     def construct(self):
-        axes = Axes((-3, 10), (-1, 8))
+        axes = Axes((-1, 10), (-1, 8))
         axes.add_coordinate_labels()
 
         self.play(Write(axes, lag_ratio=0.01, run_time=1))
@@ -668,6 +668,6 @@ class ControlsExample(Scene):
 if __name__ == "__main__":
     from os import system
 
-    system("manimgl {} SurfaceExample -o".format(__file__))
+    system("manimgl {} GraphExample -o".format(__file__))
 
 # See https://github.com/3b1b/videos for many, many more

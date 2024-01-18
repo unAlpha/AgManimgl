@@ -2,10 +2,10 @@ from manimlib import *
 from moviepy.editor import *
 from os import system
 
-video_path = r"Z:\LiFiles\2023年\11月份\巫婆和公主\交付"
+video_path = r"Z:\LiFiles\2024年\1月份\1-1+1-1\交付"
 media_path = r"E:\Dropbox\manim\AgManimgl\media\videos"
-video_name = "巫婆和公主-tt2"
-Word = "有趣的逻辑推理问题：公主会被巫婆吃掉吗？一共有几顶黑帽子？"
+video_name = "1+1-1+1-tt"
+Word = "1-1+1-1+1-1…=？答案让你意想不到！"
 GeneratorFalse = False
 num_clip = 2
 clip_times = [
