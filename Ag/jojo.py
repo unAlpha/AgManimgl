@@ -16,7 +16,7 @@
 import os
 import io
 
-file_path = r"Z:\PengVideo\短视频\10月份\AI数字人教学\网页"
+file_path = r"Z:\PengVideo\短视频\2024\7月份\发达国家\初稿"
 files_names = os.listdir(file_path)
 import sys
 

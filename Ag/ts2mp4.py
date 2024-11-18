@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 import os
 
-file_path = r"E:\录屏"
+file_path = r"E:\直播录屏\tstomp4"
 files_names = os.listdir(file_path)
 for files_name in files_names:
     if ".ts" in files_name:

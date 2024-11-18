@@ -1,4 +1,5 @@
 import os
+
 # import manimpango
 # print(manimpango.list_fonts())
 # os.system("ffmpeg -y -loop 1 \
@@ -57,42 +58,89 @@ import os
 # ax.set_zlim(-2,2)
 # plt.show()
 
-import numpy as np
-import sympy as sp
-import matplotlib.pyplot as plt
-# Define the x range and the SymPy symbol
-x_vals = np.linspace(-2, 2, 1000)
-x = sp.symbols('x')
+# import numpy as np
+# import sympy as sp
+# import matplotlib.pyplot as plt
+# # Define the x range and the SymPy symbol
+# x_vals = np.linspace(-2, 2, 1000)
+# x = sp.symbols('x')
 
-# Define the original function and its Taylor series expansion
-func_sympy = x/(1-x)**2
-taylor_series = sp.series(func_sympy, x, 0, 7).removeO()
-taylor_func = sp.lambdify(x, taylor_series, 'numpy')
+# # Define the original function and its Taylor series expansion
+# func_sympy = x/(1-x)**2
+# taylor_series = sp.series(func_sympy, x, 0, 7).removeO()
+# taylor_func = sp.lambdify(x, taylor_series, 'numpy')
 
-# Calculate the function values and Taylor series values
-y_func = taylor_func(x_vals)  # Use the same x range as before
-y_taylor = taylor_func(x_vals)
+# # Calculate the function values and Taylor series values
+# y_func = taylor_func(x_vals)  # Use the same x range as before
+# y_taylor = taylor_func(x_vals)
 
-plt.figure(figsize=(10, 6))
+# plt.figure(figsize=(10, 6))
 
-# Plot the original function
-plt.plot(x_vals, y_func, label='x/(1-x)^2')
+# # Plot the original function
+# plt.plot(x_vals, y_func, label='x/(1-x)^2')
 
-# Plot the Taylor series expansion
-plt.plot(x_vals, y_taylor, label='Taylor series expansion')
+# # Plot the Taylor series expansion
+# plt.plot(x_vals, y_taylor, label='Taylor series expansion')
 
-# Add labels and title
-plt.xlabel('x')
-plt.ylabel('y')
-plt.title('Taylor series expansion of x/(1-x)^2 up to degree 7')
-plt.legend()
+# # Add labels and title
+# plt.xlabel('x')
+# plt.ylabel('y')
+# plt.title('Taylor series expansion of x/(1-x)^2 up to degree 7')
+# plt.legend()
 
-# Set the x and y axis limits
-plt.xlim([-2, 2])
-plt.ylim([-1, 1])
+# # Set the x and y axis limits
+# plt.xlim([-2, 2])
+# plt.ylim([-1, 1])
 
-# Show the plot
-plt.grid(True)
-plt.show()
+# # Show the plot
+# plt.grid(True)
+# plt.show()
+
+import requests
 
 
+def get_coords_from_csvdata(file_name):
+    import csv
+
+    coords = []
+    with open(f"{file_name}.csv", "r", encoding="UTF-8") as csvFile:
+        reader = csv.reader(csvFile)
+        for row in reader:
+            coords.append(row)
+    csvFile.close()
+    return coords
+
+
+path = r"Z:\LiFiles\所有科普封面汇总\封面文件"
+path_data = r"Z:\LiFiles\所有科普封面汇总\youtube视频链接汇总"
+
+img_data = get_coords_from_csvdata(path_data)
+
+# print(string0)
+
+img_template = "https://i.ytimg.com/vi/****/maxresdefault.jpg"
+
+for i in range(1, len(img_data)):
+    # Extract video ID from string1
+    video_id = img_data[i][0].split("=")[-1]
+
+    # Replace "****" in string2_template with the video ID
+    img_jpg = img_template.replace("****", video_id)
+
+    # Download the image
+    output_path = path + f"\封面{img_data[i][1]}.jpg"
+    response = requests.get(img_jpg)
+
+    # Save the image to the specified directory if the request was successful
+    if response.status_code == 200:
+        with open(output_path, "wb") as file:
+            file.write(response.content)
+        download_status = f"Image downloaded and saved to {output_path}"
+    else:
+        download_status = (
+            f"Failed to download image. HTTP status code: {response.status_code}"
+        )
+
+    download_status
+
+print("Done!")

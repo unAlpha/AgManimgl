@@ -34,7 +34,9 @@ class Table_mol0(Scene):
 
     def construct(self):
         title = Text("城镇企业职工基本养老保险个人账户养老金计发月数表", font_size=30)
-        data = get_coords_from_csvdata(r"/Users/pengyinzhong/Downloads/6月份/养老金/素材/月数表")
+        data = get_coords_from_csvdata(
+            r"/Users/pengyinzhong/Downloads/6月份/养老金/素材/月数表"
+        )
         dataArray = np.array(data)
         row = dataArray.shape[0]
         column = dataArray.shape[1]
@@ -444,7 +446,9 @@ class Table_alluse2(Scene):
             font_size=36,
             font="Source Han Sans CN Regular",
         )
-        data = get_coords_from_csvdata(r"Z:\\LiFiles\\2022年\\6月份\\刹车\\素材\附着系数")
+        data = get_coords_from_csvdata(
+            r"Z:\\LiFiles\\2022年\\6月份\\刹车\\素材\附着系数"
+        )
         dataArray = np.array(data)
         row = dataArray.shape[0]
         column = dataArray.shape[1]
@@ -645,7 +649,9 @@ class Table_use1(Scene):
 
 class Table_use2(Scene):
     def construct(self):
-        ble = Table("德国与日本队数据对比", r"E:\Dropbox\manim\AgManimgl\Ag\data_files\FIFA")
+        ble = Table(
+            "德国与日本队数据对比", r"E:\Dropbox\manim\AgManimgl\Ag\data_files\FIFA"
+        )
         ble.dx_list[0] = 3
         ble.dy_list[0] = 0.8
         ble.arrange_table()
@@ -1479,7 +1485,12 @@ class Question2(Scene):
 
 class Table_use7(Scene):
     def construct(self):
-        ble = Table("北宋各地方进士人数比较", r"Z:\LiFiles\2023年\7月份\科举制度新\素材\进士", dx=2.2, dy=0.6)
+        ble = Table(
+            "北宋各地方进士人数比较",
+            r"Z:\LiFiles\2023年\7月份\科举制度新\素材\进士",
+            dx=2.2,
+            dy=0.6,
+        )
         ble.dx_list[0] = 2.5
         ble.dy_list[0] = 0.8
         ble.arrange_table()
@@ -1504,7 +1515,12 @@ class Table_use7(Scene):
 
 class Table_use8(Scene):
     def construct(self):
-        ble = Table("葫芦娃救爷爷-策略", r"Z:\LiFiles\2023年\8月份\葫芦娃救爷爷\葫芦娃救爷爷-策略", dx=1, dy=0.5)
+        ble = Table(
+            "葫芦娃救爷爷-策略",
+            r"Z:\LiFiles\2023年\8月份\葫芦娃救爷爷\葫芦娃救爷爷-策略",
+            dx=1,
+            dy=0.5,
+        )
         ble.dx_list[0] = 1
         ble.dy_list[0] = 0.6
         ble.arrange_table()
@@ -1534,7 +1550,89 @@ class Table_use8(Scene):
         self.wait(3)
 
 
+class Table_use9(Scene):
+    def construct(self):
+        ble = Table(
+            "Kimi Chat Vs ChatGPT",
+            r"Z:\PengVideo\短视频\2024\1月份\国产AI\对比表格",
+            dx=1.8,
+            dy=0.6,
+        )
+        ble.dx_list[0] = 2
+        ble.dy_list[0] = 0.8
+        ble.arrange_table()
+
+        bg = FullScreenRectangle(
+            fill_color=["#032348", "#46246d", "#31580a", "#852211"]
+        )
+        self.add(bg)
+
+        ble.table.center()
+        ble.title.next_to(ble.table, UP, buff=0.618)
+        self.play(
+            FadeIn(ble.title, scale=0.618),
+            FadeIn(ble.bg[0], scale=0.5),
+            FadeIn(ble.tex_column[0], scale=0.9),
+        )
+        self.play(
+            LaggedStartMap(FadeIn, ble.bg[1:], scale=0.9, lag_ratio=0.1),
+            LaggedStartMap(
+                FadeIn,
+                VGroup(ble.tex_column[1][0], ble.tex_column[2][0]),
+                scale=0.9,
+                lag_ratio=0.1,
+            ),
+            run_time=2,
+        )
+        self.wait()
+        for i in range(1, 6):
+            self.play(
+                LaggedStartMap(
+                    FadeIn,
+                    VGroup(ble.tex_column[1][i], ble.tex_column[2][i]),
+                    scale=0.9,
+                    lag_ratio=0.1,
+                ),
+                run_time=2,
+            )
+            self.wait()
+
+        self.wait(3)
+
+
+class Table_use10(Scene):
+    def construct(self):
+        ble = Table(
+            "美国失业率底部到顶部周期汇总",
+            r"Z:\PengVideo\短视频\2024\6月份 科普\经济危机\素材\unemployment_rate_cycles",
+            dx=3,
+            dy=0.6,
+        )
+        ble.dx_list[0] = 3.2
+        ble.dy_list[0] = 0.8
+        ble.arrange_table()
+
+        bg = FullScreenRectangle(
+            fill_color=["#032348", "#46246d", "#31580a", "#852211"]
+        )
+        self.add(bg)
+
+        ble.table.center()
+        ble.title.next_to(ble.table, UP, buff=0.618)
+        self.play(
+            FadeIn(ble.title, scale=0.618),
+            FadeIn(ble.bg[0], scale=0.5),
+            FadeIn(ble.tex_column[0], scale=0.9),
+        )
+        self.play(
+            LaggedStartMap(FadeIn, ble.bg[1:], scale=0.9, lag_ratio=0.1),
+            LaggedStartMap(FadeIn, ble.tex_column[1:], scale=0.9, lag_ratio=0.1),
+            run_time=3,
+        )
+        self.wait(3)
+
+
 if __name__ == "__main__":
     from os import system
 
-    system("manimgl {} Question1 -os".format(__file__))
+    system("manimgl {} Table_use10 -o".format(__file__))

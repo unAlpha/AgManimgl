@@ -1565,7 +1565,79 @@ class CreatePhysicsAnimation(Scene):
             )
 
 
+class TexTextTransform3(Scene):
+    def construct(self):
+        tex = TexText(
+            "$$\\text{锂电池容量计算法之一}$$",
+            "$$\\text{电流} \\times \\text{时间}$$",
+            "$$mA \\times h$$",
+            "$$1mAh=0.001\\text{安培} \\times 3600\\text{秒}$$",
+            "$$=3.6\\text{安培秒}$$",
+            "$$=3.6\\text{库仑}$$",
+            font="SimSun",
+        )
+        tex[0].scale(0.7)
+        tex[1].scale(1.1)
+        tex[2].scale(1.1)
+
+        tex[:3].arrange(DOWN, buff=0.4, aligned_edge=ORIGIN).shift(UP * 0.4)
+
+        tex[3:].scale(0.6)
+
+        tex[3:].arrange(DOWN, buff=0.5, aligned_edge=LEFT).shift(DOWN * 0.2)
+        tex[4:].shift(0.8 * RIGHT)
+        tex.center()
+
+        bg = FullScreenRectangle(
+            fill_color=["#032348", "#46246d", "#31580a", "#852211"]
+        )
+        self.add(bg)
+        self.play(Write(tex[:3]))
+        self.wait()
+        self.play(FlashAround(tex[1]))
+        self.wait()
+        self.play(FlashAround(tex[2]))
+        self.wait()
+        self.play(tex[:3].animate.shift(UP * 2))
+        self.wait()
+        self.play(Write(tex[3]))
+        self.wait()
+        self.play(Write(tex[4]))
+        self.wait()
+        self.play(Write(tex[5]))
+        self.wait()
+
+
+class TexTextTransform4(Scene):
+    def construct(self):
+        tex = TexText(
+            "$$W_\\text{功} = P_\\text{功率} \\times t_\\text{时间}$$",
+            "$$=U_\\text{电压} $$",
+            "$$\\times I_\\text{电流} \\times t_\\text{时间}$$",
+            font="SimSun",
+        )
+        tex.scale(0.9)
+        tex[1:3].arrange(RIGHT, buff=0.1).scale(0.7)
+
+        tex[0].next_to(tex[1:3], 2 * UP)
+        tex[1:3].shift(RIGHT * 0.5)
+
+        bg = FullScreenRectangle(
+            fill_color=["#032348", "#46246d", "#31580a", "#852211"]
+        )
+        self.add(bg)
+        self.play(Write(tex))
+        self.wait()
+        self.play(
+            FlashAround(tex[0][3:6]),
+            time_width=2.0,
+        )
+        self.wait()
+        self.play(FlashAround(tex[1:3]))
+        self.wait()
+
+
 if __name__ == "__main__":
     from os import system
 
-    system("manimgl {} CreatePhysicsAnimation -ot -r 3840x2160".format(__file__))
+    system("manimgl {} TexTextTransform4 -o -r 1080x1920".format(__file__))

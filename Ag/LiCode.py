@@ -3550,6 +3550,7 @@ class CustomGraph_GDP1(Scene):
                 "decimal_number_config": {
                     "num_decimal_places": self.ndp,
                     "font_size": 35,
+                    "group_with_commas": False,
                 },
             },
             height=FRAME_HEIGHT - 3,
@@ -3666,17 +3667,436 @@ class CustomGraph_GDP3_1(CustomGraph_GDP2_1):
     y_range = (0, 5000, 1000)
     sl1 = 1
     path = r"E:\Dropbox\manim\AgManimgl\Ag\data_files\表格3：1978-2022年gdp指数"
-    text2 = "国内生产总值指数"
+    text2 = "国内生产总值指数(1978=100)"
 
 
 class CustomGraph_GDP3_2(CustomGraph_GDP3_1):
     x_range = (0, 50, 5)
     y_range = (0, 3500, 500)
     sl1 = 2
-    text2 = "人均国内生产总值指数"
+    text2 = "人均国内生产总值指数(1978=100)"
+
+
+class CustomGraph_GDP4_1(CustomGraph_GDP1):
+    x_range = (0, 50, 5)
+    y_range = (0, 0.4, 0.1)
+    sl1 = 1
+    ndp = 0
+    path = r"E:\Dropbox\manim\AgManimgl\Ag\data_files\表格4：1978-2022三次产业构成"
+    text2 = "第一产业增加值(%)"
+    AxesLabels = AxesLabelsTex_GDP_100
+
+
+class CustomGraph_GDP4_2(CustomGraph_GDP1):
+    x_range = (0, 50, 5)
+    y_range = (0, 0.6, 0.1)
+    sl1 = 2
+    ndp = 0
+    path = r"E:\Dropbox\manim\AgManimgl\Ag\data_files\表格4：1978-2022三次产业构成"
+    text2 = "第二产业增加值(%)"
+    AxesLabels = AxesLabelsTex_GDP_100
+
+
+class CustomGraph_GDP4_3(CustomGraph_GDP1):
+    x_range = (0, 50, 5)
+    y_range = (0, 0.6, 0.1)
+    sl1 = 3
+    ndp = 0
+    path = r"E:\Dropbox\manim\AgManimgl\Ag\data_files\表格4：1978-2022三次产业构成"
+    text2 = "第三产业增加值(%)"
+    AxesLabels = AxesLabelsTex_GDP_100
+
+
+class YYAxes_GDP(Axes):
+    CONFIG = {
+        "right_y_axis_config": {},
+        "right_y_range": [0, 1, 0.1],  # Default right y range
+    }
+
+    def __init__(self, x_range=None, y_range=None, right_y_range=None, **kwargs):
+        CoordinateSystem.__init__(self, **kwargs)
+        VGroup.__init__(self, **kwargs)
+
+        if x_range is not None:
+            self.x_range[: len(x_range)] = x_range
+        if y_range is not None:
+            self.y_range[: len(y_range)] = y_range
+
+        if right_y_range is not None:
+            self.right_y_range = right_y_range
+
+        self.x_axis = self.create_axis(
+            self.x_range,
+            self.x_axis_config,
+            self.width,
+        )
+        self.y_axis = self.create_axis(self.y_range, self.y_axis_config, self.height)
+        self.y_axis.rotate(90 * DEGREES, about_point=ORIGIN)
+
+        self.right_y_axis = self.create_axis(
+            self.right_y_range, self.right_y_axis_config, self.height
+        )
+        self.right_y_axis.rotate(90 * DEGREES, about_point=ORIGIN)
+        self.right_y_axis.move_to(
+            # self.x_axis.number_to_point(self.x_axis.x_max),
+            self.x_axis.number_to_point(self.x_axis.number_to_point(0)),
+            coor_mask=np.array([1, 0, 0]),
+        )
+        self.axes = VGroup(self.x_axis, self.y_axis, self.right_y_axis)
+        self.add(*self.axes)
+        self.center()
+
+    def add_coordinate_labels(
+        self, x_values=None, y_values=None, right_y_values=None, **kwargs
+    ):
+        if x_values == None:
+            x_numbers = self.get_x_axis().get_tick_range()
+        if y_values == None:
+            y_numbers = self.get_y_axis().get_tick_range()
+        if right_y_values == None:
+            right_y_numbers = self.get_right_y_axis().get_tick_range()
+        self.coordinate_labels = VGroup()
+
+        for number in x_numbers:
+            axis = self.get_x_axis()
+            value = number
+            number_mob = axis.get_number_mobject(value, **kwargs)
+            number_mob_add = (
+                DecimalNumber(
+                    value + 1975, num_decimal_places=0, group_with_commas=False
+                )
+                .scale(0.5)
+                .move_to(number_mob)
+            )
+            self.coordinate_labels.add(number_mob_add)
+
+        for number in y_numbers:
+            axis = self.get_y_axis()
+            value = number
+            # kwargs["unit"] = 0.01
+            # kwargs["unit_tex"] = "\\%"
+            number_mob = axis.get_number_mobject(value, color=WHITE, **kwargs).scale(
+                0.6, about_edge=RIGHT
+            )
+            self.coordinate_labels.add(number_mob)
+
+        for number in right_y_numbers:
+            axis = self.get_right_y_axis()
+            value = number
+            # if value != 0:
+            number_mob = axis.get_number_mobject(
+                value, direction=RIGHT, color=WHITE
+            ).scale(0.6, about_edge=LEFT)
+            self.coordinate_labels.add(number_mob)
+
+        self.add(self.coordinate_labels)
+        return self
+
+    def get_right_axes(self, **kwargs):
+        # Create a new Axes object for the right y-axis with same configuration
+        right_axes = Axes(
+            x_range=self.x_range,
+            y_range=self.right_y_range,
+            axis_config=self.axis_config,
+            x_axis_config=self.x_axis_config,
+            y_axis_config=self.right_y_axis_config,
+            height=self.height,
+            width=self.width,
+        )
+        return right_axes
+
+    def get_right_graph(self, func_right, **kwargs):
+        # Draw the right graph using the right coordinate system
+        right_graph = self.get_right_axes.get_graph(func_right, **kwargs)
+
+        # Shift the right graph to align with the right y-axis
+        # right_graph.shift(self.right_y_axis.n2p(0) - right_axes.y_axis.n2p(0))
+        self.add(right_graph)
+
+        return right_graph
+
+    def get_right_y_axis(self):
+        return self.right_y_axis
+
+
+class CustomGraph_GDP2(Scene):
+    x_range = (0, 50, 5)
+    y_range = (0, 1400000, 200000)
+    right_y_range = (0, 90000, 10000)
+    # right_y_range = (0,80,10)
+    sl1 = 1
+    sl2 = 2
+    ndp = 0
+    title1 = "国内生产总值(亿元)"
+    title2 = "人均国内生产总值(元)"
+    path = r"E:\Dropbox\manim\AgManimgl\Ag\data_files\表格2：1978-2022年国内生产总值"
+
+    def construct(self):
+        axes = YYAxes_GDP(
+            self.x_range,
+            self.y_range,
+            self.right_y_range,
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 2,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                },
+                "include_tip": False,
+            },
+            x_axis_config={
+                "decimal_number_config": {
+                    "num_decimal_places": 1,
+                    "font_size": 35,
+                    "group_with_commas": False,
+                },
+            },
+            y_axis_config={
+                "decimal_number_config": {
+                    "num_decimal_places": self.ndp,
+                    "font_size": 35,
+                    "group_with_commas": False,
+                },
+            },
+            right_y_axis_config={
+                "decimal_number_config": {
+                    "font_size": 35,
+                    "num_decimal_places": self.ndp,
+                    "group_with_commas": False,
+                },
+            },
+            height=FRAME_HEIGHT - 3,
+            width=FRAME_WIDTH - 6,
+        )
+
+        # 加上全部的线
+        axes.lines_x_axis = VGroup()
+        axes.lines_y_axis = VGroup()
+        x_p = [x for x in np.arange(*axes.x_range)]
+        x_p.append(axes.x_axis.x_max)
+        y_p = [x for x in np.arange(*axes.y_range)]
+        y_p.append(axes.y_axis.x_max)
+        for x_point in list(zip(x_p, [axes.y_axis.x_max] * len(x_p), [0] * len(x_p))):
+            axes.lines_x_axis.add(axes.get_v_line(axes.c2p(*x_point), color=GREY_D))
+        for y_point in list(zip([axes.x_axis.x_max] * len(y_p), y_p, [0] * len(y_p))):
+            axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point), color=GREY_D))
+
+        coords = get_coords_from_csvdata(self.path)
+        transposed_coords = [list(x) for x in zip(*coords)]
+        # print(coords)
+        # print(transposed_coords[5][1:])
+
+        denominator = 1
+        coords1 = [
+            [float(x) - 1975, round(float(y) / denominator, 4)]
+            for (x, y) in zip(transposed_coords[0][1:], transposed_coords[self.sl1][1:])
+        ]
+        # print(coords1)
+        points1 = [axes.c2p(px, py) for px, py in coords1]
+        # Set graph
+        graph1 = DiscreteGraphFromSetPoints(points1, color=YELLOW_A, stroke_width=10)
+
+        coords2 = [
+            [float(x) - 1975, round(float(y) / denominator, 4)]
+            for (x, y) in zip(transposed_coords[0][1:], transposed_coords[self.sl2][1:])
+        ]
+        # print(coords1)
+        points2 = [axes.get_right_axes().c2p(px, py) for px, py in coords2]
+        # Set graph
+        graph2 = DiscreteGraphFromSetPoints(points2, color=RED, stroke_width=10)
+
+        axes.right_y_axis.move_to(
+            axes.x_axis.number_to_point(axes.x_axis.x_max),
+            coor_mask=np.array([1, 0, 0]),
+        )
+        axes.add_coordinate_labels()
+        x_label = (
+            Text("年份", font="思源黑体").next_to(axes.x_axis, DOWN, buff=0.5).scale(0.5)
+        )
+        y_label = (
+            Text(self.title1, font="思源黑体", color=YELLOW_A)
+            .scale(0.5)
+            .next_to(axes.y_axis.get_corner(UP), RIGHT)
+        )
+        right_y_label = (
+            Text(self.title2, font="思源黑体", color=RED)
+            .scale(0.5)
+            .next_to(axes.right_y_axis.get_corner(UP), LEFT)
+        )
+
+        # fill_color=["#032348","#46246d","#31580a","#852211"]
+
+        bg = FullScreenRectangle(height=FRAME_HEIGHT * 1.5, fill_color="#222222")
+        self.add(
+            bg,
+            axes.lines_x_axis,
+            axes.lines_y_axis,
+            axes,
+            x_label,
+            y_label,
+            right_y_label,
+        )
+        self.play(
+            ShowCreation(graph1, run_time=3),
+            ShowCreation(graph2, run_time=3),
+        )
+        self.wait(3)
+
+
+class CustomGraph_GDP3(CustomGraph_GDP2):
+    x_range = (0, 50, 5)
+    y_range = (0, 5000, 1000)
+    right_y_range = (0, 3500, 500)
+    # right_y_range = (0,80,10)
+    sl1 = 1
+    sl2 = 2
+    ndp = 0
+    title1 = "国内生产总值指数"
+    title2 = "人均国内生产总值指数"
+    path = r"E:\Dropbox\manim\AgManimgl\Ag\data_files\表格3：1978-2022年gdp指数"
+
+
+class CustomGraph_GDP4(Scene):
+    x_range = (0, 50, 5)
+    y_range = (0, 7000, 1000)
+    sl1 = 1
+    sl2 = 2
+    sl3 = 3
+    ndp = 0
+    path = r"E:\Dropbox\manim\AgManimgl\Ag\data_files\表格4：1978-2022三次产业构成"
+    text1 = "年份"
+    text2 = "产业指数"
+    AxesLabels = AxesLabelsTex_GDP
+
+    def construct(self):
+        axes = self.AxesLabels(
+            self.x_range,
+            self.y_range,
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 2,
+                "tip_config": {
+                    "width": 0.2,
+                    "length": 0.36,
+                },
+                "include_tip": False,
+            },
+            y_axis_config={
+                "decimal_number_config": {
+                    "num_decimal_places": self.ndp,
+                    "font_size": 35,
+                    "group_with_commas": False,
+                },
+            },
+            height=FRAME_HEIGHT - 3,
+            width=FRAME_WIDTH - 5,
+        )
+        axes.add_coordinate_labels().center().shift(0.068 * (UP + LEFT))
+        x_label = Text(self.text1, font="思源黑体").next_to(axes.x_axis.get_corner(UR), UP)
+        y_label = Text(self.text2, font="思源黑体").next_to(
+            axes.y_axis.get_corner(UR), RIGHT
+        )
+
+        # 加上全部的线
+        axes.lines_x_axis = VGroup()
+        axes.lines_y_axis = VGroup()
+        x_p = [x for x in np.arange(*axes.x_range)]
+        x_p.append(axes.x_axis.x_max)
+        y_p = [x for x in np.arange(*axes.y_range)]
+        y_p.append(axes.y_axis.x_max)
+        for x_point in list(zip(x_p, [axes.y_axis.x_max] * len(x_p), [0] * len(x_p))):
+            axes.lines_x_axis.add(axes.get_v_line(axes.c2p(*x_point), color=GREY_D))
+        for y_point in list(zip([axes.x_axis.x_max] * len(y_p), y_p, [0] * len(y_p))):
+            axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point), color=GREY_D))
+
+        coords = get_coords_from_csvdata(self.path)
+        transposed_coords = [list(x) for x in zip(*coords)]
+        # print(coords)
+        # print(transposed_coords[5][1:])
+        denominator = 1
+        coords1 = [
+            [float(x) - 1975, round(float(y) / denominator, 4)]
+            for (x, y) in zip(transposed_coords[0][1:], transposed_coords[self.sl1][1:])
+        ]
+        # print(coords1)
+        points1 = [axes.c2p(px, py) for px, py in coords1]
+        # Set graph
+        graph1 = DiscreteGraphFromSetPoints(points1, color=RED, stroke_width=10)
+
+        # Set dots
+        dots1 = VGroup(
+            *[
+                Dot(radius=0.06, fill_color=RED).move_to([px, py, pz])
+                for px, py, pz in points1
+            ]
+        )
+
+        coords2 = [
+            [float(x) - 1975, round(float(y) / denominator, 4)]
+            for (x, y) in zip(transposed_coords[0][1:], transposed_coords[self.sl2][1:])
+        ]
+        # print(coords1)
+        points2 = [axes.c2p(px, py) for px, py in coords2]
+        # Set graph
+        graph2 = DiscreteGraphFromSetPoints(points2, color=YELLOW_A, stroke_width=10)
+
+        # Set dots
+        dots2 = VGroup(
+            *[
+                Dot(radius=0.06, fill_color=YELLOW_E).move_to([px, py, pz])
+                for px, py, pz in points2
+            ]
+        )
+
+        coords3 = [
+            [float(x) - 1975, round(float(y) / denominator, 4)]
+            for (x, y) in zip(transposed_coords[0][1:], transposed_coords[self.sl3][1:])
+        ]
+        # print(coords1)
+        points3 = [axes.c2p(px, py) for px, py in coords3]
+        # Set graph
+        graph3 = DiscreteGraphFromSetPoints(points3, color=GREEN, stroke_width=10)
+
+        # Set dots
+        dots3 = VGroup(
+            *[
+                Dot(radius=0.06, fill_color=GREEN).move_to([px, py, pz])
+                for px, py, pz in points3
+            ]
+        )
+        bg = FullScreenRectangle(height=FRAME_HEIGHT * 1.5, fill_color="#222222")
+        self.add(bg)
+
+        self.add(axes.lines_x_axis, axes.lines_y_axis, axes, x_label, y_label)
+        # self.add(text1,text2)
+        self.wait()
+        self.play(
+            ShowCreation(graph1),
+            ShowCreation(dots1),
+            ShowCreation(graph2),
+            ShowCreation(dots2),
+            ShowCreation(graph3),
+            ShowCreation(dots3),
+            run_time=3,
+        )
+        self.wait()
+
+
+class CustomGraph_GDP5(CustomGraph_GDP4):
+    x_range = (0, 50, 5)
+    y_range = (0, 0.6, 0.1)
+    sl1 = 4
+    sl2 = 5
+    sl3 = 6
+    ndp = 0
+    path = r"E:\Dropbox\manim\AgManimgl\Ag\data_files\表格4：1978-2022三次产业构成"
+    text1 = "年份"
+    text2 = "产业增加值"
+    AxesLabels = AxesLabelsTex_GDP_100
 
 
 if __name__ == "__main__":
     from os import system
 
-    system("manimgl {} CustomGraph_GDP3_2 -o".format(__file__))
+    system("manimgl {} TexTextTransform1 -o".format(__file__))
