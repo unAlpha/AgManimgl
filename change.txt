@@ -45,3 +45,9 @@ fullName = '/System/Library/Frameworks/OpenGL.framework/OpenGL'
 
 命令
 manimgl example_scenes.py OpeningManimExample
+
+
+git
+
+git config --global user.email "pagzhong@gmail.com"
+git config --global user.name "unAlpha"
