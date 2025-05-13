@@ -1,6 +1,11 @@
 from random import sample
 from collections import Counter
 
+"""
+下方代码应用于:
+2023-02-19_诈金花中豹子和同花顺谁更难抓？100万次对局，结果令人震惊！
+"""
+
 
 def get_pk_lst(pls, pks):  # 发牌
     result = []
@@ -11,25 +16,33 @@ def get_pk_lst(pls, pks):  # 发牌
         result.append({"name": p, "poker": pk})
     return result
 
+
 def calculate(_score_map, pk_lst):  # 返回得分和牌型
     n_lst = list(map(lambda x: _score_map[x], pk_lst))  # 点数映射
     same_suit = len(set([pk[:2] for pk in pk_lst])) == 1  # 是否同花色
-    continuity = sorted(n_lst) == [i for i in range(min(n_lst), max(n_lst) + 1)] or set(n_lst) == {14, 2, 3}  # 是否连续
+    continuity = sorted(n_lst) == [i for i in range(min(n_lst), max(n_lst) + 1)] or set(
+        n_lst
+    ) == {
+        14,
+        2,
+        3,
+    }  # 是否连续
     check = len(set(n_lst))  # 重复情况
     if not same_suit and not continuity and check == 3:
         return sum(n_lst), "单张"
     if not same_suit and check == 2:
         w = [i for i in n_lst if n_lst.count(i) == 2][0]
         single = [i for i in n_lst if i != w][0]
-        return w*2*2 + single, "对子"
+        return w * 2 * 2 + single, "对子"
     if same_suit and not continuity:
-        return sum(n_lst)*9, "金花"
+        return sum(n_lst) * 9, "金花"
     if continuity and not same_suit:
-        return sum(n_lst)*81, "顺子"
+        return sum(n_lst) * 81, "顺子"
     if check == 1:
-        return sum(n_lst)*666, "豹子"
+        return sum(n_lst) * 666, "豹子"
     if continuity and same_suit:
-        return sum(n_lst)*999, "同花顺"
+        return sum(n_lst) * 999, "同花顺"
+
 
 def compare(_score_map, pk_grp, show_f=False):  # 比大小
     if show_f:
@@ -47,15 +60,17 @@ def compare(_score_map, pk_grp, show_f=False):  # 比大小
             p["score"], p["type"] = calculate(_score_map, p["poker"])
         return pk_grp
 
-def show(_score_map, _players):   # 开局
+
+def show(_score_map, _players):  # 开局
     pokers = list(_score_map.keys())
     poker_grp = get_pk_lst(_players, pokers)
     return compare(_score_map, poker_grp)
 
-def start_game(_score_map, _players, freq=1, count_f=1):   # 游戏和统计
+
+def start_game(_score_map, _players, freq=1, count_f=1):  # 游戏和统计
     type_lst = []
     players = len(_players)
-    if count_f==1:
+    if count_f == 1:
         print(f"当{players}玩游戏时：")
         for i in range(freq):
             grp = show(_score_map, _players)
@@ -65,29 +80,29 @@ def start_game(_score_map, _players, freq=1, count_f=1):   # 游戏和统计
         total = sum(c.values())
         for key, value in c.items():
             # 将当前值除以计算得到的数，然后更新字典中的值
-            c[key] = round(value/total, 4)
+            c[key] = round(value / total, 4)
         print(c)
         print("------------------------------------")
-            
-    if count_f==2 :
+
+    if count_f == 2:
         print(f"当{players}玩游戏时：")
-        c = {'单张': 0, '对子': 0, '金花': 0, '顺子': 0, '同花顺': 0, '豹子': 0}
+        c = {"单张": 0, "对子": 0, "金花": 0, "顺子": 0, "同花顺": 0, "豹子": 0}
         for i in range(freq):
             grp = show(_score_map, _players)
             type_lst = [t["type"] for t in grp]
             for key in c.keys():
                 if key in type_lst:
-                    c[key]+=1
+                    c[key] += 1
         print(c)
         total = freq
         for key, value in c.items():
             # 将当前值除以计算得到的数，然后更新字典中的值
-            c[key] = round(value/total, 4)
+            c[key] = round(value / total, 4)
         print(c)
         print("------------------------------------")
-        
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # 准备扑克牌
     suit = ["黑桃", "红心", "方块", "梅花"]
     num = [str(i) for i in range(2, 11)] + ["J", "Q", "K", "A"]
@@ -99,8 +114,8 @@ if __name__ == '__main__':
             count += 1
     # 从一人到多少人玩
     players = 6
-    for i in range(6,players+2):
+    for i in range(6, players + 2):
         # 玩家入场
         players = [f"p{i}" for i in range(1, i)]
         # 开始游戏
-        start_game(score_map, players, freq=1000000, count_f=2)
+        start_game(score_map, players, freq=10000, count_f=2)

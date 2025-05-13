@@ -1640,4 +1640,5 @@ class TexTextTransform4(Scene):
 if __name__ == "__main__":
     from os import system
 
-    system("manimgl {} TexTextTransform4 -o -r 1080x1920".format(__file__))
+    # system("manimgl {} Picture1Show -o -r 1080x1920".format(__file__))
+    system("manimgl {} Picture1Show -o".format(__file__))

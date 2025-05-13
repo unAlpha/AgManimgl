@@ -2,12 +2,12 @@ from manimlib import *
 from moviepy.editor import *
 from os import system
 
-video_path = r"Z:\LiFiles\2024年\1月份\1-1+1-1\交付"
-media_path = r"E:\Dropbox\manim\AgManimgl\media\videos"
-video_name = "1+1-1+1-tt"
-Word = "1-1+1-1+1-1…=？答案让你意想不到！"
+video_path = r"Z:\LiFiles\2023年\6月份\暗物质\交付"
+media_path = r"Z:\LiFiles\2023年\6月份\暗物质\交付\抖音切割"
+video_name = "特斯拉-tt2"
+Word = "超越时代的男人：尼古拉特斯拉的传奇人生"
 GeneratorFalse = False
-num_clip = 2
+num_clip = 6
 clip_times = [
     # ["01:00:00:00","01:00:00:00"],
     # ["01:00:00:00","01:00:00:00"],
@@ -28,7 +28,7 @@ class video_text0(Scene):
     def construct(self):
         text1 = Text(
             txt[self.i][0],
-            font_size=40,
+            font_size=32,
             color=RED,
             # font ='Alibaba PuHuiTi 2.0 115 Black',
             font="阿里巴巴普惠体 2.0",
@@ -36,7 +36,7 @@ class video_text0(Scene):
         )
         text2 = Text(
             txt[self.i][1],
-            font_size=40,
+            font_size=32,
             color=WHITE,
             # font ='Alibaba PuHuiTi 2.0 75 SemiBold',
             font="阿里巴巴普惠体 2.0",
@@ -244,6 +244,6 @@ if __name__ == "__main__":
             os.path.join(media_path, f"{video_name}_overlay_{i+1}.mov")
         ):
             system(
-                f"manimgl {__file__} video_text{i} -wt --fps 50 --file_name {video_name}_overlay_{i+1}"
+                f"manimgl {__file__} video_text{i} -wt --fps 50 --file_name {video_name}_overlay_{i+1} --video_dir {media_path}"
             )
     ffmpeg_video_clip()

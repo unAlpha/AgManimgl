@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from manimlib import *
 import numpy.linalg as LA
+from scipy.spatial import ConvexHull
 
 
 def get_coords_from_csvdata(file_name):
@@ -91,6 +92,12 @@ class SquareLocTxt:
                 color=BLACK,
             )
             self.grid[loc].txt.move_to(self.grid[loc])
+
+
+"""
+下方代码应用于:
+2021年3月10日_人脸识别啥原理？人工智能（二）卷积神经网络
+"""
 
 
 class ConvolutionPic(Scene):
@@ -271,7 +278,7 @@ class ConvolutionPic(Scene):
                 .move_to(sq3_3.sq_Vg)
             )
 
-        texj = Text("卷积核", size=0.42, color=RED).next_to(
+        texj = Text("卷积核", size=0.42, color=RED, font="SimSun").next_to(
             sq3_3.sq_Vg, UP, buff=MED_SMALL_BUFF
         )
         self.play(FadeIn(sq7_7.grid, scale=0.5))
@@ -419,7 +426,7 @@ class ConvolutionPic(Scene):
             fill_color=WHITE,
             thickness=0.1,
         )
-        tex1 = Text("池化", size=0.6).next_to(arrow, UP, buff=SMALL_BUFF)
+        tex1 = Text("池化", size=0.6, font="SimSun").next_to(arrow, UP, buff=SMALL_BUFF)
 
         self.play(ShowCreation(arrow), FadeIn(tex1, scale=0.5), Write(sq3.sq_Vg))
         self.wait()
@@ -491,6 +498,12 @@ class ConvolutionPic(Scene):
         self.play(Write(tex1), Write(axes), Write(step_graph), ShowCreation(fx_graph))
         self.play(FadeIn(fx_sq3.sq_Vg, shift=RIGHT))
         self.wait(3)
+
+
+"""
+下方代码应用于:
+2021年4月4日_永远不倒的里拉斜塔：一摞书一个比一个凸出，最多凸多少？
+"""
 
 
 class LiSa(Scene):
@@ -671,7 +684,7 @@ class PrimalityTest(Scene):
         ).add_updater(lambda v: v.set_value(a.get_value()))
         aTVg = VGroup(aText, aTxt).arrange(RIGHT).shift(UP * 2.5)
 
-        P = ValueTracker(13)
+        P = ValueTracker(8)
         PTxt = DecimalNumber(
             P.get_value(),
             font_size=fz,
@@ -681,7 +694,9 @@ class PrimalityTest(Scene):
         PTVg = (
             VGroup(PText, PTxt).arrange(RIGHT).next_to(aTVg, DOWN, buff=MED_LARGE_BUFF)
         )
-        NumX = Text("（质数）", font="SimSun", color=RED, font_size=40).next_to(PTVg, RIGHT)
+        NumX = Text("（合数）", font="SimSun", color=RED, font_size=40).next_to(
+            PTVg, RIGHT
+        )
         aPText.next_to(PTVg, DOWN, buff=LARGE_BUFF)
 
         pwText = DecimalNumber(
@@ -730,6 +745,12 @@ class PrimalityTest(Scene):
             self.wait(0.5)
             a.set_value(val)
         self.wait()
+
+
+"""
+下方代码应用于:
+2022年4月5日_“马”能不重复的走遍整个象棋盘吗？图论之骑士巡游问题
+"""
 
 
 class CChess(Scene):
@@ -863,6 +884,12 @@ class PieChart(VMobject):
         return legends
 
 
+"""
+下方代码应用于:
+2022年6月15日_交养老保险值不值？退休后你能拿多少养老金？
+"""
+
+
 class PieChartScene(Scene):
     def construct(self):
         pc_data = [
@@ -899,6 +926,12 @@ class PieChartScene(Scene):
                 run_time=2,
             )
         self.wait()
+
+
+"""
+下方代码应用于:
+2022年6月29日_雨天刹车停不住!距离超过300米!制动距离怎么算？学好物理保平安!
+"""
 
 
 class TexTextTransform1(Scene):
@@ -1066,6 +1099,12 @@ class Graph1(Scene):
         self.wait()
 
 
+"""
+下方代码应用于:
+2022年8月30日_四川为什么会停电？中国第一水电大省，如何解决电力调配难题？
+"""
+
+
 class PieChartElec1(Scene):
     def construct(self):
         pc_data = [
@@ -1116,7 +1155,7 @@ class PieChartElec2(Scene):
         pie_chart = PieChart()
         pc_arcs = pie_chart.craet_arcs(pc_data)
         pc_legends = pie_chart.create_legends(pc_data)
-        VGroup(pc_arcs, pc_legends).arrange(RIGHT, buff=LARGE_BUFF * 1.5)
+        VGroup(pc_arcs, pc_legends).scale(0.9).arrange(RIGHT, buff=LARGE_BUFF * 1.5)
 
         self.play(
             LaggedStartMap(ShowCreation, pc_arcs, lag_ratio=1),
@@ -1138,6 +1177,12 @@ class PieChartElec2(Scene):
                 run_time=2,
             )
         self.wait()
+
+
+"""
+下方代码应用于:
+2022年10月5日_一个三角形内角和180°，证明所有三角形内角和都是180°，这对吗
+"""
 
 
 class TexTextTransform4(Scene):
@@ -1226,6 +1271,12 @@ class Graph2(Scene):
         self.wait()
 
 
+"""
+下方代码应用于:
+2022年11月8日_传奇数学家张益唐和孪生素数猜：潦倒半生，58岁迎来人生转折
+"""
+
+
 class Formula1(Scene):
     def construct(self):
         text = Text(
@@ -1252,7 +1303,11 @@ class Formula1(Scene):
 class Formula2(Scene):
     def construct(self):
         text = Text(
-            "哈代-李特伍德猜想", font_size=68, font="思源黑体", gradient=[RED, YELLOW], weight=BOLD
+            "哈代-李特伍德猜想",
+            font_size=68,
+            font="思源黑体",
+            gradient=[RED, YELLOW],
+            weight=BOLD,
         )
         tex1 = TexText(
             "$$\\pi_{2}(x) \\sim 2 C_{2} \\int_{2}^{x} \\frac{d t}{\\ln ^{2} t} \\sim 2 C_{2} \\frac{x}{\\ln ^{2}(x)}$$"
@@ -1291,12 +1346,21 @@ class CustomGraph4(Scene):
         )
         axes.add_coordinate_labels()
         axes.scale(0.9618)
-        x_label = Text("自然数N", font="思源黑体").next_to(axes.x_axis.get_corner(UR), UP)
-        y_label = Text("对数", font="思源黑体").next_to(axes.y_axis.get_corner(UR), RIGHT)
+        x_label = Text("自然数N", font="思源黑体").next_to(
+            axes.x_axis.get_corner(UR), UP
+        )
+        y_label = Text("对数", font="思源黑体").next_to(
+            axes.y_axis.get_corner(UR), RIGHT
+        )
         self.add(axes, x_label, y_label)
         # Get coords
         text1 = Text("小于自然数N的孪生素数对(白线)", font="思源黑体", font_size=36)
-        text2 = Text("哈-李猜想估计出的孪生素数对(红线)", font="思源黑体", font_size=36, color=RED)
+        text2 = Text(
+            "哈-李猜想估计出的孪生素数对(红线)",
+            font="思源黑体",
+            font_size=36,
+            color=RED,
+        )
         text = VGroup(text1, text2).arrange(DOWN, aligned_edge=LEFT).shift(RIGHT)
         coords1 = get_coords_from_csv(r"Ag\data_files\Littlewood_conjecture1")
         coords2 = get_coords_from_csv(r"Ag\data_files\Littlewood_conjecture2")
@@ -1358,6 +1422,12 @@ class TexTextTransform4(Scene):
         self.wait()
 
 
+"""
+下方代码应用于:
+2022年11月25日_德国怎么输给日本了？弱队如何战胜强队？2022卡塔尔世界杯（二）
+"""
+
+
 class CustomGraph5(Scene):
     def construct(self):
         axes = Axes(
@@ -1385,8 +1455,12 @@ class CustomGraph5(Scene):
 
         axes.add_coordinate_labels()
         axes.scale(0.86)
-        x_label = Text("进球数", font="思源黑体").next_to(axes.x_axis.get_corner(UR), UP)
-        y_label = Text("概率", font="思源黑体").next_to(axes.y_axis.get_corner(UR), RIGHT)
+        x_label = Text("进球数", font="思源黑体").next_to(
+            axes.x_axis.get_corner(UR), UP
+        )
+        y_label = Text("概率", font="思源黑体").next_to(
+            axes.y_axis.get_corner(UR), RIGHT
+        )
 
         # Get coords
         title = Text("奇数个进球情况", font="思源黑体", font_size=60)
@@ -1495,8 +1569,12 @@ class CustomGraph6(Scene):
         axes.add_coordinate_labels()
         axes.scale(0.86)
 
-        x_label = Text("进球数", font="思源黑体").next_to(axes.x_axis.get_corner(UR), UP)
-        y_label = Text("概率", font="思源黑体").next_to(axes.y_axis.get_corner(UR), RIGHT)
+        x_label = Text("进球数", font="思源黑体").next_to(
+            axes.x_axis.get_corner(UR), UP
+        )
+        y_label = Text("概率", font="思源黑体").next_to(
+            axes.y_axis.get_corner(UR), RIGHT
+        )
 
         # Get coords
         title = Text("偶数个进球情况", font="思源黑体", font_size=60)
@@ -1653,14 +1731,20 @@ class Property1(Scene):
         list_110 = [1]
         obj_110 = gen_imgs("1:0", list_110, 1, 1, tex="P=30\\%")
         title1 = Text(
-            "总进球数是1个 日本获胜的概率", font="思源黑体", font_size=50, t2c={"1": RED}
+            "总进球数是1个 日本获胜的概率",
+            font="思源黑体",
+            font_size=50,
+            t2c={"1": RED},
         ).to_edge(UP)
 
         list_330 = [1, 1, 1]
         obj_330 = gen_imgs("3:0", list_330, 1, 3, tex="P_1=(30\\%)^3=2.7\\%")
 
         title3 = Text(
-            "总进球数是3个 日本获胜的概率", font="思源黑体", font_size=50, t2c={"3": RED}
+            "总进球数是3个 日本获胜的概率",
+            font="思源黑体",
+            font_size=50,
+            t2c={"3": RED},
         ).to_edge(UP)
 
         list_321 = [
@@ -1712,7 +1796,10 @@ class Property1(Scene):
         self.remove(*obj_330, *obj_321, P3_tex)
 
         title5 = Text(
-            "总进球数是5个 日本获胜的概率", font="思源黑体", font_size=50, t2c={"5": RED}
+            "总进球数是5个 日本获胜的概率",
+            font="思源黑体",
+            font_size=50,
+            t2c={"5": RED},
         ).to_edge(UP)
 
         self.play(ReplacementTransform(title3, title5))
@@ -2156,6 +2243,12 @@ class AxesLabelsTex(Axes):
         return self
 
 
+"""
+下方代码应用于:
+2023年2月19日_诈金花中豹子和同花顺谁更难抓？100万次对局，结果令人震惊！
+"""
+
+
 class CustomGraph10(Scene):
     x_range = (0, 18, 1)
     y_range = (0, 0.045, 0.005)
@@ -2187,7 +2280,9 @@ class CustomGraph10(Scene):
         )
         axes.add_coordinate_labels().center().shift(0.068 * (UP + LEFT))
         x_label = Text("人数", font="思源黑体").next_to(axes.x_axis.get_corner(UR), UP)
-        y_label = Text("概率", font="思源黑体").next_to(axes.y_axis.get_corner(UR), RIGHT)
+        y_label = Text("概率", font="思源黑体").next_to(
+            axes.y_axis.get_corner(UR), RIGHT
+        )
 
         # 加上全部的线
         axes.lines_x_axis = VGroup()
@@ -2223,7 +2318,10 @@ class CustomGraph10(Scene):
         )
 
         text1 = Text(
-            transposed_coords[self.sl1][0], font="思源黑体", font_size=36, color=YELLOW_E
+            transposed_coords[self.sl1][0],
+            font="思源黑体",
+            font_size=36,
+            color=YELLOW_E,
         )
         text2 = Text(
             transposed_coords[self.sl2][0], font="思源黑体", font_size=36, color=RED_E
@@ -2384,6 +2482,12 @@ class AxesLabelsTex_US(Axes):
         return self
 
 
+"""
+下方代码应用于:
+2023年4月1日_硅谷银行为何倒闭？这和全球疫情、中美摩擦、俄乌战争都有关… 
+"""
+
+
 class US_Interest_Rate(Scene):
     def construct(self):
         axes = AxesLabelsTex_US(
@@ -2406,7 +2510,9 @@ class US_Interest_Rate(Scene):
         )
         axes.add_coordinate_labels().center().shift(0.068 * (UP + LEFT))
         x_label = Text("月份", font="思源黑体").next_to(axes.x_axis.get_corner(UR), UP)
-        y_label = Text("利率", font="思源黑体").next_to(axes.y_axis.get_corner(UR), RIGHT)
+        y_label = Text("利率", font="思源黑体").next_to(
+            axes.y_axis.get_corner(UR), RIGHT
+        )
 
         # 加上全部的线
         axes.lines_x_axis = VGroup()
@@ -2488,9 +2594,9 @@ class US_Rescue(Scene):
         pie_chart = PieChart(y_buff=MED_LARGE_BUFF)
         pc_arcs = pie_chart.craet_arcs(pc_data)
         pc_legends = pie_chart.create_legends(pc_data).scale(0.5)
-        VGroup(pc_arcs, pc_legends).arrange(RIGHT, buff=LARGE_BUFF * 1.1).shift(
-            RIGHT * 0.15
-        )
+        VGroup(pc_arcs, pc_legends).scale(0.9).arrange(
+            RIGHT, buff=LARGE_BUFF * 1.1
+        ).shift(RIGHT * 0.15)
         fill_color = ["#032348", "#46246d", "#31580a", "#852211"]
         bg = FullScreenRectangle(fill_color=fill_color)
         self.add(bg)
@@ -2540,6 +2646,12 @@ class TaylorFormula(Scene):
         self.play(FlashAround(tex[0]))
         self.play(LaggedStartMap(FadeIn, tex[1:], shift=UP))
         self.wait()
+
+
+"""
+下方代码应用于:
+2023年4月20日_发生火灾如何自救？李永乐老师教你火场逃生秘诀
+"""
 
 
 class Fire1(Scene):
@@ -2642,10 +2754,20 @@ class Fire6(Fire1):
     al = LEFT
 
 
+"""
+下方代码应用于:
+2023年5月16日_年化利率到底怎么算？小心掉进贷款利率陷阱！
+"""
+
+
 class Formula3(Scene):
     def construct(self):
         text = Text(
-            "计算公式", font_size=68, font="思源黑体", gradient=[RED, YELLOW], weight=BOLD
+            "计算公式",
+            font_size=68,
+            font="思源黑体",
+            gradient=[RED, YELLOW],
+            weight=BOLD,
         )
         tex1 = TexText(
             r"""
@@ -2675,6 +2797,12 @@ class Formula3(Scene):
             ShowCreation(tex),
         )
         self.wait()
+
+
+"""
+下方代码应用于:
+2023年6月3日_超越时代的男人：尼古拉特斯拉的传奇人生
+"""
 
 
 class TeslaFormula(Scene):
@@ -2725,6 +2853,12 @@ class TeslaFormula(Scene):
 
         self.play(TransformMatchingTex(tex1, tex11), TransformMatchingTex(tex2, tex22))
         self.wait(3)
+
+
+"""
+下方代码应用于:
+2023年7月5日_中国最早的考试是什么时候？科举制度的创立与繁荣
+"""
 
 
 class Txt1(Scene):
@@ -2781,6 +2915,12 @@ class AxesLabelsTex100(Axes):
         return self
 
 
+"""
+下方代码应用于:
+2023年8月10日_高利贷利滚利，多久会翻倍？你必须知道的“72法则”
+"""
+
+
 class CompoundInterest(Scene):
     x_range = (0, 20, 2)
     y_range = (0, 35000, 5000)
@@ -2810,8 +2950,12 @@ class CompoundInterest(Scene):
             width=FRAME_WIDTH - 3,
         )
         axes.add_coordinate_labels().center().shift(0.068 * (UP + LEFT))
-        x_label = Text("复利周期/年", font="思源黑体").next_to(axes.x_axis.get_corner(UR), UP)
-        y_label = Text("Fv/元", font="思源黑体").next_to(axes.y_axis.get_corner(UR), RIGHT)
+        x_label = Text("复利周期/年", font="思源黑体").next_to(
+            axes.x_axis.get_corner(UR), UP
+        )
+        y_label = Text("Fv/元", font="思源黑体").next_to(
+            axes.y_axis.get_corner(UR), RIGHT
+        )
 
         # 加上全部的线
         axes.lines_x_axis = VGroup()
@@ -2825,7 +2969,9 @@ class CompoundInterest(Scene):
         for y_point in list(zip([axes.x_axis.x_max] * len(y_p), y_p, [0] * len(y_p))):
             axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point), color=GREY_D))
 
-        coords = get_coords_from_csvdata(r"/Users/pengyinzhong/Downloads/72法则/文档/本息总额")
+        coords = get_coords_from_csvdata(
+            r"Z:\LiFiles\2023年\8月份\72法则\文档\本息总额"
+        )
         transposed_coords = [list(x) for x in zip(*coords)]
         # print(coords)
         # print(transposed_coords[5][1:])
@@ -2869,6 +3015,12 @@ class CompoundInterest(Scene):
 
         self.play(ShowCreation(graph1, run_time=3), FadeIn(text1, scale=3))
         self.wait(3)
+
+
+"""
+下方代码应用于:
+2023年8月15日_葫芦娃救爷爷为啥一个一个上？童年最大疑惑被李永乐老师解开了！
+"""
 
 
 class Cucurbitaceae(Scene):
@@ -2919,7 +3071,9 @@ class Cucurbitaceae(Scene):
         for y_point in list(zip([axes.x_axis.x_max] * len(y_p), y_p, [0] * len(y_p))):
             axes.lines_y_axis.add(axes.get_h_line(axes.c2p(*y_point), color="#444444"))
 
-        coords = get_coords_from_csvdata(r"Z:\LiFiles\2023年\8月份\葫芦娃救爷爷\葫芦娃救爷爷")
+        coords = get_coords_from_csvdata(
+            r"Z:\LiFiles\2023年\8月份\葫芦娃救爷爷\葫芦娃救爷爷"
+        )
         transposed_coords = [list(x) for x in zip(*coords)]
         # print(coords)
         # print(transposed_coords[5][1:])
@@ -3019,7 +3173,9 @@ class Cucurbitaceae(Scene):
         )
         self.wait(3)
 
-        coords = get_coords_from_csvdata(r"Z:\LiFiles\2023年\8月份\葫芦娃救爷爷\葫芦娃救爷爷-赚")
+        coords = get_coords_from_csvdata(
+            r"Z:\LiFiles\2023年\8月份\葫芦娃救爷爷\葫芦娃救爷爷-赚"
+        )
 
         def convert_to_format(single_list):
             strategy_number = single_list[0]
@@ -3161,6 +3317,12 @@ class YYAxes(Axes):
         return self.right_y_axis
 
 
+"""
+下方代码应用于:
+2023年8月10日_高利贷利滚利，多久会翻倍？你必须知道的“72法则” 
+"""
+
+
 class Rule72(Scene):
     x_range = (0, 0.2, 0.02)
     y_range = (0, 80, 10)
@@ -3238,12 +3400,18 @@ class Rule72(Scene):
             coor_mask=np.array([1, 0, 0]),
         )
         axes.add_coordinate_labels()
-        x_label = Text("利率", font="思源黑体").next_to(axes.x_axis.get_corner(UR), RIGHT)
-        y_label = Text("翻倍周期", font="思源黑体").next_to(axes.y_axis.get_corner(UR), RIGHT)
+        x_label = Text("利率", font="思源黑体").next_to(
+            axes.x_axis.get_corner(UR), RIGHT
+        )
+        y_label = Text("翻倍周期", font="思源黑体").next_to(
+            axes.y_axis.get_corner(UR), RIGHT
+        )
         right_y_label = Text("误差", font="思源黑体").next_to(
             axes.right_y_axis.get_corner(UP), UP
         )
-        text1 = Text("不同利率时本息翻倍周期数", font="思源黑体", font_size=50, color=RED_A)
+        text1 = Text(
+            "不同利率时本息翻倍周期数", font="思源黑体", font_size=50, color=RED_A
+        )
 
         legend = (
             VGroup(
@@ -3264,7 +3432,9 @@ class Rule72(Scene):
                         stroke_width=4,
                     ),
                     TexText(
-                        "$$\\text{七二法则：}$$", "$$N = \\frac{72}{100r}$$", font_size=24
+                        "$$\\text{七二法则：}$$",
+                        "$$N = \\frac{72}{100r}$$",
+                        font_size=24,
                     ).arrange(RIGHT),
                 ).arrange(RIGHT, buff=0.2),
                 VGroup(
@@ -3341,7 +3511,10 @@ class Rule72(Scene):
         self.wait(3)
 
 
-from scipy.spatial import ConvexHull
+"""
+下方代码应用于:
+2023年9月13日_一只猫在四面八方都是镜子的房间里，能看到多少个自己？
+"""
 
 
 class Connect3DPoints(ThreeDScene):
@@ -3494,6 +3667,12 @@ class Connect3DPoints(ThreeDScene):
         self.wait(10)
 
 
+"""
+下方代码应用于:
+2024年1月18日_1978-2022中国的社会财富增长了多少？用实际GDP衡量一下 2
+"""
+
+
 class AxesLabelsTex_GDP_100(Axes):
     def add_coordinate_labels(self, **kwargs):
         x_numbers = self.get_x_axis().get_tick_range()
@@ -3557,7 +3736,9 @@ class CustomGraph_GDP1(Scene):
             width=FRAME_WIDTH - 5,
         )
         axes.add_coordinate_labels().center().shift(0.068 * (UP + LEFT))
-        x_label = Text(self.text1, font="思源黑体").next_to(axes.x_axis.get_corner(UR), UP)
+        x_label = Text(self.text1, font="思源黑体").next_to(
+            axes.x_axis.get_corner(UR), UP
+        )
         y_label = Text(self.text2, font="思源黑体").next_to(
             axes.y_axis.get_corner(UR), RIGHT
         )
@@ -3912,7 +4093,9 @@ class CustomGraph_GDP2(Scene):
         )
         axes.add_coordinate_labels()
         x_label = (
-            Text("年份", font="思源黑体").next_to(axes.x_axis, DOWN, buff=0.5).scale(0.5)
+            Text("年份", font="思源黑体")
+            .next_to(axes.x_axis, DOWN, buff=0.5)
+            .scale(0.5)
         )
         y_label = (
             Text(self.title1, font="思源黑体", color=YELLOW_A)
@@ -3993,7 +4176,9 @@ class CustomGraph_GDP4(Scene):
             width=FRAME_WIDTH - 5,
         )
         axes.add_coordinate_labels().center().shift(0.068 * (UP + LEFT))
-        x_label = Text(self.text1, font="思源黑体").next_to(axes.x_axis.get_corner(UR), UP)
+        x_label = Text(self.text1, font="思源黑体").next_to(
+            axes.x_axis.get_corner(UR), UP
+        )
         y_label = Text(self.text2, font="思源黑体").next_to(
             axes.y_axis.get_corner(UR), RIGHT
         )
@@ -4099,4 +4284,9 @@ class CustomGraph_GDP5(CustomGraph_GDP4):
 if __name__ == "__main__":
     from os import system
 
-    system("manimgl {} TexTextTransform1 -o".format(__file__))
+    # system("manimgl {} TexTextTransform1 -o".format(__file__))
+    # system("manimgl {} CChess -o".format(__file__))
+    # system("manimgl {} PrimalityTest -o".format(__file__))
+    # system("manimgl {} -a -w".format(__file__))
+    system("manimgl {} ConvolutionPic -o".format(__file__))
+    # system("manimgl {} PieChartElec1 -r 2560x1440  -o".format(__file__))

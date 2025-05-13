@@ -27,16 +27,24 @@ def get_coords_from_csvdata(file_name):
     return coords
 
 
+"""
+下方代码应用于:
+2022-06-15_交养老保险值不值？退休后你能拿多少养老金？
+"""
+
+
 class Table_mol0(Scene):
     CONFIG = {
         "camera_config": {"background_color": BLACK},
     }
 
     def construct(self):
-        title = Text("城镇企业职工基本养老保险个人账户养老金计发月数表", font_size=30)
-        data = get_coords_from_csvdata(
-            r"/Users/pengyinzhong/Downloads/6月份/养老金/素材/月数表"
+        title = Text(
+            "城镇企业职工基本养老保险个人账户养老金计发月数表",
+            font="Source Han Sans CN",
+            font_size=30,
         )
+        data = get_coords_from_csvdata(r"Z:\LiFiles\2022年\6月份\养老金\素材\月数表")
         dataArray = np.array(data)
         row = dataArray.shape[0]
         column = dataArray.shape[1]
@@ -45,7 +53,10 @@ class Table_mol0(Scene):
         dataTxtBackground = VGroup()
         for i in range(row):
             for j in range(column):
-                target_ij = Text(str(dataArray[i, j]))
+                target_ij = Text(
+                    str(dataArray[i, j]),
+                    font="Source Han Sans CN",
+                )
                 if i == 0:
                     target_ij.scale(0.5)
                     target_ij.set_color(RED)
@@ -95,9 +106,9 @@ class Table_mol1(Scene):
     }
 
     def construct(self):
-        title = Text("缴费与领取待遇参照表", font_size=30)
+        title = Text("缴费与领取待遇参照表", font="Source Han Sans CN", font_size=30)
         data = get_coords_from_csvdata(
-            r"/Users/pengyinzhong/Downloads/6月份/养老金/素材/缴费与领取待遇参照表"
+            r"Z:\LiFiles\2022年\6月份\养老金\素材\缴费与领取待遇参照表"
         )
         dataArray = np.array(data)
         row = dataArray.shape[0]
@@ -152,6 +163,12 @@ class Table_mol1(Scene):
         )
 
         self.wait(1)
+
+
+"""
+下方代码应用于:
+2021-12-14_核酸检测准不准？数学告诉你答案
+"""
 
 
 # 有替换部分的表格
@@ -372,6 +389,12 @@ class Table2(Scene):
         self.wait()
 
 
+"""
+下方代码应用于:
+2022-07-28_漫谈相对论(一)高考只得了6分！爱因斯坦为啥成了最伟大的科学家？
+"""
+
+
 class Table_alluse1(Scene):
     CONFIG = {
         "camera_config": {"background_color": BLACK},
@@ -380,7 +403,7 @@ class Table_alluse1(Scene):
     def construct(self):
         title = Text("爱因斯坦奇迹年", font_size=30)
         data = get_coords_from_csvdata(
-            r"/Users/pengyinzhong/Downloads/6月份/相对论/1/素材/发表日期"
+            r"Z:\LiFiles\2022年\6月份\相对论\1\素材\发表日期"
         )
         dataArray = np.array(data)
         row = dataArray.shape[0]
@@ -437,6 +460,12 @@ class Table_alluse1(Scene):
         )
 
         self.wait(1)
+
+
+"""
+下方代码应用于:
+2022-06-29_雨天刹车停不住!距离超过300米!制动距离怎么算？学好物理保平安! 
+"""
 
 
 class Table_alluse2(Scene):
@@ -647,6 +676,12 @@ class Table_use1(Scene):
         )
 
 
+"""
+下方代码应用于:
+2022-11-25_德国怎么输给日本了？弱队如何战胜强队？2022卡塔尔世界杯（二） 
+"""
+
+
 class Table_use2(Scene):
     def construct(self):
         ble = Table(
@@ -669,6 +704,12 @@ class Table_use2(Scene):
             LaggedStartMap(FadeIn, ble.tex_column[1:], scale=0.9, lag_ratio=0.1),
             run_time=3,
         )
+
+
+"""
+下方代码应用于:
+2022-12-12_奥密克戎到底有多毒？抗原检测啥原理？
+"""
 
 
 class Table_use3(Scene):
@@ -857,6 +898,12 @@ class Table_use6(Scene):
             )
             self.wait()
         self.wait(2)
+
+
+"""
+下方代码应用于:
+2022-12-17_足球彩票怎么买才能赚钱？看完这个视频再下注！
+"""
 
 
 class Fifa1(Scene):
@@ -1050,6 +1097,12 @@ class Fifa7(Fifa1):
     ]
 
 
+"""
+下方代码应用于:
+2023-02-27_ChatGPT参加北京高考，能考上哪个大学？你能比它分数更高吗？
+"""
+
+
 class GPT_p(Scene):
     title = "GPT高考物理测试汇总"
     path = r"./Ag/data_files/GPT物理测试"
@@ -1177,7 +1230,8 @@ class MidPrompt(Scene):
         self.wait()
 
 
-class ShotPrompt(Scene):
+# class ShotPrompt(Scene):
+class ShotPrompt:
     title = "摄影镜头"
     path = r"Z:\PengVideo\短视频\4月份\1_真实照片\视角"
 
@@ -1209,6 +1263,12 @@ class ShotPrompt(Scene):
             run_time=1,
         )
         self.wait()
+
+
+"""
+下方代码应用于:
+2023-04-09_揭秘百家乐：为啥不管多少钱都会输得精光？赌客能从赌场中赢钱？ 
+"""
 
 
 class Baccarat1(Scene):
@@ -1380,6 +1440,12 @@ class Baccarat2(Fifa1):
         self.wait(2)
 
 
+"""
+下方代码应用于:
+2023-04-20_发生火灾如何自救？李永乐老师教你火场逃生秘诀 10
+"""
+
+
 class Question1(Scene):
     title = "你能够回答下面这些问题吗"
     path = r"Z:\LiFiles\2023年\4月份\火灾\问题"
@@ -1435,7 +1501,8 @@ class Question1(Scene):
                 self.wait(2)
 
 
-class Question2(Scene):
+# class Question2(Scene):
+class Question2:
     title = "ChatGPT4 缺点与问题"
     path = r"Z:\PengVideo\短视频\6月份\AI高考\ChatGPT卷\GPT缺点"
 
@@ -1483,6 +1550,12 @@ class Question2(Scene):
                 self.wait(2)
 
 
+"""
+下方代码应用于:
+2023-07-05_中国最早的考试是什么时候？科举制度的创立与繁荣
+"""
+
+
 class Table_use7(Scene):
     def construct(self):
         ble = Table(
@@ -1511,6 +1584,12 @@ class Table_use7(Scene):
             LaggedStartMap(FadeIn, ble.tex_column[1:], scale=0.9, lag_ratio=0.1),
             run_time=3,
         )
+
+
+"""
+下方代码应用于:
+2023-08-15_葫芦娃救爷爷为啥一个一个上？童年最大疑惑被李永乐老师解开了！
+"""
 
 
 class Table_use8(Scene):
@@ -1550,7 +1629,8 @@ class Table_use8(Scene):
         self.wait(3)
 
 
-class Table_use9(Scene):
+# class Table_use9(Scene):
+class Table_use9:
     def construct(self):
         ble = Table(
             "Kimi Chat Vs ChatGPT",
@@ -1600,7 +1680,8 @@ class Table_use9(Scene):
         self.wait(3)
 
 
-class Table_use10(Scene):
+# class Table_use10(Scene):
+class Table_use10:
     def construct(self):
         ble = Table(
             "美国失业率底部到顶部周期汇总",
@@ -1635,4 +1716,6 @@ class Table_use10(Scene):
 if __name__ == "__main__":
     from os import system
 
-    system("manimgl {} Table_use10 -o".format(__file__))
+    # system("manimgl {} Table_use8 -o".format(__file__))
+    system("manimgl {} Table_mol0 -os".format(__file__))
+    # system("manimgl {} -a -ws".format(__file__))

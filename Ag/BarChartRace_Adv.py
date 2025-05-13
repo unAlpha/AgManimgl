@@ -49,11 +49,10 @@ class TheBar():
         
     def the_bar(self, length):
         return Rectangle( 
-        # return RRectangle( 
                 height = self.bar_height,
                 width = length,
                 fill_color = self.bar_color,
-                fill_opciaty = 1,
+                fill_opacity = 1,
                 stroke_width = self.bar_stroke_width,
             )
 
