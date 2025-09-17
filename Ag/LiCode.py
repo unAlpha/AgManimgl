@@ -4284,9 +4284,9 @@ class CustomGraph_GDP5(CustomGraph_GDP4):
 if __name__ == "__main__":
     from os import system
 
-    system("manimgl {} TeslaFormula -o".format(__file__))
+    # system("manimgl {} TexTextTransform1 -o".format(__file__))
     # system("manimgl {} CChess -o".format(__file__))
     # system("manimgl {} PrimalityTest -o".format(__file__))
     # system("manimgl {} -a -w".format(__file__))
-    # system("manimgl {} ConvolutionPic -o".format(__file__))
+    system("manimgl {} ConvolutionPic -o".format(__file__))
     # system("manimgl {} PieChartElec1 -r 2560x1440  -o".format(__file__))

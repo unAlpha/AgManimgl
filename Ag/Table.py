@@ -1507,8 +1507,13 @@ class Question1(Scene):
                 self.wait(2)
 
 
+<<<<<<< HEAD
 class Question2(Scene):
 #class Question2:
+=======
+# class Question2(Scene):
+class Question2:
+>>>>>>> 9b3e0d0e0404689b61a279a4b9f444ffebec36eb
     title = "ChatGPT4 缺点与问题"
     path = r"Z:\PengVideo\短视频\6月份\AI高考\ChatGPT卷\GPT缺点"
 
@@ -1758,7 +1763,6 @@ class 火星地比地球(Scene):
 if __name__ == "__main__":
     from os import system
 
-    # system("manimgl {} Table_use6 -o".format(__file__))
-    # system("manimgl {} Table_mol0 -os".format(__file__))
+    # system("manimgl {} Table_use8 -o".format(__file__))
+    system("manimgl {} Table_mol0 -os".format(__file__))
     # system("manimgl {} -a -ws".format(__file__))
-    system("manimgl {} 火星地比地球 -o".format(__file__))
