@@ -1,10 +1,17 @@
-from manim_imports_ext import *
+# from manim_imports_ext import *
+from manimlib import *
 
 if __name__ == "__main__":
     from os import system
+
     # system("manimgl {} CenterPoint -o --hd".format(__file__))
     system("manimgl {} PairOfPoints -o --hd".format(__file__))
     # system("manimgl {} RadialPoint -ol".format(__file__))
+
+"""
+下方代码应用于:
+2022-10-26_神奇的伯特兰悖论：一道概率题竟然有三个不同的答案！
+"""
 
 class RandomChordScene(Scene):
     title = ""
@@ -27,20 +34,28 @@ class RandomChordScene(Scene):
         flash_chords.set_stroke(width=3, opacity=1)
         indicators = Group(*map(self.get_method_indicator, chords))
 
-        title = Text(self.title,font_size=68,font="思源黑体",gradient=[RED,YELLOW],weight=BOLD)
+        title = Text(
+            self.title,
+            font_size=68,
+            font="思源黑体",
+            gradient=[RED, YELLOW],
+            weight=BOLD,
+        )
         title.set_x(FRAME_WIDTH / 5).to_edge(UP)
 
         triangle = self.get_triangle(circle)
 
         if not self.include_triangle:
             triangle.set_opacity(0)
-            
-        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+
+        bg = FullScreenRectangle(
+            fill_color=["#032348", "#46246d", "#31580a", "#852211"]
+        )
         self.add(bg)
-        
+
         self.add(circle, title, triangle)
-        
-        s =(slice(0, None))
+
+        s = slice(0, None)
         rt = self.run_time
         fraction = self.get_fraction([c.long for c in chords[s]])
         fraction.match_x(title)
@@ -62,25 +77,29 @@ class RandomChordScene(Scene):
         self.wait()
 
     def get_fraction(self, data):
-        tex = Tex(
-            "P(b>a)=","{999", "\\over ", "999", "+", "999}", "= ", "0.9999"
-        )
+        tex = Tex("P(b>a)=", "{999", "\\over ", "999", "+", "999}", "= ", "0.9999")
         nl1 = Integer(999, edge_to_fix=ORIGIN)  # Number of long chords
         nl2 = Integer(999, edge_to_fix=RIGHT)
-        
-        nl_cpy = Integer(999,edge_to_fix=ORIGIN)
-        ns_cpy = Integer(999,edge_to_fix=ORIGIN)
-        nls = VGroup(nl_cpy,ns_cpy).arrange(RIGHT,buff=LARGE_BUFF).next_to(tex,4*UP)
-        sr_nl = SurroundingRectangle(nl_cpy,corner_radius=0.1,buff=0.2)
-        sr_ns = SurroundingRectangle(ns_cpy,corner_radius=0.1,buff=0.2)
-        
-        textba = Tex("b>a").next_to(nl_cpy,1.6*UP)
-        textab = Tex("b<a").next_to(ns_cpy,1.6*UP)
-        
-        texta = Text("a：正三角形边长",font_size=30,font="Source Han Sans")
-        textb = Text("b：随机弦长",font_size=30,font="Source Han Sans")
-        ab = VGroup(texta,textb).arrange(UP,aligned_edge=LEFT,buff=MED_SMALL_BUFF).next_to(tex,10*UP)
-        
+
+        nl_cpy = Integer(999, edge_to_fix=ORIGIN)
+        ns_cpy = Integer(999, edge_to_fix=ORIGIN)
+        nls = (
+            VGroup(nl_cpy, ns_cpy).arrange(RIGHT, buff=LARGE_BUFF).next_to(tex, 4 * UP)
+        )
+        sr_nl = SurroundingRectangle(nl_cpy, corner_radius=0.1, buff=0.2)
+        sr_ns = SurroundingRectangle(ns_cpy, corner_radius=0.1, buff=0.2)
+
+        textba = Tex("b>a").next_to(nl_cpy, 1.6 * UP)
+        textab = Tex("b<a").next_to(ns_cpy, 1.6 * UP)
+
+        texta = Text("a：正三角形边长", font_size=30, font="Source Han Sans")
+        textb = Text("b：随机弦长", font_size=30, font="Source Han Sans")
+        ab = (
+            VGroup(texta, textb)
+            .arrange(UP, aligned_edge=LEFT, buff=MED_SMALL_BUFF)
+            .next_to(tex, 10 * UP)
+        )
+
         ns = Integer(999, edge_to_fix=LEFT)  # Number of short chords
         ratio = DecimalNumber(0, num_decimal_places=4)
         fraction = VGroup(
@@ -101,7 +120,7 @@ class RandomChordScene(Scene):
         )
 
         def update_fraction(frac, alpha):
-            subdata = data[:int(np.floor(alpha * len(data)))]
+            subdata = data[: int(np.floor(alpha * len(data)))]
             n_long = sum(subdata)
             n_short = len(subdata) - n_long
             frac[0].set_value(n_long)
@@ -110,10 +129,10 @@ class RandomChordScene(Scene):
             frac[2].set_color(self.long_color)
             frac[4].set_value(n_short)
             frac[4].set_color(self.short_color)
-            
+
             nl_cpy.set_value(n_long)
             nl_cpy.set_color(self.long_color)
-            
+
             ns_cpy.set_value(n_short)
             ns_cpy.set_color(self.short_color)
 
@@ -124,28 +143,18 @@ class RandomChordScene(Scene):
                 frac[6].set_value(n_long / len(subdata))
             return frac
 
-        fraction.alpha_update = UpdateFromAlphaFunc(
-            fraction, update_fraction
-        )
+        fraction.alpha_update = UpdateFromAlphaFunc(fraction, update_fraction)
         return fraction
 
     def get_chords(self, circle, chord_generator=None):
         if chord_generator is None:
             chord_generator = self.get_random_chord
         tri_len = np.sqrt(3) * circle.get_width() / 2
-        chords = VGroup(*(
-            chord_generator(circle)
-            for x in range(self.n_samples)
-        ))
+        chords = VGroup(*(chord_generator(circle) for x in range(self.n_samples)))
         for chord in chords:
-            chord.long = (chord.get_length() > tri_len)
-            chord.set_color(
-                self.long_color if chord.long else self.short_color
-            )
-        chords.set_stroke(
-            width=self.chord_width,
-            opacity=self.chord_opacity
-        )
+            chord.long = chord.get_length() > tri_len
+            chord.set_color(self.long_color if chord.long else self.short_color)
+        chords.set_stroke(width=self.chord_width, opacity=self.chord_opacity)
         return chords
 
     def get_triangle(self, circle):
@@ -174,10 +183,12 @@ class PairOfPoints(RandomChordScene):
 
     @staticmethod
     def get_method_indicator(chord):
-        dots = DotCloud([
-            chord.get_start(),
-            chord.get_end(),
-        ])
+        dots = DotCloud(
+            [
+                chord.get_start(),
+                chord.get_end(),
+            ]
+        )
         dots.set_glow_factor(0.1)
         dots.set_radius(0.1)
         dots.set_color(GOLD)
@@ -226,12 +237,10 @@ class RadialPoint(CenterPoint):
         angle = random.uniform(0, TAU)
         dist = random.uniform(0, 1)
         return CenterPoint.chord_from_xy(
-            dist * math.cos(angle),
-            dist * math.sin(angle),
-            circle
+            dist * math.cos(angle), dist * math.sin(angle), circle
         )
-        
-    def get_method_indicator(self,chord):
+
+    def get_method_indicator(self, chord):
         dot = super().get_method_indicator(chord)
         line = Line(self.circle.get_center(), dot.get_center())
         line.set_length(self.radius, about_point=line.get_start())
@@ -277,12 +286,15 @@ class CompareFirstTwoMethods(RandomChordScene):
             run_time=15,
         )
         self.play(
-            *map(FadeOut, (
-                flash_chord_groups[0][-1],
-                flash_chord_groups[1][-1],
-                indicator_groups[0][-1],
-                indicator_groups[1][-1],
-            )),
+            *map(
+                FadeOut,
+                (
+                    flash_chord_groups[0][-1],
+                    flash_chord_groups[1][-1],
+                    indicator_groups[0][-1],
+                    indicator_groups[1][-1],
+                ),
+            ),
         )
 
         self.wait()
@@ -312,9 +324,7 @@ class PortionOfRadialLineInTriangle(Scene):
         circle = Circle(radius=3.5)
         circle.set_stroke(GREY_B, 4)
         circle.rotate(-PI / 6)
-        triangle = Polygon(*(
-            circle.pfp(a) for a in np.arange(0, 1, 1 / 3)
-        ))
+        triangle = Polygon(*(circle.pfp(a) for a in np.arange(0, 1, 1 / 3)))
         triangle.set_stroke(GREEN, 2)
         center_dot = Dot(circle.get_center().copy(), radius=0.04)
         center_dot.set_fill(GREY_C, 1)
@@ -353,17 +363,14 @@ class PortionOfRadialLineInTriangle(Scene):
 
         def get_chord():
             p = dot.get_center().copy()
-            p /= (circle.get_width() / 2)
+            p /= circle.get_width() / 2
             chord = CenterPoint.chord_from_xy(p[0], p[1], circle)
             chord.set_stroke(BLUE, 4)
             return chord
 
         chord = always_redraw(get_chord)
 
-        self.play(
-            FadeIn(dot),
-            GrowFromCenter(chord)
-        )
+        self.play(FadeIn(dot), GrowFromCenter(chord))
         self.wait()
         for alpha in (0.5, 0.01, 0.4):
             self.play(
@@ -388,21 +395,16 @@ class RandomPointsFromVariousSpaces(Scene):
             "($^{*}$Implicitly: According to a \\emph{uniform} distribution)",
             color=GREY_A,
             tex_to_color_map={"\\emph{uniform}": YELLOW},
-            font_size=36
+            font_size=36,
         )
         subwords.next_to(top_words, DOWN, buff=MED_LARGE_BUFF)
 
-        dots = DotCloud([
-            interval.n2p(random.random())
-            for x in range(100)
-        ])
+        dots = DotCloud([interval.n2p(random.random()) for x in range(100)])
         dots.set_radius(0.5)
         dots.set_glow_factor(10)
         dots.set_color(YELLOW)
         dots.add_updater(lambda m: m)
-        turn_animation_into_updater(
-            ShowCreation(dots, rate_func=linear, run_time=10)
-        )
+        turn_animation_into_updater(ShowCreation(dots, rate_func=linear, run_time=10))
 
         self.add(interval, dots)
         self.play(Write(top_words, run_time=1))
@@ -417,10 +419,7 @@ class RandomPointsFromVariousSpaces(Scene):
         circle.next_to(subwords, DOWN, buff=MED_LARGE_BUFF)
         dots.clear_updaters()
         dots.generate_target(use_deepcopy=True)
-        dots.target.set_points([
-            circle.pfp(interval.p2n(p))
-            for p in dots.get_points()
-        ])
+        dots.target.set_points([circle.pfp(interval.p2n(p)) for p in dots.get_points()])
         dots.target.set_radius(0)
 
         circle_words = Text("point on a circle")
@@ -442,10 +441,7 @@ class RandomPointsFromVariousSpaces(Scene):
             MoveToTarget(top_words[0]),
         )
 
-        dots.set_points([
-            circle.pfp(random.random())
-            for x in range(25)
-        ])
+        dots.set_points([circle.pfp(random.random()) for x in range(25)])
         dots.set_radius(0.5)
         dots.set_glow_factor(5)
         dots.add_updater(lambda m: m)
@@ -480,18 +476,12 @@ class RandomPointsFromVariousSpaces(Scene):
             FadeIn(sphere_words, UP),
         )
 
-        dots.set_points([
-            random.choice(sphere.get_points())
-            for x in range(100)
-        ])
+        dots.set_points([random.choice(sphere.get_points()) for x in range(100)])
         dots.set_radius(0.25)
         self.play(ShowCreation(dots, run_time=10, rate_func=linear))
 
         # Ambiguity
-        underline = Underline(
-            subwords.get_part_by_tex("uniform"),
-            buff=0
-        )
+        underline = Underline(subwords.get_part_by_tex("uniform"), buff=0)
         underline.set_stroke(YELLOW, width=[0, 2, 2, 2, 0])
         underline.scale(1.25)
         underline.insert_n_curves(50)
@@ -513,7 +503,7 @@ class RandomPointsFromVariousSpaces(Scene):
             ShowCreation(underline),
             ShowCreation(arrow),
             FadeIn(question, shift=0.5 * DR),
-            ShowCreation(dots, run_time=4, rate_func=linear)
+            ShowCreation(dots, run_time=4, rate_func=linear),
         )
         self.wait()
 
@@ -534,8 +524,10 @@ class CoinFlips(Scene):
 
         eq = Tex(
             "{\\# \\text{Heads} \\over \\# \\text{Flips}} = ",
-            "{Num \\over Den}", "=", "0.500",
-            isolate={"Num", "Den", "\\# \\text{Heads}"}
+            "{Num \\over Den}",
+            "=",
+            "0.500",
+            isolate={"Num", "Den", "\\# \\text{Heads}"},
         )
         eq.set_color_by_tex("Heads", RED)
         num = Integer(100, edge_to_fix=ORIGIN)
@@ -575,7 +567,7 @@ class CoinFlips(Scene):
             UpdateFromAlphaFunc(Mobject(), update_eq, rate_func=linear),
             Write(words, rate_func=srf),
             ShowCreation(arrow, rate_func=srf),
-            run_time=18
+            run_time=18,
         )
         self.wait(2)
 
@@ -594,10 +586,9 @@ class ChordsInSpaceWithCircle(RandomChordScene):
         # Introduce chords
         n_lines = 500
         big_circle = Circle(radius=FRAME_WIDTH + FRAME_HEIGHT)
-        lines = VGroup(*(
-            RadialPoint.get_random_chord(big_circle)
-            for x in range(n_lines)
-        ))
+        lines = VGroup(
+            *(RadialPoint.get_random_chord(big_circle) for x in range(n_lines))
+        )
         lines.set_stroke(WHITE, 0.5, 0.5)
 
         circle = Circle(radius=2)
@@ -615,10 +606,7 @@ class ChordsInSpaceWithCircle(RandomChordScene):
         self.wait()
 
         def get_chords():
-            return VGroup(*(
-                self.line_to_chord(line, circle)
-                for line in lines
-            ))
+            return VGroup(*(self.line_to_chord(line, circle) for line in lines))
 
         chords = get_chords()
         chords.save_state(RED)
@@ -639,11 +627,11 @@ class ChordsInSpaceWithCircle(RandomChordScene):
             tex_to_color_map={
                 "Blue": BLUE,
                 "Red": RED,
-            }
+            },
         )
         key.to_edge(UP)
         key.set_backstroke(width=5)
-        key[len(key) // 2:].align_to(key[:len(key) // 2], RIGHT)
+        key[len(key) // 2 :].align_to(key[: len(key) // 2], RIGHT)
 
         self.play(
             Restore(chords),
@@ -660,7 +648,7 @@ class ChordsInSpaceWithCircle(RandomChordScene):
         self.play(
             circle.animate.set_height(7, about_edge=LEFT),
             FadeOut(key, rate_func=squish_rate_func(smooth, 0, 0.5)),
-            run_time=4
+            run_time=4,
         )
         self.play(circle.animate.set_height(4, about_edge=RIGHT), run_time=4)
 
@@ -683,10 +671,9 @@ class ChordsInSpaceWithCircle(RandomChordScene):
         triangle.set_stroke(width=2)
 
         n_lines = 1000
-        lines.become(VGroup(*(
-            CenterPoint.get_random_chord(big_circle)
-            for x in range(n_lines)
-        )))
+        lines.become(
+            VGroup(*(CenterPoint.get_random_chord(big_circle) for x in range(n_lines)))
+        )
         lines.set_stroke(WHITE, self.chord_width, self.chord_opacity)
         flash_lines = lines.copy()
         flash_lines.set_stroke(width=3, opacity=1)
@@ -706,10 +693,7 @@ class ChordsInSpaceWithCircle(RandomChordScene):
         self.wait()
 
         # Put circle back inside
-        self.play(
-            circle.animate.set_height(2).move_to(big_circle),
-            run_time=1
-        )
+        self.play(circle.animate.set_height(2).move_to(big_circle), run_time=1)
         chords.become(get_chords().set_stroke(opacity=0.7))
         self.add(chords, circle)
         self.play(VFadeIn(chords))
@@ -769,13 +753,11 @@ class TransitiveSymmetries(Scene):
         dots.add_updater(lambda m: m)
         self.play(
             Rotate(
-                Group(circle, dot), TAU,
+                Group(circle, dot),
+                TAU,
                 about_point=circle.get_center(),
             ),
-            ShowCreation(
-                dots,
-                rate_func=lambda a: smooth(a * (1 - 1 / 48) + 1 / 48)
-            ),
+            ShowCreation(dots, rate_func=lambda a: smooth(a * (1 - 1 / 48) + 1 / 48)),
             Write(low_words, rate_func=squish_rate_func(smooth, 0.3, 0.5)),
             run_time=10,
         )
@@ -811,18 +793,13 @@ class NonTransitive(Scene):
         VGroup(left_words, left_arrow).set_color(RED)
         VGroup(right_words, right_arrow).set_color(BLUE)
 
-        chords = VGroup(*(
-            RadialPoint.get_random_chord(circle)
-            for x in range(100)
-        ))
+        chords = VGroup(*(RadialPoint.get_random_chord(circle) for x in range(100)))
         chords.set_stroke(WHITE, 1, 0.5)
 
         group = VGroup(circle, chords)
 
         self.add(words)
-        self.play(
-            Rotate(group, TAU, about_point=circle.get_center(), run_time=6)
-        )
+        self.play(Rotate(group, TAU, about_point=circle.get_center(), run_time=6))
         self.wait()
 
         self.add(chord1_shadow, chord1)
@@ -837,7 +814,8 @@ class NonTransitive(Scene):
         self.add(group, left_arrow)
         self.play(
             Rotate(
-                group, TAU,
+                group,
+                TAU,
                 about_point=circle.get_center(),
             ),
             FadeIn(
@@ -859,7 +837,8 @@ class RandomSpherePoint(Scene):
         frame.add_updater(lambda m, dt: m.increment_theta(0.015 * dt))
 
         grid = NumberPlane(
-            (-6, 6), (-4, 4),
+            (-6, 6),
+            (-4, 4),
             background_line_style={
                 "stroke_color": GREY_B,
                 "stroke_width": 1,
@@ -867,7 +846,7 @@ class RandomSpherePoint(Scene):
             },
             axis_config={
                 "stroke_width": 1,
-            }
+            },
         )
         grid.scale(2)
         plane = Rectangle()
@@ -902,7 +881,7 @@ class RandomSpherePoint(Scene):
         technicality = TexText(
             "$^{*}$From a distribution that's\\\\",
             "invariant under rotational symmetries.",
-            font_size=30
+            font_size=30,
         )
         technicality[1].set_color(YELLOW)
         technicality.fix_in_frame()
@@ -947,17 +926,13 @@ class RandomSpherePoint(Scene):
         dot.move_to(patch)
 
         def show_dots_in_patch(n=2000):
-            dots = DotCloud([
-                random_sphere_point()
-                for x in range(n)
-            ])
+            dots = DotCloud([random_sphere_point() for x in range(n)])
             dots.set_color(WHITE)
             dots.set_radius(0.02)
             dots.set_glow_factor(1)
-            dots.set_opacity([
-                0.25 if point[1] > 0 else 1.0
-                for point in dots.get_points()
-            ])
+            dots.set_opacity(
+                [0.25 if point[1] > 0 else 1.0 for point in dots.get_points()]
+            )
             dots.add_updater(lambda m: m)
             self.play(ShowCreation(dots, run_time=6, rate_func=linear))
             self.wait()
@@ -969,14 +944,18 @@ class RandomSpherePoint(Scene):
         self.wait()
 
         # patch_copy = patch.copy()
-        self.play(*(
-            Rotate(
-                sm, PI / 3, axis=OUT + RIGHT,
-                about_point=sphere.get_center(),
-                run_time=2,
+        self.play(
+            *(
+                Rotate(
+                    sm,
+                    PI / 3,
+                    axis=OUT + RIGHT,
+                    about_point=sphere.get_center(),
+                    run_time=2,
+                )
+                for sm in (*sphere, patch)
             )
-            for sm in (*sphere, patch)
-        ))
+        )
         show_dots_in_patch()
         self.wait()
 
@@ -1031,10 +1010,9 @@ class CorrectionInsert(Scene):
         # Dots
         interval_dots = DotCloud([interval.pfp(random.random()) for n in range(100)])
         circle_dots = DotCloud([circle.pfp(random.random()) for n in range(100)])
-        sphere_dots = DotCloud([
-            sphere.pfp(math.acos(random.random()) / PI)
-            for n in range(300)
-        ])
+        sphere_dots = DotCloud(
+            [sphere.pfp(math.acos(random.random()) / PI) for n in range(300)]
+        )
 
         all_dots = Group(interval_dots, circle_dots, sphere_dots)
         for dots in all_dots:
@@ -1042,7 +1020,9 @@ class CorrectionInsert(Scene):
             dots.set_radius(0.1)
             dots.set_color(YELLOW)
             dots.add_updater(lambda m: m)
-        sphere_dots.set_opacity(np.random.choice([1, 0.2], sphere_dots.get_num_points()))
+        sphere_dots.set_opacity(
+            np.random.choice([1, 0.2], sphere_dots.get_num_points())
+        )
         circle_dots.set_radius(0.15)
 
         # Animations
@@ -1050,7 +1030,9 @@ class CorrectionInsert(Scene):
         self.add(shapes)
         self.add(*dots)
 
-        self.play(*(ShowCreation(dots, rate_func=linear, run_time=15) for dots in all_dots))
+        self.play(
+            *(ShowCreation(dots, rate_func=linear, run_time=15) for dots in all_dots)
+        )
         self.wait(4)
         self.play(Write(conditions[1][:2]))
         self.wait(2)
@@ -1071,7 +1053,7 @@ class CorrectionInsert(Scene):
         compact_spaces = Group(
             Group(interval, interval_dots),
             Group(circle, circle_dots),
-            Group(*sphere_group, sphere_dots)
+            Group(*sphere_group, sphere_dots),
         )
         compact_spaces.generate_target()
         compact_spaces.target.arrange(DOWN)
@@ -1107,10 +1089,9 @@ class CorrectionInsert(Scene):
         plane.set_fill(GREY_D, 1)
         plane.set_gloss(0.5)
         plane.set_reflectiveness(0.4)
-        arrows = VGroup(*(
-            Arrow(v, 2 * v, stroke_width=2)
-            for v in compass_directions(8)
-        ))
+        arrows = VGroup(
+            *(Arrow(v, 2 * v, stroke_width=2) for v in compass_directions(8))
+        )
         group = VGroup(plane, arrows)
         group.rotate(80 * DEGREES, LEFT)
         group.set_width(4.5)

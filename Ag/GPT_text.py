@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 from manimlib import *
 
+"""
+下方代码应用于:
+2023-02-27_ChatGPT参加北京高考，能考上哪个大学？你能比它分数更高吗？
+"""
+
+
 class Physics1(Scene):
     Q = """
         \\parbox{11cm}{
@@ -27,43 +33,46 @@ class Physics1(Scene):
     n_c = 2
     h_b = 1.6
     v_b = 0.22
+
     def construct(self):
-        question = TexText(self.Q, font_size=self.f,alignment="\\raggedright")
+        question = TexText(self.Q, font_size=self.f, alignment="\\raggedright")
         abcd = VGroup()
-        for a in [self.A,self.B,self.C,self.D]:
-            abcd.add(TexText(a,font_size=self.f,alignment="\\raggedright"))
+        for a in [self.A, self.B, self.C, self.D]:
+            abcd.add(TexText(a, font_size=self.f, alignment="\\raggedright"))
         abcd.arrange_in_grid(
-            self.n_r,
-            self.n_c,
-            h_buff=self.h_b,
-            v_buff=self.v_b,
-            aligned_edge=LEFT
-            )
-        question.to_edge(UL,buff=1)
-        abcd.next_to(question,DOWN,buff=0.5,aligned_edge=LEFT)
-        answer= TexText(self.Ans, color=YELLOW, font_size=self.f, alignment="\\raggedright")
-        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+            self.n_r, self.n_c, h_buff=self.h_b, v_buff=self.v_b, aligned_edge=LEFT
+        )
+        question.to_edge(UL, buff=1)
+        abcd.next_to(question, DOWN, buff=0.5, aligned_edge=LEFT)
+        answer = TexText(
+            self.Ans, color=YELLOW, font_size=self.f, alignment="\\raggedright"
+        )
+        bg = FullScreenRectangle(
+            fill_color=["#032348", "#46246d", "#31580a", "#852211"]
+        )
         self.add(bg)
         self.play(
-            FadeIn(question,scale=0.618),
-            AnimationGroup(*[FadeIn(obj,scale=0.8,shift=UP) for obj in abcd],lag_ratio=0.1)
-            )
+            FadeIn(question, scale=0.618),
+            AnimationGroup(
+                *[FadeIn(obj, scale=0.8, shift=UP) for obj in abcd], lag_ratio=0.1
+            ),
+        )
         self.wait(2)
-        if self.Pos==0:
+        if self.Pos == 0:
             answer.next_to(abcd, DOWN, aligned_edge=LEFT, buff=0.5)
-        if self.Pos==1:
-            self.play(FadeOut(question,shift=UP),
-                      abcd.animate.to_edge(UP,buff=1),
-                    )
+        if self.Pos == 1:
+            self.play(
+                FadeOut(question, shift=UP),
+                abcd.animate.to_edge(UP, buff=1),
+            )
             answer.next_to(abcd, DOWN, aligned_edge=LEFT, buff=0.5)
-        if self.Pos==2:
-            self.play(FadeOut(question,shift=UP),
-                      FadeOut(abcd,shift=UP)
-                    )
+        if self.Pos == 2:
+            self.play(FadeOut(question, shift=UP), FadeOut(abcd, shift=UP))
             answer.next_to(abcd, DOWN, aligned_edge=LEFT, buff=0.5)
-            answer.to_edge(UL,buff=1)
-        self.play(ShowIncreasingSubsets(*answer),run_time=3)
+            answer.to_edge(UL, buff=1)
+        self.play(ShowIncreasingSubsets(*answer), run_time=3)
         self.wait(5)
+
 
 class Physics2(Physics1):
     Q = """
@@ -85,7 +94,8 @@ class Physics2(Physics1):
             }
         }
         """
-        
+
+
 class Physics3(Physics1):
     Q = """
         \\parbox{11cm}{
@@ -111,7 +121,8 @@ class Physics3(Physics1):
     Pos = 0
     n_r = 4
     n_c = 1
-        
+
+
 class Physics4(Physics1):
     Q = """
         \\parbox{11cm}{
@@ -136,6 +147,7 @@ class Physics4(Physics1):
     Pos = 0
     n_r = 4
     n_c = 1
+
 
 class Physics5(Physics1):
     Q = """
@@ -163,6 +175,7 @@ class Physics5(Physics1):
     n_r = 4
     n_c = 1
 
+
 class Biology1(Physics1):
     Q = """
         \\parbox{11cm}{
@@ -185,6 +198,7 @@ class Biology1(Physics1):
         }
         """
     Pos = 0
+
 
 class Biology2(Physics1):
     Q = """
@@ -209,7 +223,8 @@ class Biology2(Physics1):
     Pos = 0
     n_r = 4
     n_c = 1
-    
+
+
 class Biology3(Physics1):
     Q = r"""
         \parbox{11cm}{
@@ -232,7 +247,8 @@ class Biology3(Physics1):
         """
     Pos = 0
     n_r = 4
-    n_c = 1      
+    n_c = 1
+
 
 class Biology4(Physics1):
     Q = """
@@ -258,6 +274,7 @@ class Biology4(Physics1):
         """
     Pos = 0
 
+
 class Biology5(Physics1):
     Q = """
         \\parbox{11cm}{
@@ -282,6 +299,7 @@ class Biology5(Physics1):
         """
     Pos = 0
 
+
 class Biology6(Physics1):
     Q = """
         \\parbox{11cm}{
@@ -292,7 +310,7 @@ class Biology6(Physics1):
     A = "A. 免疫防御"
     B = "B. 免疫自稳"
     C = "C. 免疫监视、免疫自稳"
-    D = "D. 免疫防御、免疫监视" 
+    D = "D. 免疫防御、免疫监视"
     Ans = """
         \\textbf{
             \\parbox{11cm}{
@@ -303,6 +321,7 @@ class Biology6(Physics1):
         }
         """
     Pos = 0
+
 
 class Biology7(Physics1):
     Q = """
@@ -328,6 +347,7 @@ class Biology7(Physics1):
     n_r = 4
     n_c = 1
 
+
 class Biology8(Physics1):
     Q = """
         \\parbox{11cm}{
@@ -347,7 +367,8 @@ class Biology8(Physics1):
         """
     Pos = 0
     n_r = 4
-    n_c = 1 
+    n_c = 1
+
 
 class Biology9(Physics1):
     Q = """
@@ -372,6 +393,7 @@ class Biology9(Physics1):
     n_r = 4
     n_c = 1
 
+
 class Biology10(Physics1):
     Q = """
         \\parbox{11cm}{
@@ -395,7 +417,8 @@ class Biology10(Physics1):
     Pos = 0
     n_r = 4
     n_c = 1
-    
+
+
 class History1(Physics1):
     Q = """
         \\parbox{11cm}{
@@ -419,6 +442,7 @@ class History1(Physics1):
     n_r = 4
     n_c = 1
 
+
 class History2(Physics1):
     Q = """
         \\parbox{11cm}{
@@ -430,7 +454,7 @@ class History2(Physics1):
     A = "A. 注重推行社会教化"
     B = "B. 放松了对经济的控制"
     C = "C. 鼓励文学艺术创作"
-    D = "D. 实行崇文抑武 方针" 
+    D = "D. 实行崇文抑武 方针"
     Ans = """
         \\textbf{
             \\parbox{11cm}{
@@ -439,6 +463,7 @@ class History2(Physics1):
         }
         """
     Pos = 0
+
 
 class History3(Physics1):
     Q = """
@@ -460,7 +485,8 @@ class History3(Physics1):
         """
     Pos = 0
     n_r = 4
-    n_c = 1 
+    n_c = 1
+
 
 class History4(Physics1):
     Q = """
@@ -485,6 +511,7 @@ class History4(Physics1):
     Pos = 0
     h_b = -0.2
 
+
 class History5(Physics1):
     Q = """
         \\parbox{11cm}{
@@ -506,6 +533,7 @@ class History5(Physics1):
         """
     Pos = 0
     h_b = 0.3
+
 
 class History6(Physics1):
     Q = """
@@ -530,6 +558,7 @@ class History6(Physics1):
     Pos = 0
     h_b = 0.3
 
+
 class History7(Physics1):
     Q = """
         \\parbox{11cm}{
@@ -551,6 +580,7 @@ class History7(Physics1):
     Pos = 0
     n_r = 4
     n_c = 1
+
 
 class History8(Physics1):
     Q = """
@@ -576,6 +606,7 @@ class History8(Physics1):
     n_r = 4
     n_c = 1
 
+
 class History9(Physics1):
     Q = r"""
         \parbox{11cm}{
@@ -599,10 +630,11 @@ class History9(Physics1):
             }
         }
         """
-    Pos = 0 
+    Pos = 0
     n_r = 1
     n_c = 4
     h_b = 1.2
+
 
 class History10(Physics1):
     Q = """
@@ -628,6 +660,7 @@ class History10(Physics1):
     n_r = 4
     n_c = 1
 
+
 class History11(Physics1):
     Q = r"""
         \parbox{11cm}{
@@ -652,7 +685,8 @@ class History11(Physics1):
         """
     Pos = 0
     n_r = 1
-    n_c = 4 
+    n_c = 4
+
 
 class History12(Physics1):
     Q = r"""
@@ -680,7 +714,8 @@ class History12(Physics1):
         """
     Pos = 0
     n_r = 1
-    n_c = 4 
+    n_c = 4
+
 
 class History13(Physics1):
     Q = r"""
@@ -708,10 +743,11 @@ class History13(Physics1):
         """
     Pos = 0
     n_r = 1
-    n_c = 4 
+    n_c = 4
     h_b = 0.8
 
-class English1(Scene):   
+
+class English1(Scene):
     Q = """
         \\qquad One Monday morning, while the children were enjoying “free play”,
         I stepped to the doorway of the classroom to take a break. Suddenly, 
@@ -736,16 +772,18 @@ class English1(Scene):
         This five-year-old taught me a powerful lesson in (10) .
 
         """
-    A = [["1. A. caused","B. spotted","C. checked","D. imagined"],
-         ["2. A. hesitantly","B. randomly","C. dizzily","D. carefully"],
-         ["3. A. angry","B. absent","C. special","D. noisy"],
-         ["4. A. courageous","B. content","C. unable","D. unwilling"],
-         ["5. A. recover","B. play","C. change","D. wait"],
-         ["6. A. settle","B. gather","C. arrive","D. react"],
-         ["7. A. sneeze","B. weep","C. complaint","D. laughter"],
-         ["8. A. lucky","B. happy","C. curious","D. nervous"],
-         ["9. A. show up","B. pull up","C. hold up","D. line up"],
-         ["10. A. gratitude","B. forgiveness","C. faith","D. kindness"]]
+    A = [
+        ["1. A. caused", "B. spotted", "C. checked", "D. imagined"],
+        ["2. A. hesitantly", "B. randomly", "C. dizzily", "D. carefully"],
+        ["3. A. angry", "B. absent", "C. special", "D. noisy"],
+        ["4. A. courageous", "B. content", "C. unable", "D. unwilling"],
+        ["5. A. recover", "B. play", "C. change", "D. wait"],
+        ["6. A. settle", "B. gather", "C. arrive", "D. react"],
+        ["7. A. sneeze", "B. weep", "C. complaint", "D. laughter"],
+        ["8. A. lucky", "B. happy", "C. curious", "D. nervous"],
+        ["9. A. show up", "B. pull up", "C. hold up", "D. line up"],
+        ["10. A. gratitude", "B. forgiveness", "C. faith", "D. kindness"],
+    ]
     Ans = """
         \\textbf{
             \\parbox{10cm}{
@@ -764,39 +802,47 @@ class English1(Scene):
         }
         """
     f = 20
-    
+
     def construct(self):
-        question = TexText(self.Q, font_size=self.f,alignment="\\raggedright")
+        question = TexText(self.Q, font_size=self.f, alignment="\\raggedright")
         abcd = VGroup()
         abcd_ = VGroup()
         kb = 4
         for a in self.A:
             for b in a:
-                abcd.add(TexText(b,font_size=self.f,alignment="\\raggedright"))
-        for words in [abcd[i:i+kb] for i in range(0, len(abcd), kb)]:
+                abcd.add(TexText(b, font_size=self.f, alignment="\\raggedright"))
+        for words in [abcd[i : i + kb] for i in range(0, len(abcd), kb)]:
             VgWds = VGroup()
             for word in words:
                 VgWds.add(word)
             abcd_.add(VgWds)
 
-        abcd.arrange_in_grid(4,4,h_buff=0.1,v_buff=0.2,aligned_edge=LEFT)
-        abcd.next_to(question,RIGHT,buff=0.5)
-        qa = VGroup(question,abcd).center().to_edge(UP)
+        abcd.arrange_in_grid(4, 4, h_buff=0.1, v_buff=0.2, aligned_edge=LEFT)
+        abcd.next_to(question, RIGHT, buff=0.5)
+        qa = VGroup(question, abcd).center().to_edge(UP)
         abcd.to_edge(UP)
-        answer= TexText(self.Ans, color=YELLOW, font_size=self.f, alignment="\\raggedright")
+        answer = TexText(
+            self.Ans, color=YELLOW, font_size=self.f, alignment="\\raggedright"
+        )
         answer.next_to(abcd, DOWN, aligned_edge=LEFT, buff=0.5)
-        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        bg = FullScreenRectangle(
+            fill_color=["#032348", "#46246d", "#31580a", "#852211"]
+        )
         self.add(bg)
         self.play(
-            FadeIn(question,scale=0.618),
-            AnimationGroup(*[FadeIn(obj,scale=0.8,shift=UP+LEFT*0.618) for obj in abcd_],lag_ratio=0.1)
-            )
+            FadeIn(question, scale=0.618),
+            AnimationGroup(
+                *[FadeIn(obj, scale=0.8, shift=UP + LEFT * 0.618) for obj in abcd_],
+                lag_ratio=0.1
+            ),
+        )
         self.wait(2)
-    
-        self.play(ShowIncreasingSubsets(*answer),run_time=3)
+
+        self.play(ShowIncreasingSubsets(*answer), run_time=3)
         self.wait(5)
 
-class English2(English1): 
+
+class English2(English1):
     Q = """
         \\parbox{16cm}{
         \\qquad Tom, a 15-year-old inventor and entrepreneur (创业者), 
@@ -834,7 +880,7 @@ class English2(English1):
         \\qquad 43. Among Tom’s qualities, which one(s) do you think 
         will be important for us? Why?(In about 40 words)
         }
-        """  
+        """
     Ans = """
         \\parbox{11.5cm}{
         答：\\par
@@ -865,18 +911,23 @@ class English2(English1):
     f = 16
 
     def construct(self):
-        question = TexText(self.Q, font_size=self.f,alignment="\\raggedright")
+        question = TexText(self.Q, font_size=self.f, alignment="\\raggedright")
         question.center().to_edge(UL)
-        answer= TexText(self.Ans, color=YELLOW, font_size=self.f, alignment="\\raggedright")
+        answer = TexText(
+            self.Ans, color=YELLOW, font_size=self.f, alignment="\\raggedright"
+        )
         answer.next_to(question, RIGHT, buff=0.5)
-        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        bg = FullScreenRectangle(
+            fill_color=["#032348", "#46246d", "#31580a", "#852211"]
+        )
         self.add(bg)
         self.play(
-            FadeIn(question,scale=0.618),
-            )
+            FadeIn(question, scale=0.618),
+        )
         self.wait(2)
-        self.play(ShowIncreasingSubsets(*answer),run_time=3)
+        self.play(ShowIncreasingSubsets(*answer), run_time=3)
         self.wait(5)
+
 
 class English3(Scene):
     Q = """
@@ -907,23 +958,29 @@ class English3(Scene):
         """
     Pos = 0
     f = 28
+
     def construct(self):
-        question = TexText(self.Q, font_size=self.f,alignment="\\raggedright")
-        question.to_edge(UP,buff=0.5)
-        answer= TexText(self.Ans, color=YELLOW, font_size=self.f, alignment="\\raggedright")
-        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        question = TexText(self.Q, font_size=self.f, alignment="\\raggedright")
+        question.to_edge(UP, buff=0.5)
+        answer = TexText(
+            self.Ans, color=YELLOW, font_size=self.f, alignment="\\raggedright"
+        )
+        bg = FullScreenRectangle(
+            fill_color=["#032348", "#46246d", "#31580a", "#852211"]
+        )
         self.add(bg)
         self.play(
-            FadeIn(question,scale=0.618),
-            )
+            FadeIn(question, scale=0.618),
+        )
         self.wait(2)
-        if self.Pos==0:
-            answer.next_to(question, DOWN, buff=0.5) 
-        if self.Pos==1:
-            self.play(FadeOut(question,shift=UP))
-            answer.to_edge(UP,buff=0.5)
-        self.play(ShowIncreasingSubsets(*answer),run_time=1) 
+        if self.Pos == 0:
+            answer.next_to(question, DOWN, buff=0.5)
+        if self.Pos == 1:
+            self.play(FadeOut(question, shift=UP))
+            answer.to_edge(UP, buff=0.5)
+        self.play(ShowIncreasingSubsets(*answer), run_time=1)
         self.wait(2)
+
 
 class Math(Scene):
     Ans = """
@@ -942,189 +999,191 @@ class Math(Scene):
             }
         }
         """
-    def construct(self):     
-        configs1 ={
-            "Q" : """
+
+    def construct(self):
+        configs1 = {
+            "Q": """
                 \\parbox{11cm}{
                 1、已知全集$U=\{\left. x|-3<x<3\}$，
                 集合$A=\{\left. x|-2<x\le 1\}$，
                 则$\complement_{U}A=$（\\quad）
                 }
                 """,
-            "A" : "A. $(-2,1]$",
-            "B" : r"B. $(-3,-2)\bigcup [1,3)$",
-            "C" : "C. $[-2,1)$",
-            "D" : r"D. $(-3,-2]\bigcup (1,3)$",
-            "f" : 28,
-            "n_r" : 2,
-            "n_c" : 2,
-            "h_b" : 1.6,
-            "v_b" : 0.22,
+            "A": "A. $(-2,1]$",
+            "B": r"B. $(-3,-2)\bigcup [1,3)$",
+            "C": "C. $[-2,1)$",
+            "D": r"D. $(-3,-2]\bigcup (1,3)$",
+            "f": 28,
+            "n_r": 2,
+            "n_c": 2,
+            "h_b": 1.6,
+            "v_b": 0.22,
         }
-        configs2 ={
-            "Q" : """
+        configs2 = {
+            "Q": """
                 \\parbox{11cm}{
                 2. 若某个复数满足$i \cdot z$等于$3-4i$，则这个复数的模等于（\\quad）
                 }
                 """,
-            "A" : "A. 1",
-            "B" : "B. 5",
-            "C" : "C. 1",
-            "D" : "D. -1",
-            "n_r" : 1,
-            "n_c" : 4,
+            "A": "A. 1",
+            "B": "B. 5",
+            "C": "C. 1",
+            "D": "D. -1",
+            "n_r": 1,
+            "n_c": 4,
         }
-        configs3 ={
-            "Q" : """
+        configs3 = {
+            "Q": """
                 \\parbox{11cm}{
                 3. 若直线$2x+y-1=0$是圆${{(x-a)}^{2}}+{{y}^{2}}=1$的一条对称轴，则a=（\\quad）
                 }
                 """,
-            "A" : r"A. $\frac{1}{2}$",
-            "B" : r"B. $-\frac{1}{2}$",
-            "C" : "C. 7",
-            "D" : "D. 25",
-            "n_r" : 1,
-            "n_c" : 4,
+            "A": r"A. $\frac{1}{2}$",
+            "B": r"B. $-\frac{1}{2}$",
+            "C": "C. 7",
+            "D": "D. 25",
+            "n_r": 1,
+            "n_c": 4,
         }
-        configs4 ={
-            "Q" : """
+        configs4 = {
+            "Q": """
                 \\parbox{11cm}{
                 4. 己知函数$f(x)=\\frac{1}{1+2^x}$，则对任意实数x，有（\\quad）
                 }
                 """,
-            "A" : r"A. $f(-x)+f(x)=0$",
-            "B" : r"B. $f(-x)-f(x)=0$",
-            "C" : r"C. $f(-x)+f(x)=1$",
-            "D" : r"D. $f(-x)-f(x)=\frac{1}{3}$",
-            "n_r" : 2,
-            "n_c" : 2,
+            "A": r"A. $f(-x)+f(x)=0$",
+            "B": r"B. $f(-x)-f(x)=0$",
+            "C": r"C. $f(-x)+f(x)=1$",
+            "D": r"D. $f(-x)-f(x)=\frac{1}{3}$",
+            "n_r": 2,
+            "n_c": 2,
         }
-        configs5 ={
-            "Q" : """
+        configs5 = {
+            "Q": """
                 \\parbox{11cm}{
                 5.已知函数$f(x)={{\cos }^{2}}x-{{\sin }^{2}}x$，则（\\quad）
                 }
                 """,
-            "A" : r"A. $f(x)$在$\left( -\frac{\pi }{2},-\frac{\pi }{6} \right)$上单调递减",
-            "B" : r"B. $f(x)$在上单调递增$\left( -\frac{\pi }{4},\frac{\pi }{12} \right)$",
-            "C" : r"C. $f(x)$在$\left( 0,\frac{\pi }{3} \right)$上单调递减",
-            "D" : r"D. $f(x)$在$\left( \frac{\pi }{4},\frac{7\pi }{12} \right)$上单调递增",
-            "n_r" : 2,
-            "n_c" : 2,
-            "h_b" : 0.2,
+            "A": r"A. $f(x)$在$\left( -\frac{\pi }{2},-\frac{\pi }{6} \right)$上单调递减",
+            "B": r"B. $f(x)$在上单调递增$\left( -\frac{\pi }{4},\frac{\pi }{12} \right)$",
+            "C": r"C. $f(x)$在$\left( 0,\frac{\pi }{3} \right)$上单调递减",
+            "D": r"D. $f(x)$在$\left( \frac{\pi }{4},\frac{7\pi }{12} \right)$上单调递增",
+            "n_r": 2,
+            "n_c": 2,
+            "h_b": 0.2,
         }
-        configs6 ={
-            "Q" : """
+        configs6 = {
+            "Q": """
                 \\parbox{11cm}{
                 6. 设$\left\{ {{a}_{n}}\}$是公差不为0的无穷等差数列，
                 则“$\left\{ {{a}_{n}}\}$为递增数列”是“存在正整数${N}_{0}$，
                 当$n>{{N}_{0}}$时，${{a}_{n}}>0$”的（\\quad）
                 }
                 """,
-            "A" : "A. 充分而不必要条件",
-            "B" : "B. 必要而不充分条件",
-            "C" : "C. 充分必要条件",
-            "D" : "D. 既不充分也不必要条件",
-            "n_r" : 2,
-            "n_c" : 2,
-            "h_b" : 1.6,
+            "A": "A. 充分而不必要条件",
+            "B": "B. 必要而不充分条件",
+            "C": "C. 充分必要条件",
+            "D": "D. 既不充分也不必要条件",
+            "n_r": 2,
+            "n_c": 2,
+            "h_b": 1.6,
         }
-        configs7 ={
-            "Q" : """
+        configs7 = {
+            "Q": """
                 \\parbox{11cm}{
                 7. 若${{(2x-1)}^{4}}={{a}_{4}}{{x}^{4}}+{{a}_{3}}{{x}^{3}}+{{a}_{2}}{{x}^{2}}+{{a}_{1}}x+{{a}_{0}}$，
                 则${{a}_{0}}+{{a}_{2}}+{{a}_{4}}$=（\\quad）
                 }
                 """,
-            "A" : "A. 40",
-            "B" : "B. 41",
-            "C" : "C. -40",
-            "D" : "D. -41",
-            "n_r" : 1,
-            "n_c" : 4,
+            "A": "A. 40",
+            "B": "B. 41",
+            "C": "C. -40",
+            "D": "D. -41",
+            "n_r": 1,
+            "n_c": 4,
         }
-        configs8 ={
-            "Q" : """
+        configs8 = {
+            "Q": """
                 \\parbox{11cm}{
                 8. 已知正三棱锥$P-ABC$ 六条棱长均为6，$S$是$\\vartriangle ABC$
                 及其内部的点构成的集合．设集合$T=\left\{ \left. Q\in S |PQ\le 5 \}$，
                 则T表示的区域的面积为（\\quad）
                 }
                 """,
-            "A" : r"A. $\frac{3\pi }{4}$",
-            "B" : "B. $ \pi $",
-            "C" : "C. $2 \pi $",
-            "D" : "D. $3 \pi $",
+            "A": r"A. $\frac{3\pi }{4}$",
+            "B": "B. $ \pi $",
+            "C": "C. $2 \pi $",
+            "D": "D. $3 \pi $",
         }
-        configs9 ={
-            "Q" : """
+        configs9 = {
+            "Q": """
                 \\parbox{11cm}{
                 9. 在$\\vartriangle ABC$中，$AC=3,BC=4,\\angle C=90{}^\circ $．$P$为
                 $\\vartriangle ABC$所在平面内的动点，且$PC=1$，则$\\overrightarrow{PA}
                 \\cdot \\overrightarrow{PB}$的取值范围是（\\quad）
                 }
                 """,
-            "A" : "A. $[-5,3]$",
-            "B" : "B. $[-3,5]$",
-            "C" : "C. $[-6,4]$",
-            "D" : "D. $[-4,6]$",
-            "h_b" : 1.2,
+            "A": "A. $[-5,3]$",
+            "B": "B. $[-3,5]$",
+            "C": "C. $[-6,4]$",
+            "D": "D. $[-4,6]$",
+            "h_b": 1.2,
         }
         qas = VGroup()
         for configtmp in [
-                configs1,
-                configs2,
-                configs3,
-                configs4,
-                configs5,
-                configs6,
-                configs7,
-                configs8,
-                configs9,
-            ]:
+            configs1,
+            configs2,
+            configs3,
+            configs4,
+            configs5,
+            configs6,
+            configs7,
+            configs8,
+            configs9,
+        ]:
             qas.add(self.config(**configtmp))
-            if len(qas)>1:
-                qas[-1].next_to(qas[-2],DOWN,buff=0.3,aligned_edge=LEFT)
-        answer= TexText(self.Ans, font_size=self.f, alignment="\\raggedright")
-        
-        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+            if len(qas) > 1:
+                qas[-1].next_to(qas[-2], DOWN, buff=0.3, aligned_edge=LEFT)
+        answer = TexText(self.Ans, font_size=self.f, alignment="\\raggedright")
+
+        bg = FullScreenRectangle(
+            fill_color=["#032348", "#46246d", "#31580a", "#852211"]
+        )
         self.add(bg)
-        
+
         self.play(
-            AnimationGroup(*[FadeIn(obj,scale=0.8,shift=UP) for obj in qas],lag_ratio=0.1)
+            AnimationGroup(
+                *[FadeIn(obj, scale=0.8, shift=UP) for obj in qas], lag_ratio=0.1
             )
+        )
         self.wait()
-        
+
         # 正常使用
-        # self.play(qas.animate.to_edge(DOWN,buff=2.8),run_time=8,rate_func=linear)
-        # answer.next_to(qas, DOWN, buff=0.5)
-        
+        self.play(qas.animate.to_edge(DOWN, buff=2.8), run_time=8, rate_func=linear)
+        answer.next_to(qas, DOWN, buff=0.5)
+
         # 截图使用
-        answer.next_to(qas, DOWN, buff=0.3)
-        VGroup(answer,qas).center().scale(0.5)
+        # answer.next_to(qas, DOWN, buff=0.3)
+        # VGroup(answer, qas).center().scale(0.5)
         # system("manimgl {} Math -os -r 1200x1900".format(__file__))
-           
+
         self.wait()
-        self.play(ShowIncreasingSubsets(*answer),run_time=1) 
+        self.play(ShowIncreasingSubsets(*answer), run_time=1)
         self.wait(2)
-        
-    def config(self,**configs):
-        digest_config(self,configs)
-        question = TexText(self.Q, font_size=self.f,alignment="\\raggedright")
+
+    def config(self, **configs):
+        digest_config(self, configs)
+        question = TexText(self.Q, font_size=self.f, alignment="\\raggedright")
         abcd = VGroup()
-        for a in [self.A,self.B,self.C,self.D]:
-            abcd.add(TexText(a,font_size=self.f,alignment="\\raggedright"))
+        for a in [self.A, self.B, self.C, self.D]:
+            abcd.add(TexText(a, font_size=self.f, alignment="\\raggedright"))
         abcd.arrange_in_grid(
-            self.n_r,
-            self.n_c,
-            h_buff=self.h_b,
-            v_buff=self.v_b,
-            aligned_edge=LEFT
-            )
-        question.to_edge(UL,buff=1)
-        abcd.next_to(question,DOWN,buff=0.2,aligned_edge=LEFT)
-        return VGroup(question,abcd)
+            self.n_r, self.n_c, h_buff=self.h_b, v_buff=self.v_b, aligned_edge=LEFT
+        )
+        question.to_edge(UL, buff=1)
+        abcd.next_to(question, DOWN, buff=0.2, aligned_edge=LEFT)
+        return VGroup(question, abcd)
+
 
 class Language1(Scene):
     Q = """
@@ -1148,29 +1207,35 @@ class Language1(Scene):
         }
         """
     f = 28
+
     def construct(self):
-        question = TexText(self.Q, font_size=self.f,alignment="\\raggedright")
-        question.to_edge(UP,buff=1)
-        answer= TexText(self.Ans, color=YELLOW, font_size=self.f, alignment="\\raggedright")
-        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        question = TexText(self.Q, font_size=self.f, alignment="\\raggedright")
+        question.to_edge(UP, buff=1)
+        answer = TexText(
+            self.Ans, color=YELLOW, font_size=self.f, alignment="\\raggedright"
+        )
+        bg = FullScreenRectangle(
+            fill_color=["#032348", "#46246d", "#31580a", "#852211"]
+        )
         self.add(bg)
-        
+
         # 正常使用
-        # answer.next_to(question, DOWN, buff=0.5)
-        
+        answer.next_to(question, DOWN, buff=0.5)
+
         # 截图使用
-        bg.scale(1.5)
-        answer.next_to(question, DOWN, buff=0.3)
-        VGroup(answer,question).center().scale(1.6)
+        # bg.scale(1.5)
+        # answer.next_to(question, DOWN, buff=0.3)
+        # VGroup(answer, question).center().scale(1.6)
         # system("manimgl {} Language1 -os -r 1100x450".format(__file__))
-    
+
         self.play(
-            FadeIn(question,scale=0.618),
-            )
+            FadeIn(question, scale=0.618),
+        )
         self.wait(2)
-        self.play(ShowIncreasingSubsets(*answer),run_time=1) 
+        self.play(ShowIncreasingSubsets(*answer), run_time=1)
         self.wait(2)
-               
+
+
 class Language2(Scene):
     Q = """
         \\parbox{13cm}{
@@ -1183,18 +1248,22 @@ class Language2(Scene):
         }
         """
     f = 28
+
     def construct(self):
-        question = TexText(self.Q, font_size=self.f,alignment="\\raggedright")
-        question.to_edge(UP,buff=1)
-        bg = FullScreenRectangle(fill_color=["#032348","#46246d","#31580a","#852211"])
+        question = TexText(self.Q, font_size=self.f, alignment="\\raggedright")
+        question.to_edge(UP, buff=1)
+        bg = FullScreenRectangle(
+            fill_color=["#032348", "#46246d", "#31580a", "#852211"]
+        )
         self.add(bg)
         self.play(
-            FadeIn(question,scale=0.618),
-            )
+            FadeIn(question, scale=0.618),
+        )
         self.wait(2)
         # self.play(FadeOut(question,shift=UP))
         # self.wait(2)
-    
+
+
 class Language2Ans(Scene):
     Ans = """
         \\parbox{13cm}{
@@ -1224,13 +1293,21 @@ class Language2Ans(Scene):
         }
         """
     f = 28
+
     def construct(self):
-        answer= TexText(self.Ans, color=YELLOW, font_size=self.f, alignment="\\raggedright")
-        answer.to_edge(UP,buff=1)
-        self.play(ShowIncreasingSubsets(*answer[0:6]),run_time=3)
-        self.play(answer.animate.to_edge(DOWN,buff=1),run_time=7)
+        answer = TexText(
+            self.Ans, color=YELLOW, font_size=self.f, alignment="\\raggedright"
+        )
+        answer.to_edge(UP, buff=1)
+        self.play(ShowIncreasingSubsets(*answer[0:6]), run_time=3)
+        self.play(answer.animate.to_edge(DOWN, buff=1), run_time=7)
         self.wait(2)
+
 
 if __name__ == "__main__":
     from os import system
-    system("manimgl {} Math -os -r 1200x1900".format(__file__))
+
+    system("manimgl {} Language2 -o".format(__file__))
+    # system("manimgl {} Math -o".format(__file__))
+    # system("manimgl {} Language1 -ws".format(__file__))
+    # system("manimgl {} -a -ws".format(__file__))

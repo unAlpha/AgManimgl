@@ -26,11 +26,7 @@ class Fade(Transform):
     }
 
     def __init__(
-        self,
-        mobject: Mobject,
-        shift: np.ndarray = ORIGIN,
-        scale: float = 1,
-        **kwargs
+        self, mobject: Mobject, shift: np.ndarray = ORIGIN, scale: float = 1, **kwargs
     ):
         self.shift_vect = shift
         self.scale_factor = scale
@@ -97,10 +93,7 @@ class FadeTransform(Transform):
     def __init__(self, mobject: Mobject, target_mobject: Mobject, **kwargs):
         self.to_add_on_completion = target_mobject
         mobject.save_state()
-        super().__init__(
-            Group(mobject, target_mobject.copy()),
-            **kwargs
-        )
+        super().__init__(Group(mobject, target_mobject.copy()), **kwargs)
 
     def begin(self) -> None:
         self.ending_mobject = self.mobject.copy()
@@ -147,22 +140,16 @@ class VFadeIn(Animation):
     """
     VFadeIn and VFadeOut only work for VMobjects,
     """
+
     CONFIG = {
         "suspend_mobject_updating": False,
     }
 
     def interpolate_submobject(
-        self,
-        submob: VMobject,
-        start: VMobject,
-        alpha: float
+        self, submob: VMobject, start: VMobject, alpha: float
     ) -> None:
-        submob.set_stroke(
-            opacity=interpolate(0, start.get_stroke_opacity(), alpha)
-        )
-        submob.set_fill(
-            opacity=interpolate(0, start.get_fill_opacity(), alpha)
-        )
+        submob.set_stroke(opacity=interpolate(0, start.get_stroke_opacity(), alpha))
+        submob.set_fill(opacity=interpolate(0, start.get_fill_opacity(), alpha))
 
 
 class VFadeOut(VFadeIn):
@@ -173,10 +160,7 @@ class VFadeOut(VFadeIn):
     }
 
     def interpolate_submobject(
-        self,
-        submob: VMobject,
-        start: VMobject,
-        alpha: float
+        self, submob: VMobject, start: VMobject, alpha: float
     ) -> None:
         super().interpolate_submobject(submob, start, 1 - alpha)
 
