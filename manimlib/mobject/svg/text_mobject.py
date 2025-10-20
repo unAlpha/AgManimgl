@@ -69,7 +69,7 @@ class MarkupText(StringMobject):
         "indent": 0,
         "alignment": "",
         "line_width": None,
-        "font": "",
+        "font": "思源黑体",
         "slant": NORMAL,
         "weight": NORMAL,
         "gradient": None,

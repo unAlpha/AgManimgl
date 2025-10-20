@@ -38,7 +38,12 @@ def find_file(
         stem, name = os.path.split(file_name)
         folder = get_downloads_dir()
         path = os.path.join(folder, name)
-        urllib.request.urlretrieve(file_name, path)
+        #urllib.request.urlretrieve(file_name, path)
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}
+        req = urllib.request.Request(file_name, headers=headers)
+        with urllib.request.urlopen(req) as response, open(path, 'wb') as out_file:
+            data = response.read() # a `bytes` object
+            out_file.write(data)
         return path
 
     # Check if what was passed in is already a valid path to a file
